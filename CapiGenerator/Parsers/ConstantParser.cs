@@ -1,65 +1,20 @@
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System.Collections.Immutable;
+using CapiGenerator.ConstantToken;
 using CapiGenerator.Model;
 using CppAst;
+
+using ConstLookup = CapiGenerator.GuidRef<CapiGenerator.Model.Constant>.LookupCollection;
 
 namespace CapiGenerator.Parsers;
 
 public class ConstantParser
 {
-    public enum Type
-    {
-        NONE = 0,
-        Int,
-        Float,
-        String,
-    }
-
-    private readonly static HashSet<string> ValidIntPunctuation = new()
-    {
-        "+",
-        "-",
-        "*",
-        "/",
-        "%",
-        "&",
-        "|",
-        "^",
-        "~",
-        "<<",
-        ">>",
-        "(",
-        ")",
-    };
-
-    private readonly static HashSet<string> ValidFloatPunctuation = new()
-    {
-        "+",
-        "-",
-        "*",
-        "/",
-        "%",
-        "(",
-        ")",
-    };
-
-    private readonly static HashSet<string> ValidStringPunctuation = new()
-    {
-        "+",
-        "(",
-        ")",
-    };
-
-    private readonly Dictionary<string, (Type, CppMacro?)> parsedCache = new();
-    private readonly HashSet<string> visitedMacros = new();
-
-
-    public Constant[] Create(CppCompilation compilation)
+    public Constant[] Parse(ParseArgs args)
     {
         List<Constant> constants = new();
-
         List<CppMacro> potentialConstants = new();
-        Dictionary<string, CppMacro> nameLookup = new();
+
+        var compilation = args.Compilation;
 
         foreach (var constant in compilation.Macros)
         {
@@ -68,205 +23,80 @@ public class ConstantParser
                 continue;
             }
 
-            if (ShouldSkip(constant))
+            if (ShouldSkip(constant, args))
             {
                 continue;
             }
 
-            nameLookup.Add(constant.Name, constant);
             potentialConstants.Add(constant);
         }
 
-        parsedCache.Clear();
-        visitedMacros.Clear();
-
-        foreach (var constant in compilation.Macros)
+        foreach (CppMacro item in potentialConstants)
         {
-            TryParseMarcoValue(constant, nameLookup, out var _);
-        }
-
-
-        return Array.Empty<Constant>();
-    }
-
-    protected virtual bool ShouldSkip(CppMacro constant) => false;
-
-    protected virtual void OnError(CppMacro macro, string message) { }
-
-    protected bool TryParseMarcoValue(
-        CppMacro value,
-        IReadOnlyDictionary<string, CppMacro> otherMacros,
-        out Type type)
-    {
-        if (parsedCache.TryGetValue(value.Name, out var cached))
-        {
-            type = cached.Item1;
-            return type != Type.NONE;
-        }
-
-        if (visitedMacros.Contains(value.Name))
-        {
-            type = default;
-            return false;
-        }
-
-        visitedMacros.Add(value.Name);
-
-        if (TryParseMarcoValueImpl(value, otherMacros, out type))
-        {
-            parsedCache.Add(value.Name, (type, value));
-            return true;
-        }
-        else
-        {
-            parsedCache.Add(value.Name, (Type.NONE, null));
-        }
-
-        type = default;
-        return false;
-    }
-
-    protected virtual bool TryParseMarcoValueImpl(
-        CppMacro value,
-        IReadOnlyDictionary<string, CppMacro> otherMacros,
-         out Type type)
-    {
-        if (IsIntType(value, otherMacros))
-        {
-            type = Type.Int;
-            return true;
-        }
-        else if (IsFloatType(value, otherMacros))
-        {
-            type = Type.Float;
-            return true;
-        }
-        else if (IsStringType(value, otherMacros))
-        {
-            type = Type.String;
-            return true;
-        }
-        else
-        {
-            type = default;
-            return false;
-        }
-    }
-
-
-    private bool IsIntType(
-        CppMacro value,
-        IReadOnlyDictionary<string, CppMacro> otherMacros)
-    {
-        foreach (var token in value.Tokens)
-        {
-            switch (token.Kind)
+            var constant = ParseMarcoValue(item, args);
+            if (constant is not null)
             {
-                case CppTokenKind.Comment:
-                    break;
-                case CppTokenKind.Identifier:
-                    if (!TryParseMarcoValue(value, otherMacros, out var type) && type != Type.Int)
-                    {
-                        return false;
-                    }
-                    break;
-                case CppTokenKind.Keyword:
-                case CppTokenKind.Literal:
-                    if (token.Text.StartsWith('"') || token.Text.EndsWith('"'))
-                    {
-                        return false;
-                    }
-                    break;
-
-                case CppTokenKind.Punctuation:
-                    if (!ValidIntPunctuation.Contains(token.Text))
-                    {
-                        return false;
-                    }
-                    break;
-
-                default:
-                    return false;
+                constants.Add(constant);
             }
         }
-        return true;
+
+        return constants.ToArray();
     }
 
-    private bool IsFloatType(
-        CppMacro value,
-        IReadOnlyDictionary<string, CppMacro> otherMacros)
+    protected virtual bool ShouldSkip(CppMacro constant, ParseArgs args) => false;
+
+    protected virtual void OnError(CppMacro macro, string message, ParseArgs args)
     {
-        foreach (var token in value.Tokens)
-        {
-            switch (token.Kind)
-            {
-                case CppTokenKind.Comment:
-                    break;
-                case CppTokenKind.Identifier:
-
-                    if (!TryParseMarcoValue(value, otherMacros, out var type) &&
-                        type is not Type.Float or Type.Int)
-                    {
-                        return false;
-                    }
-                    break;
-                case CppTokenKind.Keyword:
-                case CppTokenKind.Literal:
-                    if (token.Text.StartsWith('"') || token.Text.EndsWith('"'))
-                    {
-                        return false;
-                    }
-                    break;
-
-                case CppTokenKind.Punctuation:
-                    if (!ValidFloatPunctuation.Contains(token.Text))
-                    {
-                        return false;
-                    }
-                    break;
-
-                default:
-                    return false;
-            }
-        }
-        return true;
+        Console.Error.WriteLine($"Error parsing constant {macro.Name}: {message}");
     }
 
-    private bool IsStringType(
-        CppMacro value,
-        IReadOnlyDictionary<string, CppMacro> otherMacros)
+    protected virtual Constant? ParseMarcoValue(CppMacro value, ParseArgs args)
     {
-        foreach (var token in value.Tokens)
+        var compileUnitNamespace = args.CompileUnitNamespace;
+        var lookup = args.Lookups;
+        var outputFolder = args.OutputFolder;
+
+        Constant.ConstantInput input = new()
         {
-            switch (token.Kind)
-            {
-                case CppTokenKind.Comment:
-                    break;
-                case CppTokenKind.Identifier:
-                    if (!TryParseMarcoValue(value, otherMacros, out var type) && type != Type.String)
-                    {
-                        return false;
-                    }
-                    break;
-                case CppTokenKind.Keyword:
-                case CppTokenKind.Literal:
-                    if (!token.Text.StartsWith('"') || !token.Text.EndsWith('"'))
-                    {
-                        return false;
-                    }
-                    break;
+            Name = value.Name,
+            CompileUnitNamespace = compileUnitNamespace,
+            Macro = value,
+        };
 
-                case CppTokenKind.Punctuation:
-                    if (!ValidStringPunctuation.Contains(token.Text))
-                    {
-                        return false;
-                    }
-                    break;
+        var constantTokens = value.Tokens.Select(
+            token => CppTokenToConstantToken(token, compileUnitNamespace, lookup.ConstLookup)
+        ).ToArray();
 
-                default:
-                    return false;
-            }
+        if (constantTokens.Any(token => token is null))
+        {
+            OnError(value, $"Failed to parse constant {value.Name}", args);
+            return null;
         }
-        return true;
+
+        Constant.ConstantOutput output = new()
+        {
+            Name = value.Name,
+            OutputClassName = value.Name,
+            OutputFile = outputFolder.GetFile(compileUnitNamespace + "Consts", ClassType.StaticClass),
+            Tokens = constantTokens!.ToImmutableArray()!,
+        };
+
+        return new Constant(lookup.ConstLookup, input, output);
     }
+
+    public static BaseConstantToken? CppTokenToConstantToken(
+        CppToken token,
+        string compileUnitNamespace,
+        ConstLookup lookup
+    ) => token.Kind switch
+    {
+        CppTokenKind.Identifier => new ConstIdentifierToken()
+        {
+            Value = lookup.Get(token.Text, compileUnitNamespace)
+        },
+        CppTokenKind.Literal => new ConstantLiteralToken(token.Text),
+        CppTokenKind.Punctuation when
+            ConstantPunctuationToken.TryParse(token.Text, out var punctuationToken) => punctuationToken,
+        _ => null
+    };
 }

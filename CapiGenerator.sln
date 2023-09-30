@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapiGenerator", "CapiGenerator\CapiGenerator.csproj", "{64CBF23B-F3E9-49D9-9B3E-6C3E3A25061F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject\TestProject.csproj", "{9BAFB9D1-6F15-4334-8064-5E1E2ED8BFC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{64CBF23B-F3E9-49D9-9B3E-6C3E3A25061F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64CBF23B-F3E9-49D9-9B3E-6C3E3A25061F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64CBF23B-F3E9-49D9-9B3E-6C3E3A25061F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9BAFB9D1-6F15-4334-8064-5E1E2ED8BFC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BAFB9D1-6F15-4334-8064-5E1E2ED8BFC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BAFB9D1-6F15-4334-8064-5E1E2ED8BFC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BAFB9D1-6F15-4334-8064-5E1E2ED8BFC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

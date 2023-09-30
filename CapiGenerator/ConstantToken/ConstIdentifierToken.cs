@@ -6,8 +6,9 @@ public record class ConstIdentifierToken : BaseConstantToken
 {
     public required GuidRef<Constant> Value { get; init; }
 
-    public override string GetValue(IReadOnlyDictionary<Guid, Constant> constants)
+    public override string GetOutValue()
     {
-        return constants[Value.Guid].Output.Name;
+        var constant = Value.Get() ?? throw new InvalidOperationException($"Constant {Value} not found");
+        return constant.Output.Name;
     }
 }

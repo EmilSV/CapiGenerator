@@ -1,6 +1,9 @@
 namespace CapiGenerator;
 
-public interface IGUIDItem
+public interface IGUIDItem<TSelf>
+    where TSelf : class, IGUIDItem<TSelf>
 {
-    public Guid Id { get; }
+    public GuidRef<TSelf> Id { get; }
+    public string OriginalName { get; }
+    public string CompileUnitNamespace { get; }
 }

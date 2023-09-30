@@ -3,25 +3,26 @@ using CapiGenerator.Model;
 
 namespace CapiGenerator.ConstantToken;
 
+public enum PunctuationType
+{
+    Plus,
+    Minus,
+    Multiply,
+    Divide,
+    Modulo,
+    BitwiseAnd,
+    BitwiseOr,
+    BitwiseXor,
+    BitwiseNot,
+    BitwiseLeftShift,
+    BitwiseRightShift,
+    LeftParenthesis,
+    RightParenthesis,
+}
+
+
 public record class ConstantPunctuationToken : BaseConstantToken
 {
-    public enum PunctuationType
-    {
-        Plus,
-        Minus,
-        Multiply,
-        Divide,
-        Modulo,
-        BitwiseAnd,
-        BitwiseOr,
-        BitwiseXor,
-        BitwiseNot,
-        BitwiseLeftShift,
-        BitwiseRightShift,
-        LeftParenthesis,
-        RightParenthesis,
-    }
-
     public required PunctuationType Type { get; init; }
 
     public override string ToString() => Type switch
@@ -75,7 +76,7 @@ public record class ConstantPunctuationToken : BaseConstantToken
         return constantPunctuation is not null;
     }
 
-    public override string GetValue(IReadOnlyDictionary<Guid, Constant> constants)
+    public override string GetOutValue()
     {
         return ToString();
     }

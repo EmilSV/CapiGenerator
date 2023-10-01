@@ -504,7 +504,7 @@ enum TJPARAM {
    * **Value**
    * - `8`, `12`, or `16`
    *
-   * 12-bit data precision implies #TJPARAM_OPTIMIZE unless #TJPARAM_ARITHMETIC
+   * 12-bit data precisioenumn implies #TJPARAM_OPTIMIZE unless #TJPARAM_ARITHMETIC
    * is set.
    */
   TJPARAM_PRECISION,

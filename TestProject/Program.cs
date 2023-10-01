@@ -45,7 +45,10 @@ if (cppCompilation.HasErrors)
 
 var generator = new CapiGeneratorUnit();
 
-generator.AddCompilation(cppCompilation, Path.GetFileNameWithoutExtension(headerFile), outputFolder);
+var @namespace = Path.GetFileNameWithoutExtension(headerFile);
+@namespace = char.ToUpper(@namespace[0]) + @namespace[1..];
+
+generator.AddCompilation(cppCompilation, @namespace, outputFolder);
 await generator.WriteToDiskAsync();
 
 return 0;

@@ -1,38 +1,49 @@
-using CapiGenerator.Parsers;
+using CapiGenerator.Model;
+using CapiGenerator.OutFile;
+using CapiGenerator.Parser;
 using CppAst;
+using System.Reflection.Emit;
 
 namespace CapiGenerator;
 
 public sealed class CapiGeneratorUnit
 {
-    private readonly CapiModelLookup _modelLookup = new();
+    public readonly CapiFactory Factory = new();
     public readonly CapiParser Parser = new();
     public readonly CapiWriter Writer = new();
 
-    public void AddCompilation(CppCompilation compilation, string compileUnitNamespace, CsharpOutFolder outFolder)
+    private Dictionary<string, CsharpOutFolder> _outFolders = new();
+
+
+    public void AddCompilation(CppCompilation compilation, string @namespace, string outFolderPath)
     {
+        outFolderPath = Path.GetFullPath(outFolderPath);
+        if (_outFolders.TryGetValue(outFolderPath, out var outFolder))
+        {
+            if (outFolder.Namespace != @namespace)
+            {
+                throw new Exception($"Out folder {outFolderPath} is already used for namespace {outFolder.Namespace}.");
+            }
+        }
+        else
+        {
+            outFolder = new(outFolderPath, @namespace);
+            _outFolders.Add(outFolderPath, outFolder);
+        }
+
         var args = new ParseArgs()
         {
             Compilation = compilation,
-            CompileUnitNamespace = compileUnitNamespace,
-            Lookups = _modelLookup,
+            CompileUnitNamespace = @namespace,
+            Lookups = Factory.ToModelLookup(),
             OutputFolder = outFolder,
         };
-        Parser.Parse(args);
+        Factory.AddResult(Parser.Parse(args));
     }
 
-    public void AddCompilation(CppCompilation compilation, string compileUnitNamespace, string outFolderPath)
+    public List<Constant> GetConstants()
     {
-        CsharpOutFolder outFolder = new(outFolderPath);
-
-        var args = new ParseArgs()
-        {
-            Compilation = compilation,
-            CompileUnitNamespace = compileUnitNamespace,
-            Lookups = _modelLookup,
-            OutputFolder = outFolder,
-        };
-        Parser.Parse(args);
+        return Factory.ConstFactory.GetValueCollection().ToList();
     }
 
 
@@ -40,13 +51,13 @@ public sealed class CapiGeneratorUnit
     {
         var args = new WriterArgs()
         {
-            Lookups = _modelLookup,
+            Lookups = Factory.ToModelLookup(),
         };
         Writer.Write(args);
 
-        HashSet<CSharpOutFile> outFiles = new();
+        HashSet<BaseCSharpOutFile> outFiles = new();
 
-        foreach (var item in _modelLookup.ConstLookup.GetValueCollection())
+        foreach (var item in Factory.ConstFactory.GetValueCollection())
         {
             outFiles.Add(item.Output.OutputFile);
         }

@@ -1,4 +1,5 @@
 using System.Globalization;
+using CapiGenerator.Model;
 namespace CapiGenerator.ConstantToken;
 
 public record class ConstantLiteralToken : BaseConstantToken
@@ -8,7 +9,7 @@ public record class ConstantLiteralToken : BaseConstantToken
     public string Value { get; }
     public ConstantType Type => _type;
 
-    public override string GetOutValue()
+    public override string GetOutValue(BaseModelRefLookup<Constant> constLookup)
     {
         switch (Type)
         {

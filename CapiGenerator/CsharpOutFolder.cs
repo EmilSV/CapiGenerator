@@ -1,32 +1,60 @@
 namespace CapiGenerator;
 
+using CapiGenerator.OutFile;
 using PathIO = Path;
 
 public class CsharpOutFolder
 {
-    private readonly Dictionary<string, CSharpOutFile> _lookup = new();
-    private readonly string Path;
+    private readonly Dictionary<string, BaseCSharpOutFile> _lookup = new();
+    public readonly string Path;
+    public readonly string Namespace;
 
-    public CsharpOutFolder(string path)
+    internal CsharpOutFolder(string path, string @namespace)
     {
-        Path = PathIO.GetFullPath(path);
+        Path = path;
+        Namespace = @namespace;
     }
 
-    public CSharpOutFile GetFile(string className, ClassType classType)
+    public T GetFile<T>(string className)
+        where T : BaseCSharpOutFile
     {
         var fileName = $"{className}.cs";
         var filePath = PathIO.Combine(Path, fileName);
         if (_lookup.TryGetValue(filePath, out var outFile))
         {
-            if (outFile.ClassType != classType)
+            if (outFile is T cachedOutFile)
             {
-                throw new Exception($"File {filePath} is already used for {outFile.ClassType}.");
+                return cachedOutFile;
             }
-            return outFile;
+            else
+            {
+                throw new Exception($"File {filePath} is already used for {outFile.ClassName}.");
+            }
         }
-        outFile = new CSharpOutFile(filePath, classType);
+
+        if(typeof(T) == typeof(EnumCSharpOutFile))
+        {
+            outFile = new EnumCSharpOutFile(Namespace, filePath);
+        }
+        else if (typeof(T) == typeof(StaticClassCSharpOutFile))
+        {
+            outFile = new StaticClassCSharpOutFile(Namespace, filePath);
+        }
+        else if (typeof(T) == typeof(StructCSharpOutFile))
+        {
+            outFile = new StructCSharpOutFile(Namespace, filePath);
+        }
+        else if (typeof(T) == typeof(ClassCSharpOutFile))
+        {
+            outFile = new ClassCSharpOutFile(Namespace, filePath);
+        }
+        else
+        {
+            throw new Exception($"Unknown type {typeof(T)}.");
+        }
+
         _lookup.Add(filePath, outFile);
 
-        return outFile;
+        return (T)outFile;
     }
 }

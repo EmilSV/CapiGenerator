@@ -76,7 +76,7 @@ public record class ConstantPunctuationToken : BaseConstantToken
         return constantPunctuation is not null;
     }
 
-    public override string GetOutValue()
+    public override string GetOutValue(BaseModelRefLookup<Constant> constLookup)
     {
         return ToString();
     }

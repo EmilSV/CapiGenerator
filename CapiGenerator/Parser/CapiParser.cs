@@ -1,6 +1,6 @@
 using CapiGenerator.Model;
 
-namespace CapiGenerator.Parsers;
+namespace CapiGenerator.Parser;
 
 public class CapiParser
 {
@@ -13,10 +13,11 @@ public class CapiParser
 
     internal CapiParserResult Parse(ParseArgs args)
     {
-        var result = new CapiParserResult();
-        var lookup = new GuidRef<Constant>.LookupCollection();
         var constants = _constantParser.Parse(args);
-        result.Constants.AddRange(constants);
+        var result = new CapiParserResult()
+        {
+            ConstLookup = constants
+        };
         return result;
     }
 }

@@ -1,6 +1,7 @@
 using System.Text;
 using CapiGenerator.ConstantToken;
 using CapiGenerator.Model;
+using CapiGenerator.OutFile;
 
 namespace CapiGenerator;
 
@@ -13,12 +14,27 @@ public class ConstWriter
         _constantTypeResolver = constantTypeResolver ?? new DefaultConstTypeResolver();
     }
 
-    public void WriteToOutFile(CSharpOutFile outputFile, Constant constant, WriterArgs args)
+    public void WriteToOutFile(BaseCSharpOutFile outputFile, Constant constant, WriterArgs args)
     {
         var name = constant.Output.Name;
         var code = GenerateCode(constant, args);
 
-        outputFile.Add(name, code);
+        if (outputFile is StructCSharpOutFile structOutFile)
+        {
+            structOutFile.Add(name, code);
+        }
+        else if (outputFile is StaticClassCSharpOutFile staticClassOutFile)
+        {
+            staticClassOutFile.Add(name, code);
+        }
+        else if (outputFile is EnumCSharpOutFile)
+        {
+            throw new NotSupportedException("Enums are not supported");
+        }
+        else if (outputFile is ClassCSharpOutFile classOutFile)
+        {
+            classOutFile.Add(name, code);
+        }
     }
 
     private string GenerateCode(Constant constant, WriterArgs args)
@@ -27,11 +43,12 @@ public class ConstWriter
         var outputType = constant.ResolveOutputType(_constantTypeResolver);
         var tokens = constant.Output.Tokens.AsSpan();
         var name = constant.Output.Name;
+        var constLookup = args.Lookups.ConstLookup;
 
 
         if (outputType == ConstantType.String)
         {
-            GenerateUtf8SpanContent(builder, name, tokens);
+            GenerateUtf8SpanContent(builder, name, tokens, args);
         }
         else
         {
@@ -49,24 +66,7 @@ public class ConstWriter
 
             foreach (var token in tokens)
             {
-                if (token is ConstantLiteralToken literalToken)
-                {
-                    builder.Append(literalToken.GetOutValue());
-                }
-                else if (token is ConstantPunctuationToken punctuationToken)
-                {
-                    builder.Append(punctuationToken.GetOutValue());
-                }
-                else if (token is ConstIdentifierToken identifierToken)
-                {
-                    builder.Append(identifierToken.GetOutValue());
-                }
-                else
-                {
-                    throw new ArgumentOutOfRangeException(nameof(token), token, null);
-                }
-
-                builder.Append(" ");
+                builder.Append(token.GetOutValue(constLookup));
             }
 
             builder.Append(";");
@@ -75,30 +75,18 @@ public class ConstWriter
         return builder.ToString();
     }
 
-    private void GenerateUtf8SpanContent(StringBuilder builder, string name, ReadOnlySpan<BaseConstantToken> tokens)
+    private void GenerateUtf8SpanContent(
+        StringBuilder builder,
+        string name,
+        ReadOnlySpan<BaseConstantToken> tokens,
+        WriterArgs args)
     {
+        var constLookup = args.Lookups.ConstLookup;
         builder.Append($"public static System.ReadOnlySpan<byte> {name} => ");
 
         foreach (var token in tokens)
         {
-            if (token is ConstantLiteralToken literalToken)
-            {
-                builder.Append(literalToken.GetOutValue());
-            }
-            else if (token is ConstantPunctuationToken punctuationToken)
-            {
-                builder.Append(punctuationToken.GetOutValue());
-            }
-            else if (token is ConstIdentifierToken identifierToken)
-            {
-                builder.Append(identifierToken.GetOutValue());
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(token), token, null);
-            }
-
-            builder.Append(" ");
+            builder.Append(token.GetOutValue(constLookup) + " ");
         }
 
         builder.Append(";");

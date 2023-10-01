@@ -108,7 +108,7 @@ public class DefaultConstTypeResolver : IConstantTypeResolver
             }
             else if (token is ConstIdentifierToken identifierToken)
             {
-                var referencedConstant = identifierToken.Value.Get();
+                var referencedConstant = identifierToken.Value.Get(constant.OwingFactory);
                 if (referencedConstant == null)
                 {
                     return false;
@@ -148,7 +148,7 @@ public class DefaultConstTypeResolver : IConstantTypeResolver
             }
             else if (token is ConstIdentifierToken identifierToken)
             {
-                var referencedConstant = identifierToken.Value.Get();
+                var referencedConstant = identifierToken.Value.Get(constant.OwingFactory);
                 if (referencedConstant == null)
                 {
                     return false;
@@ -188,7 +188,7 @@ public class DefaultConstTypeResolver : IConstantTypeResolver
             }
             else if (token is ConstIdentifierToken identifierToken)
             {
-                var referencedConstant = identifierToken.Value.Get();
+                var referencedConstant = identifierToken.Value.Get(constant.OwingFactory);
                 if (referencedConstant == null)
                 {
                     return false;
@@ -228,7 +228,7 @@ public class DefaultConstTypeResolver : IConstantTypeResolver
             }
             else if (token is ConstIdentifierToken identifierToken)
             {
-                var referencedConstant = identifierToken.Value.Get();
+                var referencedConstant = identifierToken.Value.Get(constant.OwingFactory);
                 if (referencedConstant == null)
                 {
                     return false;

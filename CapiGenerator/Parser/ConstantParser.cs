@@ -1,18 +1,27 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using CapiGenerator.ConstantToken;
 using CapiGenerator.Model;
+using CapiGenerator.ModelFactory;
+using CapiGenerator.OutFile;
 using CppAst;
 
-using ConstLookup = CapiGenerator.GuidRef<CapiGenerator.Model.Constant>.LookupCollection;
 
-namespace CapiGenerator.Parsers;
+namespace CapiGenerator.Parser;
 
 public class ConstantParser
 {
-    public Constant[] Parse(ParseArgs args)
+    private readonly IConstantTypeResolver _constantTypeResolver;
+
+    public ConstantParser(IConstantTypeResolver? constantTypeResolver = null)
     {
-        List<Constant> constants = new();
+        _constantTypeResolver = constantTypeResolver ?? new DefaultConstTypeResolver();
+    }
+
+    public ConstModelFactory Parse(ParseArgs args)
+    {
         List<CppMacro> potentialConstants = new();
+        ConstModelFactory factory = new ConstModelFactory();
 
         var compilation = args.Compilation;
 
@@ -33,14 +42,24 @@ public class ConstantParser
 
         foreach (CppMacro item in potentialConstants)
         {
-            var constant = ParseMarcoValue(item, args);
-            if (constant is not null)
-            {
-                constants.Add(constant);
-            }
+            ParseMarcoValue(factory, item, args);
         }
 
-        return constants.ToArray();
+        factory.RemoveAll(constant => constant is null);
+        factory.RemoveAll(constant => constant.Output.Tokens.Length == 0);
+        factory.RemoveAll(constant =>
+        {
+            if (constant.Input.Name == "TJ_444")
+            {
+                Debugger.Break();
+            }
+
+            bool isRemoved = constant.ResolveOutputType(_constantTypeResolver) is ConstantType.Unknown or ConstantType.NONE;
+
+            return isRemoved;
+        });
+
+        return factory;
     }
 
     protected virtual bool ShouldSkip(CppMacro constant, ParseArgs args) => false;
@@ -50,7 +69,7 @@ public class ConstantParser
         Console.Error.WriteLine($"Error parsing constant {macro.Name}: {message}");
     }
 
-    protected virtual Constant? ParseMarcoValue(CppMacro value, ParseArgs args)
+    protected virtual void ParseMarcoValue(ConstModelFactory factory, CppMacro value, ParseArgs args)
     {
         var compileUnitNamespace = args.CompileUnitNamespace;
         var lookup = args.Lookups;
@@ -64,35 +83,33 @@ public class ConstantParser
         };
 
         var constantTokens = value.Tokens.Select(
-            token => CppTokenToConstantToken(token, compileUnitNamespace, lookup.ConstLookup)
+            token => CppTokenToConstantToken(token, compileUnitNamespace, factory)
         ).ToArray();
 
         if (constantTokens.Any(token => token is null))
         {
             OnError(value, $"Failed to parse constant {value.Name}", args);
-            return null;
         }
 
         Constant.ConstantOutput output = new()
         {
             Name = value.Name,
-            OutputClassName = value.Name,
-            OutputFile = outputFolder.GetFile(compileUnitNamespace + "Consts", ClassType.StaticClass),
+            OutputFile = outputFolder.GetFile<StaticClassCSharpOutFile>(compileUnitNamespace + "Consts"),
             Tokens = constantTokens!.ToImmutableArray()!,
         };
 
-        return new Constant(lookup.ConstLookup, input, output);
+        factory.CreateConstant(input, output);
     }
 
     public static BaseConstantToken? CppTokenToConstantToken(
         CppToken token,
         string compileUnitNamespace,
-        ConstLookup lookup
+        ConstModelFactory factory
     ) => token.Kind switch
     {
         CppTokenKind.Identifier => new ConstIdentifierToken()
         {
-            Value = lookup.Get(token.Text, compileUnitNamespace)
+            Value = factory.GetRef(token.Text, compileUnitNamespace)
         },
         CppTokenKind.Literal => new ConstantLiteralToken(token.Text),
         CppTokenKind.Punctuation when

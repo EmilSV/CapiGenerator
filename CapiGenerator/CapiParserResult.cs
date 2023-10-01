@@ -4,5 +4,5 @@ namespace CapiGenerator;
 
 public class CapiParserResult
 {
-    public List<Constant> Constants { get; } = new();
+    public required BaseModelRefLookup<Constant> ConstLookup { get; init; }
 }

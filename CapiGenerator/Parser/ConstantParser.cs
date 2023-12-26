@@ -78,7 +78,7 @@ public class ConstantParser
         Constant.ConstantInput input = new()
         {
             Name = value.Name,
-            CompileUnitNamespace = compileUnitNamespace,
+            DllName = compileUnitNamespace,
             Macro = value,
         };
 

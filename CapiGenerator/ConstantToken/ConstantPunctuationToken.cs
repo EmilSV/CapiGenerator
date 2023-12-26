@@ -21,7 +21,7 @@ public enum PunctuationType
 }
 
 
-public record class ConstantPunctuationToken : BaseConstantToken
+public class ConstantPunctuationToken : BaseConstantToken
 {
     public required PunctuationType Type { get; init; }
 
@@ -76,7 +76,7 @@ public record class ConstantPunctuationToken : BaseConstantToken
         return constantPunctuation is not null;
     }
 
-    public override string GetOutValue(BaseModelRefLookup<Constant> constLookup)
+    public override string GetOutValue()
     {
         return ToString();
     }

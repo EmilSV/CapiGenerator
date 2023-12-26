@@ -2,7 +2,8 @@ using CapiGenerator.Model;
 
 namespace CapiGenerator.ConstantToken;
 
-public abstract record class BaseConstantToken
+public abstract class BaseConstantToken
 {
-    public abstract string GetOutValue(BaseModelRefLookup<Constant> constLookup);
+    public abstract string? GetOutValue();
+    public virtual void OnSecondPass(IReadOnlyDictionary<string, Constant> constants) { }
 }

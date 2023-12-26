@@ -1,25 +1,21 @@
 using System.Globalization;
-using CapiGenerator.Model;
 namespace CapiGenerator.ConstantToken;
 
-public record class ConstantLiteralToken : BaseConstantToken
+public class ConstantLiteralToken : BaseConstantToken
 {
-    private ConstantType _type;
+    private readonly ConstantType _type;
 
     public string Value { get; }
     public ConstantType Type => _type;
 
-    public override string GetOutValue(BaseModelRefLookup<Constant> constLookup)
+    public override string GetOutValue()
     {
-        switch (Type)
+        return Type switch
         {
-            case ConstantType.String:
-                return $"\"{Value[1..^1]}\"u8";
-            case ConstantType.Char:
-                return $"(byte){Value}";
-        }
-
-        return Value;
+            ConstantType.String => $"\"{Value[1..^1]}\"u8",
+            ConstantType.Char => $"(byte){Value}",
+            _ => Value,
+        };
     }
 
     public ConstantLiteralToken(string value)
@@ -32,7 +28,18 @@ public record class ConstantLiteralToken : BaseConstantToken
         }
     }
 
-    public static ConstantType GetConstantType(string value, out string? newValue)
+    public bool TryParseValueAsFloat(out double value)
+    {
+        return double.TryParse(Value, NumberStyles.Float, null, out value);
+    }
+
+
+    public bool TryParseValueAsInteger(out long value)
+    {
+        return long.TryParse(Value, NumberStyles.Integer | NumberStyles.HexNumber | NumberStyles., null, out value);
+    }
+
+    private static ConstantType GetConstantType(string value, out string? newValue)
     {
         value = value.Trim();
         newValue = value;

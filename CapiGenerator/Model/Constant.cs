@@ -1,76 +1,23 @@
-using System.Collections.Immutable;
 using CapiGenerator.ConstantToken;
-using CapiGenerator.ModelFactory;
-using CapiGenerator.OutFile;
-using CppAst;
 
 namespace CapiGenerator.Model;
 
-public class Constant : IModel<Constant>
+public class Constant
 {
-    public ModelRef<Constant> ModelRef { get; }
-    public BaseModelRefLookup<Constant> OwingFactory { get; private set; }
-    public string InputName => Input.Name;
-    public string CompileUnitNamespace => Input.CompileUnitNamespace;
+    private readonly BaseConstantToken[] _tokens;
 
-    public class ConstantInput : IEquatable<ConstantInput>
+    public string GetConstantIdentifierValue()
     {
-        public required string Name { get; init; }
-        public required string CompileUnitNamespace { get; init; }
-        public required CppMacro Macro { get; init; }
-
-        public bool Equals(ConstantInput? other) =>
-            other is not null &&
-            Name == other.Name &&
-            CompileUnitNamespace == other.CompileUnitNamespace;
-
-        public override bool Equals(object? obj) => Equals(obj as ConstantInput);
-
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name, CompileUnitNamespace);
-        }
+        throw new NotImplementedException();
     }
 
-    public class ConstantOutput
-    {
-        public required string Name { get; set; }
-        public required BaseCSharpOutFile OutputFile { get; set; }
-        public required ImmutableArray<BaseConstantToken> Tokens { get; set; }
-        public ConstWriter? Writer { get; set; }
-    }
+    public IReadOnlyList<BaseConstantToken> GetTokens() => _tokens;
+    public ReadOnlySpan<BaseConstantToken> GetTokensAsSpan() => _tokens;
 
-    private readonly ConstantInput _input;
-    private readonly ConstantOutput _output;
-
-    public ConstantInput Input => _input;
-    public ConstantOutput Output => _output;
-    
-    public ConstantType ResolveOutputType(IConstantTypeResolver resolver)
+    public Constant(
+        ReadOnlySpan<BaseConstantToken> tokens
+    )
     {
-        var type = resolver.ResolveType(this);
-        return type;
-    }
-
-    internal void SetOwingFactory(BaseModelRefLookup<Constant> factory)
-    {
-        OwingFactory = factory;
-    }
-
-    void IModel<Constant>.SetOwingFactory(BaseModelRefLookup<Constant> factory)
-    {
-        OwingFactory = factory;
-    }
-
-    internal Constant(
-        ModelRef<Constant> modelRef,
-        BaseModelRefLookup<Constant> owingFactory,
-        ConstantInput input,
-        ConstantOutput output)
-    {
-        ModelRef = modelRef;
-        OwingFactory = owingFactory;
-        _input = input;
-        _output = output;
+        _tokens = tokens.ToArray();
     }
 }

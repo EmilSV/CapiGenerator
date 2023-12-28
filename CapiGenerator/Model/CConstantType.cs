@@ -1,6 +1,6 @@
-namespace CapiGenerator;
+namespace CapiGenerator.Model;
 
-public enum ConstantType
+public enum CConstantType
 {
     Unknown = -1,
     NONE = 0,

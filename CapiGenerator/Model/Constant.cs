@@ -1,23 +1,29 @@
-using CapiGenerator.ConstantToken;
+using CapiGenerator.Model.ConstantToken;
+using CapiGenerator.Parser;
 
 namespace CapiGenerator.Model;
 
-public class Constant
+public class CConst(string name, ReadOnlySpan<BaseCConstantToken> tokens) : INeedSecondPass
 {
-    private readonly BaseConstantToken[] _tokens;
+    public readonly string Name = name;
+    private readonly BaseCConstantToken[] _tokens = tokens.ToArray();
 
     public string GetConstantIdentifierValue()
     {
         throw new NotImplementedException();
     }
 
-    public IReadOnlyList<BaseConstantToken> GetTokens() => _tokens;
-    public ReadOnlySpan<BaseConstantToken> GetTokensAsSpan() => _tokens;
+    public IReadOnlyList<BaseCConstantToken> GetTokens() => _tokens;
+    public ReadOnlySpan<BaseCConstantToken> GetTokensAsSpan() => _tokens;
 
-    public Constant(
-        ReadOnlySpan<BaseConstantToken> tokens
-    )
+    public void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        _tokens = tokens.ToArray();
+        foreach (var token in _tokens)
+        {
+            if (token is INeedSecondPass needSecondPass)
+            {
+                needSecondPass.OnSecondPass(compilationUnit);
+            }
+        }
     }
 }

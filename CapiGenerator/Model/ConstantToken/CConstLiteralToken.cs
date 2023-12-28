@@ -1,24 +1,24 @@
 using System.Globalization;
-namespace CapiGenerator.ConstantToken;
+namespace CapiGenerator.Model.ConstantToken;
 
-public class ConstantLiteralToken : BaseConstantToken
+public class CConstLiteralToken : BaseCConstantToken
 {
-    private readonly ConstantType _type;
+    private readonly CConstantType _type;
 
     public string Value { get; }
-    public ConstantType Type => _type;
+    public CConstantType Type => _type;
 
-    public override string GetOutValue()
-    {
-        return Type switch
-        {
-            ConstantType.String => $"\"{Value[1..^1]}\"u8",
-            ConstantType.Char => $"(byte){Value}",
-            _ => Value,
-        };
-    }
+    // public override string GetOutValue()
+    // {
+    //     return Type switch
+    //     {
+    //         ConstantType.String => $"\"{Value[1..^1]}\"u8",
+    //         ConstantType.Char => $"(byte){Value}",
+    //         _ => Value,
+    //     };
+    // }
 
-    public ConstantLiteralToken(string value)
+    public CConstLiteralToken(string value)
     {
         Value = value;
         _type = GetConstantType(value, out var newValue);
@@ -36,10 +36,10 @@ public class ConstantLiteralToken : BaseConstantToken
 
     public bool TryParseValueAsInteger(out long value)
     {
-        return long.TryParse(Value, NumberStyles.Integer | NumberStyles.HexNumber | NumberStyles., null, out value);
+        return long.TryParse(Value, NumberStyles.Integer | NumberStyles.HexNumber, null, out value);
     }
 
-    private static ConstantType GetConstantType(string value, out string? newValue)
+    private static CConstantType GetConstantType(string value, out string? newValue)
     {
         value = value.Trim();
         newValue = value;
@@ -47,13 +47,13 @@ public class ConstantLiteralToken : BaseConstantToken
         if (value.StartsWith('"') ||
             value.EndsWith('"'))
         {
-            return ConstantType.String;
+            return CConstantType.String;
         }
 
         if (value.StartsWith('\'') ||
             value.EndsWith('\''))
         {
-            return ConstantType.Char;
+            return CConstantType.Char;
         }
 
         bool isHex = value.StartsWith("0x", StringComparison.OrdinalIgnoreCase);
@@ -62,12 +62,12 @@ public class ConstantLiteralToken : BaseConstantToken
 
         if (isHex && long.TryParse(value[2..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))
         {
-            return ConstantType.Int;
+            return CConstantType.Int;
         }
 
         if (isFloat && double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
         {
-            return ConstantType.Float;
+            return CConstantType.Float;
         }
 
         if (isOctal)
@@ -76,7 +76,7 @@ public class ConstantLiteralToken : BaseConstantToken
             {
                 long octalAsLong = Convert.ToInt64(value[1..], 8);
                 newValue = octalAsLong.ToString(CultureInfo.InvariantCulture);
-                return ConstantType.Int;
+                return CConstantType.Int;
             }
             catch (Exception)
             {
@@ -86,9 +86,9 @@ public class ConstantLiteralToken : BaseConstantToken
 
         if (long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
         {
-            return ConstantType.Int;
+            return CConstantType.Int;
         }
 
-        return ConstantType.Unknown;
+        return CConstantType.Unknown;
     }
 }

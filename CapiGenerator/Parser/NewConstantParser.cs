@@ -7,10 +7,10 @@ namespace CapiGenerator.Parser;
 
 public class ConstantParser
 {
-    public CConst[] Parse(ReadOnlySpan<CppCompilation> compilations)
+    public void Parse(
+        ReadOnlySpan<CppCompilation> compilations,
+        BaseParserOutputChannel outputChannel)
     {
-        var constants = new List<CConst>();
-
         foreach (var compilation in compilations)
         {
             foreach (var macro in compilation.Macros)
@@ -28,22 +28,19 @@ public class ConstantParser
                 var newConst = FirstPass(macro);
                 if (newConst is not null)
                 {
-                    constants.Add(newConst);
+                    outputChannel.OnReceiveConstant(newConst);
                 }
-            } 
+            }
         }
-
-        return constants.ToArray();
     }
 
-    public void OnSecondPass(CCompilationUnit compilationUnit, ReadOnlySpan<CConst> constants)
+    public void OnSecondPass(CCompilationUnit compilationUnit, BaseParserInputChannel inputChannel)
     {
-        foreach (var constant in constants)
+        foreach (var constant in inputChannel.GetConstants())
         {
             SecondPass(constant, compilationUnit);
         }
     }
-
 
     protected virtual void SecondPass(CConst value, CCompilationUnit compilationUnit)
     {

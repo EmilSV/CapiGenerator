@@ -1,19 +1,40 @@
 using System.Reflection.Metadata;
 using CapiGenerator.Model;
+using CppAst;
 
 namespace CapiGenerator.Parser;
 
 public sealed class CCompilationUnit
 {
-    private sealed class ParserInputChannel(CConst[] constants) : BaseParserInputChannel
+    private class ParserOutputChannel(CCompilationUnit compilationUnit) : BaseParserOutputChannel
     {
-        private CConst[]? constants = constants;
+        private readonly CCompilationUnit _compilationUnit = compilationUnit;
+        private readonly List<CConstant> _receiveConstants = [];
 
-        public override ReadOnlySpan<CConst> GetConstants()
+        public override void OnReceiveConstant(ReadOnlySpan<CConstant> constants)
         {
-            return constants is null ? ReadOnlySpan<CConst>.Empty : constants;
+            foreach (var constant in constants)
+            {
+                _compilationUnit._constants.Add(constant.Name, constant);
+            }
+        }
+
+        public CConstant[] ReceiveConstantsToArray()
+        {
+            return [.. _receiveConstants];
         }
     }
+
+    private sealed class ParserInputChannel(CConstant[] constants) : BaseParserInputChannel
+    {
+        public override ReadOnlySpan<CConstant> GetConstants()
+        {
+            return constants is null ? ReadOnlySpan<CConstant>.Empty : constants;
+        }
+    }
+
+    private readonly Dictionary<string, CConstant> _constants = [];
+
 
     private readonly List<BaseParser> _parsers = [];
 
@@ -23,7 +44,7 @@ public sealed class CCompilationUnit
     public ICParameterType GetParameterType(string name) =>
         throw new NotImplementedException("This method is not implemented.");
 
-    public CConst GetConstant(string name) =>
+    public CConstant GetConstant(string name) =>
         throw new NotImplementedException("This method is not implemented.");
 
 
@@ -40,5 +61,24 @@ public sealed class CCompilationUnit
             _parsers.Add(parser);
         }
         return this;
+    }
+
+    public void Parse(ReadOnlySpan<CppCompilation> compilations)
+    {
+        List<(BaseParser, ParserInputChannel)> parserChannels = [];
+
+        foreach (var parser in _parsers)
+        {
+            var outputChannel = new ParserOutputChannel(this);
+            parser.Parse(compilations, outputChannel);
+
+            var inputChannel = new ParserInputChannel(outputChannel.ReceiveConstantsToArray());
+            parserChannels.Add((parser, inputChannel));
+        }
+
+        foreach (var (parser, inputChannel) in parserChannels)
+        {
+            parser.OnSecondPass(this, inputChannel);
+        }
     }
 }

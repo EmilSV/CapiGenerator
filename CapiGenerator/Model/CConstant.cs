@@ -3,9 +3,10 @@ using CapiGenerator.Parser;
 
 namespace CapiGenerator.Model;
 
-public class CConst(string name, ReadOnlySpan<BaseCConstantToken> tokens) : INeedSecondPass
+public class CConstant(string name, bool isFromEnum, ReadOnlySpan<BaseCConstantToken> tokens) : INeedSecondPass
 {
     public readonly string Name = name;
+    public readonly bool IsFromEnum = isFromEnum;
     private readonly BaseCConstantToken[] _tokens = tokens.ToArray();
 
     public string GetConstantIdentifierValue()

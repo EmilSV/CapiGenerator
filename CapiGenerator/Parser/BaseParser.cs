@@ -8,4 +8,8 @@ public abstract class BaseParser
         ReadOnlySpan<CppCompilation> compilations,
         BaseParserOutputChannel outputChannel);
 
+    public abstract void OnSecondPass(
+        CCompilationUnit compilationUnit,
+        BaseParserInputChannel inputChannel
+    );
 }

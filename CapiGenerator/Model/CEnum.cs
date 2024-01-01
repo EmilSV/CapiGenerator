@@ -3,13 +3,13 @@ using CapiGenerator.Parser;
 namespace CapiGenerator.Model;
 
 
-public sealed class CEnum(string name, ReadOnlySpan<CConst> values) : INeedSecondPass
+public sealed class CEnum(string name, ReadOnlySpan<CConstant> values) : INeedSecondPass
 {
     public readonly string Name = name;
-    private readonly CConst[] _values = values.ToArray();
+    private readonly CConstant[] _values = values.ToArray();
 
-    public IReadOnlyList<CConst> GetValues() => _values;
-    public ReadOnlySpan<CConst> GetValuesAsSpan() => _values;
+    public IReadOnlyList<CConstant> GetValues() => _values;
+    public ReadOnlySpan<CConstant> GetValuesAsSpan() => _values;
 
     public void OnSecondPass(CCompilationUnit compilationUnit)
     {

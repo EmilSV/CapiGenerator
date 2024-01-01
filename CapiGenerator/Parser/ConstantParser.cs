@@ -1,117 +1,76 @@
-// using System.Collections.Immutable;
-// using System.Diagnostics;
-// using CapiGenerator.Model;
-// using CapiGenerator.OutFile;
-// using CppAst;
+using CapiGenerator.Model;
+using CapiGenerator.Model.ConstantToken;
+using CppAst;
+
+namespace CapiGenerator.Parser;
 
 
-// namespace CapiGenerator.Parser;
+public class ConstantParser
+{
+    public void Parse(
+        ReadOnlySpan<CppCompilation> compilations,
+        BaseParserOutputChannel outputChannel)
+    {
+        foreach (var compilation in compilations)
+        {
+            foreach (var macro in compilation.Macros)
+            {
+                if (macro.Parameters != null && macro.Parameters.Count > 0)
+                {
+                    continue;
+                }
 
-// public class ConstantParser
-// {
-//     private readonly IConstantTypeResolver _constantTypeResolver;
+                if (ShouldSkip(macro))
+                {
+                    continue;
+                }
 
-//     public ConstantParser(IConstantTypeResolver? constantTypeResolver = null)
-//     {
-//         _constantTypeResolver = constantTypeResolver ?? new DefaultConstTypeResolver();
-//     }
+                var newConst = FirstPass(macro);
+                if (newConst is not null)
+                {
+                    outputChannel.OnReceiveConstant(newConst);
+                }
+            }
+        }
+    }
 
-//     public ConstModelFactory Parse(ParseArgs args)
-//     {
-//         List<CppMacro> potentialConstants = new();
-//         ConstModelFactory factory = new ConstModelFactory();
+    public void OnSecondPass(CCompilationUnit compilationUnit, BaseParserInputChannel inputChannel)
+    {
+        foreach (var constant in inputChannel.GetConstants())
+        {
+            SecondPass(constant, compilationUnit);
+        }
+    }
 
-//         var compilation = args.Compilation;
+    protected virtual void SecondPass(CConstant value, CCompilationUnit compilationUnit)
+    {
+        value.OnSecondPass(compilationUnit);
+    }
 
-//         foreach (var constant in compilation.Macros)
-//         {
-//             if (constant.Parameters != null && constant.Parameters.Count > 0)
-//             {
-//                 continue;
-//             }
+    protected virtual CConstant? FirstPass(CppMacro macro)
+    {
+        var constantTokens = macro.Tokens.Select(CppTokenToConstantToken).ToArray();
+        if (constantTokens == null || constantTokens.Any(token => token is null))
+        {
+            OnError(macro, "Failed to parse tokens");
+            return null;
+        }
 
-//             if (ShouldSkip(constant, args))
-//             {
-//                 continue;
-//             }
+        return new CConstant(macro.Name, false, constantTokens!);
+    }
 
-//             potentialConstants.Add(constant);
-//         }
+    protected virtual bool ShouldSkip(CppMacro constant) => false;
+    protected virtual void OnError(CppMacro macro, string message)
+    {
+        Console.Error.WriteLine($"Error parsing constant {macro.Name}: {message}");
+    }
 
-//         foreach (CppMacro item in potentialConstants)
-//         {
-//             ParseMarcoValue(factory, item, args);
-//         }
-
-//         factory.RemoveAll(constant => constant is null);
-//         factory.RemoveAll(constant => constant.Output.Tokens.Length == 0);
-//         factory.RemoveAll(constant =>
-//         {
-//             if (constant.Input.Name == "TJ_444")
-//             {
-//                 Debugger.Break();
-//             }
-
-//             bool isRemoved = constant.ResolveOutputType(_constantTypeResolver) is ConstantType.Unknown or ConstantType.NONE;
-
-//             return isRemoved;
-//         });
-
-//         return factory;
-//     }
-
-//     protected virtual bool ShouldSkip(CppMacro constant, ParseArgs args) => false;
-
-//     protected virtual void OnError(CppMacro macro, string message, ParseArgs args)
-//     {
-//         Console.Error.WriteLine($"Error parsing constant {macro.Name}: {message}");
-//     }
-
-//     protected virtual void ParseMarcoValue(ConstModelFactory factory, CppMacro value, ParseArgs args)
-//     {
-//         var compileUnitNamespace = args.CompileUnitNamespace;
-//         var lookup = args.Lookups;
-//         var outputFolder = args.OutputFolder;
-
-//         Constant.ConstantInput input = new()
-//         {
-//             Name = value.Name,
-//             DllName = compileUnitNamespace,
-//             Macro = value,
-//         };
-
-//         var constantTokens = value.Tokens.Select(
-//             token => CppTokenToConstantToken(token, compileUnitNamespace, factory)
-//         ).ToArray();
-
-//         if (constantTokens.Any(token => token is null))
-//         {
-//             OnError(value, $"Failed to parse constant {value.Name}", args);
-//         }
-
-//         Constant.ConstantOutput output = new()
-//         {
-//             Name = value.Name,
-//             OutputFile = outputFolder.GetFile<StaticClassCSharpOutFile>(compileUnitNamespace + "Consts"),
-//             Tokens = constantTokens!.ToImmutableArray()!,
-//         };
-
-//         factory.CreateConstant(input, output);
-//     }
-
-//     public static BaseConstantToken? CppTokenToConstantToken(
-//         CppToken token,
-//         string compileUnitNamespace,
-//         ConstModelFactory factory
-//     ) => token.Kind switch
-//     {
-//         CppTokenKind.Identifier => new ConstIdentifierToken()
-//         {
-//             Value = factory.GetRef(token.Text, compileUnitNamespace)
-//         },
-//         CppTokenKind.Literal => new ConstantLiteralToken(token.Text),
-//         CppTokenKind.Punctuation when
-//             ConstantPunctuationToken.TryParse(token.Text, out var punctuationToken) => punctuationToken,
-//         _ => null
-//     };
-// }
+    public static BaseCConstantToken? CppTokenToConstantToken(CppToken token) => token.Kind switch
+    {
+        CppTokenKind.Identifier => new CConstIdentifierToken(token.Text),
+        CppTokenKind.Literal => new CConstLiteralToken(token.Text),
+        CppTokenKind.Punctuation when
+            CConstantPunctuationToken.TryParse(token.Text, out var punctuationToken) => punctuationToken,
+        _ => null
+    };
+}

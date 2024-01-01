@@ -4,7 +4,7 @@ namespace CapiGenerator.Model.ConstantToken;
 
 public class CConstIdentifierToken : BaseCConstantToken, INeedSecondPass
 {
-    private CConst? _constantModel;
+    private CConstant? _constantModel;
     private readonly string? _constIdentifierName;
 
     public CConstIdentifierToken(string constIdentifierName)
@@ -12,12 +12,12 @@ public class CConstIdentifierToken : BaseCConstantToken, INeedSecondPass
         _constIdentifierName = constIdentifierName;
     }
 
-    public CConstIdentifierToken(CConst constantIdentifier)
+    public CConstIdentifierToken(CConstant constantIdentifier)
     {
         _constantModel = constantIdentifier;
     }
 
-    public CConst? GetConstantModel()
+    public CConstant? GetConstantModel()
     {
         return _constantModel;
     }

@@ -9,4 +9,28 @@ public abstract class BaseParserOutputChannel
     {
         OnReceiveConstant([constant]);
     }
+
+    public abstract void OnReceiveEnum(ReadOnlySpan<CEnum> enums);
+    public void OnReceiveEnum(CEnum enumValue)
+    {
+        OnReceiveEnum([enumValue]);
+    }
+
+    public abstract void OnReceiveStruct(ReadOnlySpan<CStruct> structs);
+    public void OnReceiveStruct(CStruct structValue)
+    {
+        OnReceiveStruct([structValue]);
+    }
+
+    public abstract void OnReceiveType(ReadOnlySpan<ICType> types);
+    public void OnReceiveType(ICType type)
+    {
+        OnReceiveType([type]);
+    }
+
+    public abstract void OnReceiveFunction(ReadOnlySpan<CFunction> types);
+    public void OnReceiveFunction(CFunction type)
+    {
+        OnReceiveFunction([type]);
+    }
 }

@@ -5,12 +5,12 @@
             // Use IntelliSense to find out which attributes exist for C# debugging
             // Use hover for the description of the existing attributes
             // For further information visit https://github.com/dotnet/vscode-csharp/blob/main/debugger-launchjson.md
-            "name": ".NET Core Launch (console)",
             "type": "coreclr",
+            "name": ".NET Core Launch (console)",
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/TestProject/bin/Debug/net7.0/win-x64/TestProject.dll",
+            "program": "${workspaceFolder}/TestProject/bin/Debug/net8.0/win-x64/TestProject.dll",
             "args": ["TestHeader\\ConstTest.h", "Output"],
             "cwd": "${workspaceFolder}/",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console

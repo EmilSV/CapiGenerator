@@ -5,9 +5,10 @@ using CppAst;
 namespace CapiGenerator.Parser;
 
 
-public class ConstantParser
+public class ConstantParser : BaseParser
 {
-    public void Parse(
+    public override void FirstPass(
+        Guid compilationUnitId,
         ReadOnlySpan<CppCompilation> compilations,
         BaseParserOutputChannel outputChannel)
     {
@@ -25,7 +26,7 @@ public class ConstantParser
                     continue;
                 }
 
-                var newConst = FirstPass(macro);
+                var newConst = FirstPass(compilationUnitId, macro);
                 if (newConst is not null)
                 {
                     outputChannel.OnReceiveConstant(newConst);
@@ -34,7 +35,7 @@ public class ConstantParser
         }
     }
 
-    public void OnSecondPass(CCompilationUnit compilationUnit, BaseParserInputChannel inputChannel)
+    public override void SecondPass(CCompilationUnit compilationUnit, BaseParserInputChannel inputChannel)
     {
         foreach (var constant in inputChannel.GetConstants())
         {
@@ -47,7 +48,7 @@ public class ConstantParser
         value.OnSecondPass(compilationUnit);
     }
 
-    protected virtual CConstant? FirstPass(CppMacro macro)
+    protected virtual CConstant? FirstPass(Guid compilationUnitId, CppMacro macro)
     {
         var constantTokens = macro.Tokens.Select(CppTokenToConstantToken).ToArray();
         if (constantTokens == null || constantTokens.Any(token => token is null))
@@ -56,7 +57,7 @@ public class ConstantParser
             return null;
         }
 
-        return new CConstant(macro.Name, false, constantTokens!);
+        return new CConstant(compilationUnitId, macro.Name, false, constantTokens!);
     }
 
     protected virtual bool ShouldSkip(CppMacro constant) => false;

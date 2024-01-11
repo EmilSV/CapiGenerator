@@ -1,35 +1,33 @@
 using CapiGenerator.Parser;
+using CapiGenerator.Type;
 
 namespace CapiGenerator.Model;
 
-public class CField : INeedSecondPass
+public class CField(
+    Guid compilationUnitId, string name, TypeInstance type)
+    : BaseCAstItem(compilationUnitId)
 {
-    public readonly string Name;
-    private readonly string? _typeName;
-    private ICFieldType? _type;
+    public readonly string Name = name;
+    private TypeInstance _type = type;
 
-    public ICFieldType? GetFieldType()
+    public TypeInstance GetFieldType()
     {
         return _type;
     }
 
-    public void OnSecondPass(CCompilationUnit compilationUnit)
+    public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        if (_typeName != null)
+        if (_type.IsCompletedType)
         {
-            _type = compilationUnit.GetFieldType(_typeName);
+            return;
         }
-    }
 
-    public CField(string name, string typeName)
-    {
-        Name = name;
-        _typeName = typeName;
-    }
+        var _typeName = _type.TypeName ??
+                throw new InvalidOperationException("Field type name is null");
 
-    public CField(string name, ICFieldType type)
-    {
-        Name = name;
-        _type = type;
+        var foundType = compilationUnit.GetTypeByName(_typeName) ??
+             throw new InvalidOperationException($"Field type '{_typeName}' not found");
+
+        _type = _type.NewWithType(foundType);
     }
 }

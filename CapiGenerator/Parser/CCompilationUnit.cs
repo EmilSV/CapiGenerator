@@ -8,14 +8,53 @@ public sealed class CCompilationUnit
 {
     private class ParserOutputChannel(CCompilationUnit compilationUnit) : BaseParserOutputChannel
     {
-        private readonly CCompilationUnit _compilationUnit = compilationUnit;
         private readonly List<CConstant> _receiveConstants = [];
+        private readonly List<CEnum> _receiveEnums = [];
+        private readonly List<CStruct> _receiveStructs = [];
+        private readonly List<ICType> _receiveTypes = [];
 
         public override void OnReceiveConstant(ReadOnlySpan<CConstant> constants)
         {
             foreach (var constant in constants)
             {
-                _compilationUnit._constants.Add(constant.Name, constant);
+                if (compilationUnit._constants.TryAdd(constant.Name, constant))
+                {
+                    _receiveConstants.Add(constant);
+                }
+            }
+        }
+
+        public override void OnReceiveEnum(ReadOnlySpan<CEnum> enums)
+        {
+            foreach (var @enum in enums)
+            {
+                if (compilationUnit._enums.TryAdd(@enum.Name, @enum))
+                {
+                    _receiveEnums.Add(@enum);
+                }
+            }
+
+        }
+
+        public override void OnReceiveStruct(ReadOnlySpan<CStruct> structs)
+        {
+            foreach (var @struct in structs)
+            {
+                if (compilationUnit._structs.TryAdd(@struct.Name, @struct))
+                {
+                    _receiveStructs.Add(@struct);
+                }
+            }
+        }
+
+        public override void OnReceiveType(ReadOnlySpan<ICType> types)
+        {
+            foreach (var type in types)
+            {
+                if(compilationUnit._types.TryAdd(type.Name, type))
+                {
+                    _receiveTypes.Add(type);
+                }
             }
         }
 
@@ -23,29 +62,62 @@ public sealed class CCompilationUnit
         {
             return [.. _receiveConstants];
         }
-    }
 
-    private sealed class ParserInputChannel(CConstant[] constants) : BaseParserInputChannel
-    {
-        public override ReadOnlySpan<CConstant> GetConstants()
+        public CEnum[] ReceiveEnumsToArray()
         {
-            return constants is null ? ReadOnlySpan<CConstant>.Empty : constants;
+            return [.. _receiveEnums];
+        }
+
+        public CStruct[] ReceiveStructsToArray()
+        {
+            return [.. _receiveStructs];
+        }
+
+        public ICType[] ReceiveTypesToArray()
+        {
+            return [.. _receiveTypes];
         }
     }
 
-    private readonly Dictionary<string, CConstant> _constants = [];
+    private sealed class ParserInputChannel(
+        CConstant[]? constants,
+        CEnum[]? enums,
+        CStruct[]? structs,
+        ICType[]? types
+    ) : BaseParserInputChannel
+    {
+        public override ReadOnlySpan<CConstant> GetConstants() =>
+            constants is null ? ReadOnlySpan<CConstant>.Empty : constants;
 
+        public override ReadOnlySpan<CEnum> GetEnums() =>
+            enums is null ? ReadOnlySpan<CEnum>.Empty : enums;
+
+        public override ReadOnlySpan<CStruct> GetStructs() =>
+            structs is null ? ReadOnlySpan<CStruct>.Empty : structs;
+
+        public override ReadOnlySpan<ICType> GetTypes() =>
+            types is null ? ReadOnlySpan<ICType>.Empty : types;
+    }
+
+    public readonly Guid CompilationUnitId = Guid.NewGuid();
+    private readonly Dictionary<string, CConstant> _constants = [];
+    private readonly Dictionary<string, CEnum> _enums = [];
+    private readonly Dictionary<string, CStruct> _structs = [];
+    private readonly Dictionary<string, ICType> _types = [];
 
     private readonly List<BaseParser> _parsers = [];
 
-    public ICFieldType GetFieldType(string name) =>
-        throw new NotImplementedException("This method is not implemented.");
+    public ICType? GetTypeByName(string name) =>
+        _types.TryGetValue(name, out var type) ? type : null;
 
-    public ICParameterType GetParameterType(string name) =>
-        throw new NotImplementedException("This method is not implemented.");
+    public CConstant? GetConstantByName(string name) =>
+        _constants.TryGetValue(name, out var constant) ? constant : null;
 
-    public CConstant GetConstant(string name) =>
-        throw new NotImplementedException("This method is not implemented.");
+    public CEnum? GetEnumByName(string name) =>
+        _enums.TryGetValue(name, out var @enum) ? @enum : null;
+
+    public CStruct? GetStructByName(string name) =>
+        _structs.TryGetValue(name, out var @struct) ? @struct : null;
 
 
     public CCompilationUnit AddParser(BaseParser parser)
@@ -69,16 +141,21 @@ public sealed class CCompilationUnit
 
         foreach (var parser in _parsers)
         {
-            var outputChannel = new ParserOutputChannel(this);
-            parser.Parse(compilations, outputChannel);
+            ParserOutputChannel outputChannel = new(this);
+            parser.FirstPass(CompilationUnitId, compilations, outputChannel);
 
-            var inputChannel = new ParserInputChannel(outputChannel.ReceiveConstantsToArray());
+            ParserInputChannel inputChannel = new(
+                constants: outputChannel.ReceiveConstantsToArray(),
+                enums: outputChannel.ReceiveEnumsToArray(),
+                structs: outputChannel.ReceiveStructsToArray(),
+                types: outputChannel.ReceiveTypesToArray()
+            );
             parserChannels.Add((parser, inputChannel));
         }
 
         foreach (var (parser, inputChannel) in parserChannels)
         {
-            parser.OnSecondPass(this, inputChannel);
+            parser.SecondPass(this, inputChannel);
         }
     }
 }

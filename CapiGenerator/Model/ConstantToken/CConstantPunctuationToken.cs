@@ -32,7 +32,7 @@ public sealed class CConstantPunctuationToken : BaseCConstantToken
             return constantPunctuation;
         }
 
-        throw new ArgumentException(nameof(value), value, null);
+        throw new ArgumentException(value, nameof(value), null);
     }
 
     public static bool TryParse(string value, [NotNullWhen(true)] out CConstantPunctuationToken? constantPunctuation)

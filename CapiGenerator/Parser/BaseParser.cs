@@ -4,12 +4,13 @@ namespace CapiGenerator.Parser;
 
 public abstract class BaseParser
 {
-    public abstract void Parse(
+    public abstract void FirstPass(
+        Guid CompilationUnitId,
         ReadOnlySpan<CppCompilation> compilations,
         BaseParserOutputChannel outputChannel);
 
-    public abstract void OnSecondPass(
+    public virtual void SecondPass(
         CCompilationUnit compilationUnit,
         BaseParserInputChannel inputChannel
-    );
+    ) {}
 }

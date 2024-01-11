@@ -2,7 +2,7 @@ using CapiGenerator.Parser;
 
 namespace CapiGenerator.Model.ConstantToken;
 
-public class CConstIdentifierToken : BaseCConstantToken, INeedSecondPass
+public class CConstIdentifierToken : BaseCConstantToken
 {
     private CConstant? _constantModel;
     private readonly string? _constIdentifierName;
@@ -22,11 +22,11 @@ public class CConstIdentifierToken : BaseCConstantToken, INeedSecondPass
         return _constantModel;
     }
 
-    public void OnSecondPass(CCompilationUnit compilationUnit)
+    public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
         if (_constIdentifierName != null)
         {
-            _constantModel = compilationUnit.GetConstant(_constIdentifierName);
+            _constantModel = compilationUnit.GetConstantByName(_constIdentifierName);
         }
     }
 }

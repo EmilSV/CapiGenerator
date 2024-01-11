@@ -1,35 +1,31 @@
 using CapiGenerator.Parser;
+using CapiGenerator.Type;
 
 namespace CapiGenerator.Model;
 
-public sealed class CParameter : INeedSecondPass
+public sealed class CParameter(
+    Guid compilationUnitId, string name, TypeInstance type) 
+    : BaseCAstItem(compilationUnitId)
 {
-    public readonly string Name;
-    private readonly string? _typeName;
-    private ICParameterType? _type;
+    public readonly string Name = name;
+    private TypeInstance _type = type;
+    public TypeInstance GetParameterType() => _type;
 
-    public ICParameterType? GetParameterType()
+    public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        return _type;
-    }
-
-    public void OnSecondPass(CCompilationUnit compilationUnit)
-    {
-        if (_typeName != null)
+        if (_type.IsCompletedType)
         {
-            _type = compilationUnit.GetParameterType(_typeName);
+            return;
         }
-    }
 
-    public CParameter(string name, string typeName)
-    {
-        Name = name;
-        _typeName = typeName;
-    }
-
-    public CParameter(string name, ICParameterType type)
-    {
-        Name = name;
-        _type = type;
+        var typeName = _type.TypeName;
+        if (typeName != null)
+        {
+            var newType = compilationUnit.GetTypeByName(typeName);
+            if (newType != null)
+            {
+                _type = _type.NewWithType(newType);
+            }
+        }
     }
 }

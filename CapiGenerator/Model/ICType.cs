@@ -1,6 +1,6 @@
 namespace CapiGenerator.Model;
 
-public interface ICFieldType
+public interface ICType
 {
     string Name { get; }
 }

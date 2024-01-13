@@ -12,6 +12,8 @@ public sealed class CCompilationUnit
         private readonly List<CEnum> _receiveEnums = [];
         private readonly List<CStruct> _receiveStructs = [];
         private readonly List<ICType> _receiveTypes = [];
+        private readonly List<CFunction> _receiveFunctions = [];
+
 
         public override void OnReceiveConstant(ReadOnlySpan<CConstant> constants)
         {
@@ -36,26 +38,40 @@ public sealed class CCompilationUnit
 
         }
 
-        public override void OnReceiveStruct(ReadOnlySpan<CStruct> structs)
+        public override void OnReceiveFunction(ReadOnlySpan<CFunction> functions)
         {
-            foreach (var @struct in structs)
+            foreach (var type in functions)
             {
-                if (compilationUnit._structs.TryAdd(@struct.Name, @struct))
+                if (compilationUnit._functions.TryAdd(type.Name, type))
                 {
-                    _receiveStructs.Add(@struct);
+                    _receiveFunctions.Add(type);
                 }
             }
         }
 
-        public override void OnReceiveType(ReadOnlySpan<ICType> types)
+        public override void OnReceiveStruct(ReadOnlySpan<CStruct> structs)
         {
-            foreach (var type in types)
+            foreach (var @struct in structs)
             {
-                if(compilationUnit._types.TryAdd(type.Name, type))
+                if (compilationUnit._types.ContainsKey(@struct.Name))
                 {
-                    _receiveTypes.Add(type);
+                    continue;
                 }
+
+                if(compilationUnit._structs.ContainsKey(@struct.Name))
+                {
+                    continue;
+                }
+
+                compilationUnit._types.Add(@struct.Name, @struct);
+                compilationUnit._structs.Add(@struct.Name, @struct);
+                _receiveStructs.Add(@struct);
             }
+        }
+
+        public override void OnReceiveTypedef(ReadOnlySpan<CTypedef> types)
+        {
+            throw new NotImplementedException();
         }
 
         public CConstant[] ReceiveConstantsToArray()
@@ -73,17 +89,15 @@ public sealed class CCompilationUnit
             return [.. _receiveStructs];
         }
 
-        public ICType[] ReceiveTypesToArray()
-        {
-            return [.. _receiveTypes];
-        }
+        
     }
 
     private sealed class ParserInputChannel(
         CConstant[]? constants,
         CEnum[]? enums,
         CStruct[]? structs,
-        ICType[]? types
+        CFunction[]? functions,
+        CTypedef[]? typedefs
     ) : BaseParserInputChannel
     {
         public override ReadOnlySpan<CConstant> GetConstants() =>
@@ -92,18 +106,23 @@ public sealed class CCompilationUnit
         public override ReadOnlySpan<CEnum> GetEnums() =>
             enums is null ? ReadOnlySpan<CEnum>.Empty : enums;
 
+        public override ReadOnlySpan<CFunction> GetFunctions() =>
+            functions is null ? ReadOnlySpan<CFunction>.Empty : functions;
+
         public override ReadOnlySpan<CStruct> GetStructs() =>
             structs is null ? ReadOnlySpan<CStruct>.Empty : structs;
 
-        public override ReadOnlySpan<ICType> GetTypes() =>
-            types is null ? ReadOnlySpan<ICType>.Empty : types;
+        public override ReadOnlySpan<CTypedef> GetTypedefs() =>
+            typedefs is null ? ReadOnlySpan<CTypedef>.Empty : typedefs;
     }
 
     public readonly Guid CompilationUnitId = Guid.NewGuid();
+    private readonly Dictionary<string, ICType> _types = [];
+
     private readonly Dictionary<string, CConstant> _constants = [];
     private readonly Dictionary<string, CEnum> _enums = [];
     private readonly Dictionary<string, CStruct> _structs = [];
-    private readonly Dictionary<string, ICType> _types = [];
+    private readonly Dictionary<string, CFunction> _functions = [];
 
     private readonly List<BaseParser> _parsers = [];
 

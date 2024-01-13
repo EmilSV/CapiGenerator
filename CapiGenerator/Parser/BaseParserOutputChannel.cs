@@ -22,15 +22,15 @@ public abstract class BaseParserOutputChannel
         OnReceiveStruct([structValue]);
     }
 
-    public abstract void OnReceiveType(ReadOnlySpan<ICType> types);
-    public void OnReceiveType(ICType type)
-    {
-        OnReceiveType([type]);
-    }
-
     public abstract void OnReceiveFunction(ReadOnlySpan<CFunction> types);
     public void OnReceiveFunction(CFunction type)
     {
         OnReceiveFunction([type]);
+    }
+
+    public abstract void OnReceiveTypedef(ReadOnlySpan<CTypedef> types);
+    public void OnReceiveTypedef(CTypedef type)
+    {
+        OnReceiveTypedef([type]);
     }
 }

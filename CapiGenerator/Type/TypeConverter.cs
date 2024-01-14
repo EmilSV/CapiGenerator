@@ -5,15 +5,15 @@ namespace CapiGenerator.Type;
 
 public static class TypeConverter
 {
-    [ThreadStatic] private static List<TypeModifier>? cachedModifiersList; 
-    public static TypeInstance PartialConvert(CppType type)
+    [ThreadStatic] private static List<TypeModifier>? cachedModifiersList;
+    public static TypeInstance PartialConvert(Guid compilationUnitId, CppType type)
     {
         cachedModifiersList ??= [];
         List<TypeModifier> modifiers = cachedModifiersList;
         modifiers.Clear();
 
         CppType convertedType = InnerConvert(type, modifiers, null);
-        return new TypeInstance(convertedType.FullName,  CollectionsMarshal.AsSpan(modifiers));
+        return new TypeInstance(compilationUnitId, convertedType.FullName, CollectionsMarshal.AsSpan(modifiers));
     }
 
     private static CppType InnerConvert(CppType type, List<TypeModifier> modifiers, TypeModifier? modifierToAdd)
@@ -32,7 +32,7 @@ public static class TypeConverter
             CppPrimitiveType => type,
             CppEnum => type,
             CppClass => type,
-            _ => throw new ArgumentException($"unsupported type {type.GetType().Name}" ,nameof(type))
+            _ => throw new ArgumentException($"unsupported type {type.GetType().Name}", nameof(type))
         };
     }
 }

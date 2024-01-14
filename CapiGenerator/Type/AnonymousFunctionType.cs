@@ -1,19 +1,23 @@
+using CapiGenerator.Model;
 using CapiGenerator.Parser;
-using CapiGenerator.Type;
 
-namespace CapiGenerator.Model;
+namespace CapiGenerator.Type;
 
 
-public class CFunction(
-    Guid compilationUnitId, TypeInstance returnType, string name, ReadOnlySpan<CParameter> parameters)
-    : BaseCAstItem(compilationUnitId)
+public class AnonymousFunctionType(
+    Guid compilationUnitId, TypeInstance returnType, ReadOnlySpan<CParameter> parameters)
+    : BaseAnonymousType(compilationUnitId)
 {
     private readonly CParameter[] _parameters = parameters.ToArray();
     private TypeInstance _returnType = returnType;
 
-    public string Name => name;
     public TypeInstance ReturnType => _returnType;
     public ReadOnlySpan<CParameter> Parameters => _parameters;
+
+    public override bool GetIsCompletedType()
+    {
+        return _returnType.GetIsCompletedType() && _parameters.All(p => p.GetIsCompletedType());
+    }
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
@@ -22,12 +26,9 @@ public class CFunction(
             parameter.OnSecondPass(compilationUnit);
         }
 
-        if (_returnType.GetIsCompletedType())
+        if (!_returnType.GetIsCompletedType())
         {
-            return;
+            _returnType.OnSecondPass(compilationUnit);
         }
-
-
-        _returnType.OnSecondPass(compilationUnit);
     }
 }

@@ -1,38 +1,73 @@
 using CapiGenerator.Model;
+using CapiGenerator.Parser;
 
 namespace CapiGenerator.Type;
 
-public struct TypeInstance
+public class TypeInstance : BaseCAstItem
 {
     private object? _cTypeOrTypeName;
     private TypeModifier[]? _modifiers;
-    public readonly ICType? CType => _cTypeOrTypeName is ICType cType ? cType : null;
-    public readonly string? TypeName => _cTypeOrTypeName is string typeName ? typeName :
+    public ICType? CType => _cTypeOrTypeName is ICType cType ? cType : null;
+    public string? TypeName => _cTypeOrTypeName is string typeName ? typeName :
         _cTypeOrTypeName is ICType cType ? cType.Name : null;
-    public readonly ReadOnlySpan<TypeModifier> Modifiers =>
+    public ReadOnlySpan<TypeModifier> Modifiers =>
         _modifiers ?? ReadOnlySpan<TypeModifier>.Empty;
 
-    public readonly bool IsCompletedType => _cTypeOrTypeName is ICType;
+    public bool GetIsCompletedType()
+    {
+        if (_cTypeOrTypeName is BaseAnonymousType anonymousType)
+        {
+            return anonymousType.GetIsCompletedType();
+        }
 
-    public TypeInstance(ICType cType, ReadOnlySpan<TypeModifier> modifiers)
+        if (_cTypeOrTypeName is ICType)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public TypeInstance(Guid compilationUnitId, ICType cType, ReadOnlySpan<TypeModifier> modifiers)
+        : base(compilationUnitId)
     {
         _cTypeOrTypeName = cType;
         _modifiers = modifiers.ToArray();
     }
 
-    public TypeInstance(string typeName, ReadOnlySpan<TypeModifier> modifiers)
+    public TypeInstance(Guid compilationUnitId, string typeName, ReadOnlySpan<TypeModifier> modifiers)
+        : base(compilationUnitId)
     {
         _cTypeOrTypeName = typeName;
         _modifiers = modifiers.ToArray();
     }
 
-    public readonly TypeInstance NewWithType(ICType cType)
+    public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        TypeInstance newTypeInstance = default;
-        newTypeInstance._cTypeOrTypeName = cType;
-        newTypeInstance._modifiers = _modifiers;
+        if (compilationUnit.CompilationUnitId != CompilationUnitId)
+        {
+            throw new InvalidOperationException("Compilation unit id mismatch");
+        }
 
-        return newTypeInstance;
+        if (GetIsCompletedType())
+        {
+            return;
+        }
+
+        if (_cTypeOrTypeName is BaseAnonymousType anonymousType)
+        {
+            anonymousType.OnSecondPass(compilationUnit);
+            return;
+        }
+        
+        if(_cTypeOrTypeName is string typeName)
+        {
+            var newType = compilationUnit.GetTypeByName(typeName);
+            if (newType != null)
+            {
+                _cTypeOrTypeName = newType;
+            }
+            return;
+        }
     }
-
 }

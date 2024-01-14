@@ -11,21 +11,15 @@ public sealed class CParameter(
     private TypeInstance _type = type;
     public TypeInstance GetParameterType() => _type;
 
+    public bool GetIsCompletedType() => _type.GetIsCompletedType();
+
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        if (_type.IsCompletedType)
+        if (_type.GetIsCompletedType())
         {
             return;
         }
-
-        var typeName = _type.TypeName;
-        if (typeName != null)
-        {
-            var newType = compilationUnit.GetTypeByName(typeName);
-            if (newType != null)
-            {
-                _type = _type.NewWithType(newType);
-            }
-        }
+        
+        _type.OnSecondPass(compilationUnit);
     }
 }

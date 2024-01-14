@@ -11,8 +11,8 @@ public sealed class CCompilationUnit
         private readonly List<CConstant> _receiveConstants = [];
         private readonly List<CEnum> _receiveEnums = [];
         private readonly List<CStruct> _receiveStructs = [];
-        private readonly List<ICType> _receiveTypes = [];
         private readonly List<CFunction> _receiveFunctions = [];
+        private readonly List<CTypedef> _receiveTypedefs = [];
 
 
         public override void OnReceiveConstant(ReadOnlySpan<CConstant> constants)
@@ -30,10 +30,19 @@ public sealed class CCompilationUnit
         {
             foreach (var @enum in enums)
             {
-                if (compilationUnit._enums.TryAdd(@enum.Name, @enum))
+                if (compilationUnit._types.ContainsKey(@enum.Name))
                 {
-                    _receiveEnums.Add(@enum);
+                    continue;
                 }
+
+                if(compilationUnit._typedefs.ContainsKey(@enum.Name))
+                {
+                    continue;
+                }
+
+                compilationUnit._types.Add(@enum.Name, @enum);
+                compilationUnit._enums.Add(@enum.Name, @enum);
+                _receiveEnums.Add(@enum);
             }
 
         }
@@ -71,7 +80,17 @@ public sealed class CCompilationUnit
 
         public override void OnReceiveTypedef(ReadOnlySpan<CTypedef> types)
         {
-            throw new NotImplementedException();
+            foreach (var type in types)
+            {
+                if (compilationUnit._types.ContainsKey(type.Name))
+                {
+                    continue;
+                }
+
+                compilationUnit._types.Add(type.Name, type);
+                compilationUnit._typedefs.Add(type.Name, type);
+                _receiveTypedefs.Add(type);
+            }
         }
 
         public CConstant[] ReceiveConstantsToArray()
@@ -87,6 +106,16 @@ public sealed class CCompilationUnit
         public CStruct[] ReceiveStructsToArray()
         {
             return [.. _receiveStructs];
+        }
+
+        public CFunction[] ReceiveFunctionsToArray()
+        {
+            return [.. _receiveFunctions];
+        }
+
+        public CTypedef[] ReceiveTypedefsToArray()
+        {
+            return [.. _receiveTypedefs];
         }
 
         
@@ -123,6 +152,7 @@ public sealed class CCompilationUnit
     private readonly Dictionary<string, CEnum> _enums = [];
     private readonly Dictionary<string, CStruct> _structs = [];
     private readonly Dictionary<string, CFunction> _functions = [];
+    private readonly Dictionary<string, CTypedef> _typedefs = [];
 
     private readonly List<BaseParser> _parsers = [];
 
@@ -167,7 +197,8 @@ public sealed class CCompilationUnit
                 constants: outputChannel.ReceiveConstantsToArray(),
                 enums: outputChannel.ReceiveEnumsToArray(),
                 structs: outputChannel.ReceiveStructsToArray(),
-                types: outputChannel.ReceiveTypesToArray()
+                functions: outputChannel.ReceiveFunctionsToArray(),
+                typedefs: outputChannel.ReceiveTypedefsToArray()
             );
             parserChannels.Add((parser, inputChannel));
         }

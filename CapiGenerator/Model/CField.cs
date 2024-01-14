@@ -17,17 +17,11 @@ public class CField(
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        if (_type.IsCompletedType)
+        if (_type.GetIsCompletedType())
         {
             return;
         }
 
-        var _typeName = _type.TypeName ??
-                throw new InvalidOperationException("Field type name is null");
-
-        var foundType = compilationUnit.GetTypeByName(_typeName) ??
-             throw new InvalidOperationException($"Field type '{_typeName}' not found");
-
-        _type = _type.NewWithType(foundType);
+        _type.OnSecondPass(compilationUnit);
     }
 }

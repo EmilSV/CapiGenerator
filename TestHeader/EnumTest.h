@@ -19,26 +19,11 @@ enum ExpresionEnum
     ExpresionEnum_EnumValue3 = (10 + 3) * 3
 };
 
-enum ExpresionEnum
-{
-    ExpresionEnum_EnumValue1 = 1 * 4,
-    ExpresionEnum_EnumValue2 = 1 << 3,
-    ExpresionEnum_EnumValue3 = (10 + 3) * 3
-};
-
 enum RefEnum
 {
-    ExpresionEnum_EnumValue1 = SimpleEnum_EnumValue1,
-    ExpresionEnum_EnumValue2 = ExpresionEnum_EnumValue2,
-    ExpresionEnum_EnumValue3 = ExpresionEnum_EnumValue1
-};
-
-
-enum RefEnum
-{
-    ExpresionEnum_EnumValue1 = SimpleEnum_EnumValue1,
-    ExpresionEnum_EnumValue2 = ExpresionEnum_EnumValue2,
-    ExpresionEnum_EnumValue3 = ExpresionEnum_EnumValue1
+    RefEnum_EnumValue1 = SimpleEnum_EnumValue1,
+    RefEnum_EnumValue2 = ExpresionEnum_EnumValue2,
+    RefEnum_EnumValue3 = ExpresionEnum_EnumValue1
 };
 
 

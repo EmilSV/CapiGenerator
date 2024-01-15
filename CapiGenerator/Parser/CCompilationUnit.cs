@@ -1,5 +1,6 @@
 using System.Reflection.Metadata;
 using CapiGenerator.Model;
+using CapiGenerator.Type;
 using CppAst;
 
 namespace CapiGenerator.Parser;
@@ -35,7 +36,7 @@ public sealed class CCompilationUnit
                     continue;
                 }
 
-                if(compilationUnit._typedefs.ContainsKey(@enum.Name))
+                if (compilationUnit._typedefs.ContainsKey(@enum.Name))
                 {
                     continue;
                 }
@@ -67,7 +68,7 @@ public sealed class CCompilationUnit
                     continue;
                 }
 
-                if(compilationUnit._structs.ContainsKey(@struct.Name))
+                if (compilationUnit._structs.ContainsKey(@struct.Name))
                 {
                     continue;
                 }
@@ -83,6 +84,11 @@ public sealed class CCompilationUnit
             foreach (var type in types)
             {
                 if (compilationUnit._types.ContainsKey(type.Name))
+                {
+                    continue;
+                }
+
+                if (compilationUnit._typedefs.ContainsKey(type.Name))
                 {
                     continue;
                 }
@@ -118,7 +124,15 @@ public sealed class CCompilationUnit
             return [.. _receiveTypedefs];
         }
 
-        
+
+    }
+
+    public CCompilationUnit()
+    {
+        foreach (var item in PrimitiveType.GetAllTypes())
+        {
+            _types.Add(item.Name, item);
+        }
     }
 
     private sealed class ParserInputChannel(
@@ -168,6 +182,12 @@ public sealed class CCompilationUnit
     public CStruct? GetStructByName(string name) =>
         _structs.TryGetValue(name, out var @struct) ? @struct : null;
 
+    public CFunction? GetFunctionByName(string name) =>
+        _functions.TryGetValue(name, out var function) ? function : null;
+
+    public CTypedef? GetTypedefByName(string name) =>
+        _typedefs.TryGetValue(name, out var typedef) ? typedef : null;
+
 
     public CCompilationUnit AddParser(BaseParser parser)
     {
@@ -208,4 +228,12 @@ public sealed class CCompilationUnit
             parser.SecondPass(this, inputChannel);
         }
     }
+
+
+    public IEnumerable<ICType> GetTypeEnumerable() => _types.Values;
+    public IEnumerable<CConstant> GetConstantEnumerable() => _constants.Values;
+    public IEnumerable<CEnum> GetEnumEnumerable() => _enums.Values;
+    public IEnumerable<CStruct> GetStructEnumerable() => _structs.Values;
+    public IEnumerable<CFunction> GetFunctionEnumerable() => _functions.Values;
+    public IEnumerable<CTypedef> GetTypedefEnumerable() => _typedefs.Values;
 }

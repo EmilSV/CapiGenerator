@@ -56,9 +56,7 @@ public class StructParser : BaseParser
 
     private static CField? CppFieldToCField(Guid compilationUnitId, CppField field)
     {
-        var fieldType = CppTypeToCType(field.Type);
+        var fieldType = TypeConverter.PartialConvert(compilationUnitId, field.Type);
         return new CField(compilationUnitId, field.Name, fieldType);
     }
-
-    private static TypeInstance CppTypeToCType(CppType cppType) => TypeConverter.PartialConvert(cppType);
 }

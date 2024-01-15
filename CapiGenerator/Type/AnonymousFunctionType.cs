@@ -9,26 +9,33 @@ public class AnonymousFunctionType(
     : BaseAnonymousType(compilationUnitId)
 {
     private readonly CParameter[] _parameters = parameters.ToArray();
-    private TypeInstance _returnType = returnType;
-
-    public TypeInstance ReturnType => _returnType;
+    public TypeInstance ReturnType => returnType;
     public ReadOnlySpan<CParameter> Parameters => _parameters;
+
+    private bool _isCompletedType = false;
 
     public override bool GetIsCompletedType()
     {
-        return _returnType.GetIsCompletedType() && _parameters.All(p => p.GetIsCompletedType());
+        if (_isCompletedType)
+        {
+            return true;
+        }
+
+        _isCompletedType = returnType.GetIsCompletedType() && _parameters.All(p => p.GetIsCompletedType());
+        return _isCompletedType;
     }
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
+        if(GetIsCompletedType())
+        {
+            return;
+        }
+
         foreach (var parameter in Parameters)
         {
             parameter.OnSecondPass(compilationUnit);
         }
-
-        if (!_returnType.GetIsCompletedType())
-        {
-            _returnType.OnSecondPass(compilationUnit);
-        }
+        returnType.OnSecondPass(compilationUnit);
     }
 }

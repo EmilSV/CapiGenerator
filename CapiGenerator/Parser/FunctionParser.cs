@@ -38,7 +38,10 @@ public class FunctionParser : BaseParser
         CCompilationUnit compilationUnit,
         BaseParserInputChannel inputChannel)
     {
-        throw new NotImplementedException();
+        foreach (var function in inputChannel.GetFunctions())
+        {
+            function.OnSecondPass(compilationUnit);
+        }
     }
 
     protected virtual CFunction? FirstPass(Guid compilationUnitId, CppFunction function)
@@ -50,8 +53,8 @@ public class FunctionParser : BaseParser
             return null;
         }
 
-        var returnType = CppTypeToCType(function.ReturnType);
- 
+        var returnType = TypeConverter.PartialConvert(compilationUnitId, function.ReturnType);
+
         return new CFunction(compilationUnitId, returnType, function.Name, parameters!);
 
     }
@@ -62,11 +65,9 @@ public class FunctionParser : BaseParser
         Console.Error.WriteLine($"Error parsing function {constant.Name}: {message}");
     }
 
-    private static TypeInstance CppTypeToCType(CppType cppType) => TypeConverter.PartialConvert(cppType);
-
     private static CParameter CppParameterToCParameter(Guid compilationUnitId, CppParameter parameter)
     {
-        var parameterType = CppTypeToCType(parameter.Type);
+        var parameterType = TypeConverter.PartialConvert(compilationUnitId, parameter.Type);
         return new CParameter(compilationUnitId, parameter.Name, parameterType);
     }
 }

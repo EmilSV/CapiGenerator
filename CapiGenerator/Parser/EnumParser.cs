@@ -43,7 +43,7 @@ public class EnumParser : BaseParser
             return null;
         }
 
-        return new CEnum(astEnum.Name, enumConstants!);
+        return new CEnum(compilationUnitId, astEnum.Name, enumConstants!);
     }
 
     protected virtual bool ShouldSkip(CppEnum value) => false;

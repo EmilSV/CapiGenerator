@@ -1,6 +1,6 @@
 using CapiGenerator.Parser;
 
-namespace CapiGenerator.Model.ConstantToken;
+namespace CapiGenerator.CModel.ConstantToken;
 
 public class CConstIdentifierToken : BaseCConstantToken
 {

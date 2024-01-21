@@ -1,5 +1,5 @@
 using System.Reflection.Metadata;
-using CapiGenerator.Model;
+using CapiGenerator.CModel;
 using CapiGenerator.Type;
 using CppAst;
 

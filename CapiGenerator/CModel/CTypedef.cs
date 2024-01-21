@@ -1,7 +1,7 @@
 using CapiGenerator.Parser;
 using CapiGenerator.Type;
 
-namespace CapiGenerator.Model;
+namespace CapiGenerator.CModel;
 
 public class CTypedef(Guid compilationUnitId, string name, TypeInstance innerType) :
     BaseCAstItem(compilationUnitId), ICType

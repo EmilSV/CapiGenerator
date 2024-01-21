@@ -1,4 +1,4 @@
-using CapiGenerator.Model;
+using CapiGenerator.CModel;
 
 namespace CapiGenerator.Parser;
 

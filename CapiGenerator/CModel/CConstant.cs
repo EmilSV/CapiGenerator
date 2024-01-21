@@ -1,7 +1,7 @@
-using CapiGenerator.Model.ConstantToken;
+using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.Parser;
 
-namespace CapiGenerator.Model;
+namespace CapiGenerator.CModel;
 
 public class CConstant(Guid compilationUnitId, string name, bool isFromEnum, ReadOnlySpan<BaseCConstantToken> tokens)
     : BaseCAstItem(compilationUnitId)

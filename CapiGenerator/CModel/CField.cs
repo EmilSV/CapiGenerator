@@ -1,7 +1,7 @@
 using CapiGenerator.Parser;
 using CapiGenerator.Type;
 
-namespace CapiGenerator.Model;
+namespace CapiGenerator.CModel;
 
 public class CField(
     Guid compilationUnitId, string name, TypeInstance type)

@@ -1,53 +1,63 @@
+using CapiGenerator.CModel;
 using CapiGenerator.CSharpEnrichingData;
 using CapiGenerator.Enricher;
 using CapiGenerator.Parser;
 
 namespace CapiGenerator.CSharpEnricher
 {
-    public class NamespaceEnricher(string namespaceName) : BaseEnricher
+    public class EnumEnricher(
+        string namespaceName,
+        string enumName,
+        Func<BaseCAstItem, bool> predicate) : BaseEnricher
     {
+        private readonly EnumData data = new()
+        {
+            NamespaceName = namespaceName,
+            EnumName = enumName,
+        };
+
         public override void Enrich(ReadOnlySpan<CCompilationUnit> compilationUnit)
         {
             foreach (var unit in compilationUnit)
             {
                 foreach (var item in unit.GetStructEnumerable())
                 {
-                    item.AddEnrichingData(new NamespaceData
+                    if (predicate(item))
                     {
-                        NamespaceName = namespaceName
-                    });
+                        item.AddEnrichingData(data);
+                    }
                 }
 
                 foreach (var item in unit.GetEnumEnumerable())
                 {
-                    item.AddEnrichingData(new NamespaceData
+                    if (predicate(item))
                     {
-                        NamespaceName = namespaceName
-                    });
+                        item.AddEnrichingData(data);
+                    }
                 }
 
                 foreach (var item in unit.GetFunctionEnumerable())
                 {
-                    item.AddEnrichingData(new NamespaceData
+                    if (predicate(item))
                     {
-                        NamespaceName = namespaceName
-                    });
+                        item.AddEnrichingData(data);
+                    }
                 }
 
                 foreach (var item in unit.GetTypedefEnumerable())
                 {
-                    item.AddEnrichingData(new NamespaceData
+                    if (predicate(item))
                     {
-                        NamespaceName = namespaceName
-                    });
+                        item.AddEnrichingData(data);
+                    }
                 }
 
                 foreach (var item in unit.GetConstantEnumerable())
                 {
-                    item.AddEnrichingData(new NamespaceData
+                    if (predicate(item))
                     {
-                        NamespaceName = namespaceName
-                    });
+                        item.AddEnrichingData(data);
+                    }
                 }
             }
         }

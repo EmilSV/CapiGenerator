@@ -1,5 +1,5 @@
 using System.Net.Http.Headers;
-using CapiGenerator.Model;
+using CapiGenerator.CModel;
 using CapiGenerator.Type;
 using CppAst;
 

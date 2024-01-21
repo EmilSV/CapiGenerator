@@ -1,4 +1,4 @@
-namespace CapiGenerator.Model;
+namespace CapiGenerator.CModel;
 
 public enum CConstantType
 {

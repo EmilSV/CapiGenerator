@@ -1,5 +1,5 @@
 using System.Globalization;
-namespace CapiGenerator.Model.ConstantToken;
+namespace CapiGenerator.CModel.ConstantToken;
 
 public class CConstLiteralToken : BaseCConstantToken
 {

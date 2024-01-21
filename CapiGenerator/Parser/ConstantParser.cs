@@ -1,5 +1,5 @@
-using CapiGenerator.Model;
-using CapiGenerator.Model.ConstantToken;
+using CapiGenerator.CModel;
+using CapiGenerator.CModel.ConstantToken;
 using CppAst;
 
 namespace CapiGenerator.Parser;

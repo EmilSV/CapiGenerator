@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace CapiGenerator.Model.ConstantToken;
+namespace CapiGenerator.CModel.ConstantToken;
 
 
 public sealed class CConstantPunctuationToken : BaseCConstantToken

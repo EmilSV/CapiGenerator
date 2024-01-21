@@ -1,6 +1,6 @@
 using CapiGenerator.Parser;
 
-namespace CapiGenerator.Model;
+namespace CapiGenerator.CModel;
 
 
 public sealed class CEnum(Guid compilationUnitId, string name, ReadOnlySpan<CConstant> values) :

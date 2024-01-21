@@ -1,6 +1,6 @@
 using CapiGenerator.Parser;
 
-namespace CapiGenerator.Model;
+namespace CapiGenerator.CModel;
 
 public class CStruct(Guid compilationUnitId, string name, ReadOnlySpan<CField> fields) :
     BaseCAstItem(compilationUnitId), ICType

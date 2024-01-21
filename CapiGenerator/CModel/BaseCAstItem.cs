@@ -3,7 +3,7 @@ using CapiGenerator.Parser;
 
 using ObjectType = System.Type;
 
-namespace CapiGenerator.Model;
+namespace CapiGenerator.CModel;
 
 public abstract class BaseCAstItem(Guid compilationUnitId)
 {

@@ -1,6 +1,6 @@
-using CapiGenerator.CModel;
+using System.Collections;
 
-namespace CapiGenerator.Type;
+namespace CapiGenerator.CModel.Type;
 
 public sealed class PrimitiveType : ICType
 {

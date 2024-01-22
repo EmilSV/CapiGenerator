@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.Parser;
 
@@ -142,6 +143,53 @@ public abstract class BaseCAstItem(Guid compilationUnitId)
         }
 
         return null;
+    }
+
+    public object? GetEnrichingData(ObjectType type)
+    {
+        if (enrichingData == null)
+        {
+            return null;
+        }
+
+        if (enrichingData.TryGetValue(type, out var currentData))
+        {
+            if (currentData is IList currentDataList)
+            {
+                return currentDataList[^1];
+            }
+            else
+            {
+                return currentData;
+            }
+        }
+
+        return null;
+    }
+
+    public void GetEnrichingData(ObjectType type, IList outList)
+    {
+        if (enrichingData == null)
+        {
+            return;
+        }
+
+        if (enrichingData.TryGetValue(type, out var currentData))
+        {
+
+            if (currentData is IList currentDataList)
+            {
+                int count = currentDataList.Count;
+                for (int i = 0; i < count; i++)
+                {
+                    outList.Add(currentDataList[i]);
+                }
+            }
+            else
+            {
+                outList.Add(currentData);
+            }
+        }
     }
 
     public virtual void OnSecondPass(CCompilationUnit compilationUnit)

@@ -1,9 +1,9 @@
 using CapiGenerator.CModel;
 using CapiGenerator.Parser;
 
-namespace CapiGenerator.Type;
+namespace CapiGenerator.CModel.Type;
 
-public class TypeInstance : BaseCAstItem
+public class CTypeInstance : BaseCAstItem
 {
     private object? _cTypeOrTypeName;
     private TypeModifier[]? _modifiers;
@@ -28,14 +28,14 @@ public class TypeInstance : BaseCAstItem
         return false;
     }
 
-    public TypeInstance(Guid compilationUnitId, ICType cType, ReadOnlySpan<TypeModifier> modifiers)
+    public CTypeInstance(Guid compilationUnitId, ICType cType, ReadOnlySpan<TypeModifier> modifiers)
         : base(compilationUnitId)
     {
         _cTypeOrTypeName = cType;
         _modifiers = modifiers.ToArray();
     }
 
-    public TypeInstance(Guid compilationUnitId, string typeName, ReadOnlySpan<TypeModifier> modifiers)
+    public CTypeInstance(Guid compilationUnitId, string typeName, ReadOnlySpan<TypeModifier> modifiers)
         : base(compilationUnitId)
     {
         _cTypeOrTypeName = typeName;

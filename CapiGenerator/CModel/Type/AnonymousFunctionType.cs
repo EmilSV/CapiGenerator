@@ -1,15 +1,15 @@
 using CapiGenerator.CModel;
 using CapiGenerator.Parser;
 
-namespace CapiGenerator.Type;
+namespace CapiGenerator.CModel.Type;
 
 
 public class AnonymousFunctionType(
-    Guid compilationUnitId, TypeInstance returnType, ReadOnlySpan<CParameter> parameters)
+    Guid compilationUnitId, CTypeInstance returnType, ReadOnlySpan<CParameter> parameters)
     : BaseAnonymousType(compilationUnitId)
 {
     private readonly CParameter[] _parameters = parameters.ToArray();
-    public TypeInstance ReturnType => returnType;
+    public CTypeInstance ReturnType => returnType;
     public ReadOnlySpan<CParameter> Parameters => _parameters;
 
     private bool _isCompletedType = false;

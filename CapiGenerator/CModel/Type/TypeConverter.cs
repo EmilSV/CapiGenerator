@@ -1,19 +1,19 @@
 using System.Runtime.InteropServices;
 using CppAst;
 
-namespace CapiGenerator.Type;
+namespace CapiGenerator.CModel.Type;
 
 public static class TypeConverter
 {
     [ThreadStatic] private static List<TypeModifier>? cachedModifiersList;
-    public static TypeInstance PartialConvert(Guid compilationUnitId, CppType type)
+    public static CTypeInstance PartialConvert(Guid compilationUnitId, CppType type)
     {
         cachedModifiersList ??= [];
         List<TypeModifier> modifiers = cachedModifiersList;
         modifiers.Clear();
 
         CppType convertedType = InnerConvert(type, modifiers, null);
-        return new TypeInstance(compilationUnitId, convertedType.FullName, CollectionsMarshal.AsSpan(modifiers));
+        return new CTypeInstance(compilationUnitId, convertedType.FullName, CollectionsMarshal.AsSpan(modifiers));
     }
 
     private static CppType InnerConvert(CppType type, List<TypeModifier> modifiers, TypeModifier? modifierToAdd)

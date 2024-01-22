@@ -1,4 +1,4 @@
-namespace CapiGenerator.Type;
+namespace CapiGenerator.CModel.Type;
 
 public sealed class PointerType : TypeModifier
 {

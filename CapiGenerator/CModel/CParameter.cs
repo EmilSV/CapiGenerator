@@ -1,15 +1,15 @@
 using CapiGenerator.Parser;
-using CapiGenerator.Type;
+using CapiGenerator.CModel.Type;
 
 namespace CapiGenerator.CModel;
 
 public sealed class CParameter(
-    Guid compilationUnitId, string name, TypeInstance type) 
+    Guid compilationUnitId, string name, CTypeInstance type) 
     : BaseCAstItem(compilationUnitId)
 {
     public readonly string Name = name;
-    private TypeInstance _type = type;
-    public TypeInstance GetParameterType() => _type;
+    private CTypeInstance _type = type;
+    public CTypeInstance GetParameterType() => _type;
 
     public bool GetIsCompletedType() => _type.GetIsCompletedType();
 

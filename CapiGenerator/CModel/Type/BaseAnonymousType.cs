@@ -1,6 +1,6 @@
 using CapiGenerator.CModel;
 
-namespace CapiGenerator.Type;
+namespace CapiGenerator.CModel.Type;
 
 public abstract class BaseAnonymousType(Guid compilationUnitId) 
     : BaseCAstItem(compilationUnitId)

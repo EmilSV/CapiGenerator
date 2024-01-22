@@ -1,16 +1,16 @@
 using CapiGenerator.Parser;
-using CapiGenerator.Type;
+using CapiGenerator.CModel.Type;
 
 namespace CapiGenerator.CModel;
 
 public class CField(
-    Guid compilationUnitId, string name, TypeInstance type)
+    Guid compilationUnitId, string name, CTypeInstance type)
     : BaseCAstItem(compilationUnitId)
 {
     public readonly string Name = name;
-    private TypeInstance _type = type;
+    private CTypeInstance _type = type;
 
-    public TypeInstance GetFieldType()
+    public CTypeInstance GetFieldType()
     {
         return _type;
     }

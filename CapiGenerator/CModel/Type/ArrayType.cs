@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using CapiGenerator.CModel;
 
-namespace CapiGenerator.Type;
+namespace CapiGenerator.CModel.Type;
 
 public class ArrayType(ArrayType.Size size) : TypeModifier
 {

@@ -1,5 +1,5 @@
 using CppAst;
-using CapiGenerator.Type;
+using CapiGenerator.CModel.Type;
 using CapiGenerator.CModel;
 
 namespace CapiGenerator.Parser;

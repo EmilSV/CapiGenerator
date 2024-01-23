@@ -1,6 +1,5 @@
-using System.Net.Http.Headers;
 using CapiGenerator.CModel;
-using CapiGenerator.Type;
+using CapiGenerator.CModel.Type;
 using CppAst;
 
 namespace CapiGenerator.Parser;

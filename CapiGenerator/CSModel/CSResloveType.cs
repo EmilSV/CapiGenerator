@@ -12,13 +12,13 @@ public record CSResolveType(
     public CTypeInstance TypeInstance => typeInstance;
     public bool GetIsResolved()
     {
-        return typeInstance.CType is BaseCAstItem baseCAstItem && baseCAstItem.GetEnrichingData<CSTranslationsTypeData>() != null;
+        return typeInstance.CType is BaseCAstItem baseCAstItem && baseCAstItem.EnrichingDataStore.Get<CSTranslationsTypeData>() != null;
     }
 
     public CSBaseType? GetResolvedType()
     {
         return typeInstance.CType is BaseCAstItem baseCAstItem ?
-            baseCAstItem?.GetEnrichingData<CSTranslationsTypeData>()?.CsType :
+            baseCAstItem?.EnrichingDataStore.Get<CSTranslationsTypeData>()?.CsType :
             null;
     }
 }

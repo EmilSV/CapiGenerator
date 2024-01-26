@@ -4,7 +4,7 @@ public class CSField(
     string name,
     CSResolveType type,
     CSDefaultValue defaultValue
-)
+) : BaseCSAstItem
 {
     public string Name => name;
     public CSResolveType Type => type;

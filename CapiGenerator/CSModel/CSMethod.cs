@@ -4,7 +4,7 @@ public class CSMethod(
     string name,
     CSResolveType returnType,
     ReadOnlySpan<CSParameter> parameters
-)
+) : BaseCSAstItem
 {
     private readonly CSParameter[] _parameters = parameters.ToArray();
 

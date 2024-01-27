@@ -18,4 +18,6 @@ public class CConstant(Guid compilationUnitId, string name, bool isFromEnum, Rea
             token.OnSecondPass(compilationUnit);
         }
     }
+
+
 }

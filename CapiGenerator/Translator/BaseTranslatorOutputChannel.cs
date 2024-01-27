@@ -9,4 +9,16 @@ public abstract class BaseTranslatorOutputChannel
     {
         OnReceiveStruct([structValue]);
     }
+    public abstract void OnReceiveEnum(ReadOnlySpan<CSEnum> enums);
+    public virtual void OnReceiveEnum(CSEnum enumValue)
+    {
+        OnReceiveEnum([enumValue]);
+    }
+
+
+    public abstract void OnReceiveStaticClass(ReadOnlySpan<CSStaticClass> staticClasses);
+    public virtual void OnReceiveStaticClass(CSStaticClass staticClass)
+    {
+        OnReceiveStaticClass([staticClass]);
+    }
 }

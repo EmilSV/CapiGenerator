@@ -5,7 +5,7 @@ using CapiGenerator.CSModel.EnrichData;
 
 namespace CapiGenerator.CSModel;
 
-public record CSResolveType(
+public record struct CSResolveType(
     CTypeInstance typeInstance
 )
 {

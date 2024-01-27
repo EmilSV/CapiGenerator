@@ -3,10 +3,10 @@ namespace CapiGenerator.CSModel;
 public class CSField(
     string name,
     CSResolveType type,
-    CSDefaultValue defaultValue
+    CSDefaultValue? defaultValue
 ) : BaseCSAstItem
 {
     public string Name => name;
     public CSResolveType Type => type;
-    public CSDefaultValue DefaultValue => defaultValue;
+    public CSDefaultValue? DefaultValue => defaultValue;
 }

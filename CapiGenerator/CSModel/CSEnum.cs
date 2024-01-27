@@ -2,14 +2,12 @@ namespace CapiGenerator.CSModel;
 
 public class CSEnum(
     string name,
-    CSResolveType type,
-    CSDefaultValue defaultValue,
-    ReadOnlySpan<CSField> values
+    CSResolveType? type,
+    ReadOnlySpan<CSEnumValue> values
 ) : CSBaseType(name)
 {
-    private readonly CSField[] _values = values.ToArray();
+    private readonly CSEnumValue[] _values = values.ToArray();
 
-    public CSResolveType Type => type;
-    public CSDefaultValue DefaultValue => defaultValue;
-    public ReadOnlySpan<CSField> Values => _values;
+    public CSResolveType? Type => type;
+    public ReadOnlySpan<CSEnumValue> Values => _values;
 }

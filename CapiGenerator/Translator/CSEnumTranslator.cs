@@ -1,0 +1,56 @@
+using CapiGenerator.CModel;
+using CapiGenerator.CModel.ConstantToken;
+using CapiGenerator.CModel.Type;
+using CapiGenerator.CSModel;
+using CapiGenerator.CSModel.EnrichData;
+using CapiGenerator.Parser;
+
+namespace CapiGenerator.Translator;
+
+public class CSEnumTranslator : BaseTranslator
+{
+    public override void Translator(
+        ReadOnlySpan<CCompilationUnit> compilationUnits,
+        BaseTranslatorOutputChannel outputChannel)
+    {
+        foreach (var compilationUnit in compilationUnits)
+        {
+            foreach (var structItem in compilationUnit.GetEnumEnumerable())
+            {
+                outputChannel.OnReceiveEnum(TranslateEnum(structItem));
+            }
+        }
+    }
+
+    private static CSEnum TranslateEnum(CEnum enumItem)
+    {
+        List<CSEnumValue> enumValue = [];
+
+        foreach (var value in enumItem.GetValues())
+        {
+            enumValue.Add(TranslateEnumValue(value));
+        }
+
+        var newCSEnum = new CSEnum(enumItem.Name, null, enumValue.ToArray());
+        newCSEnum.EnrichingDataStore.Add(new CSTranslationCAstData(enumItem));
+        enumItem.EnrichingDataStore.Add(new CSTranslationsTypeData(newCSEnum));
+        return newCSEnum;
+    }
+
+    private static CSEnumValue TranslateEnumValue(CConstant constant)
+    {
+        CSEnumValue newCSEnumValue;
+        if (constant.GetTokens() is [CConstLiteralToken literalToken] &&
+            literalToken.TryParseValueAsInteger(out var value))
+        {
+            newCSEnumValue = new CSEnumValue(constant.Name, value);
+        }
+        else
+        {
+            newCSEnumValue = new CSEnumValue(constant.Name, constant);
+        }
+
+        newCSEnumValue.EnrichingDataStore.Add(new CSTranslationCAstData(constant));
+        return newCSEnumValue;
+    }
+}

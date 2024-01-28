@@ -16,8 +16,8 @@ public class CConstTranslator(
     : BaseTranslator
 {
 
-    private string nameSelector(CConstant value) => customNameSelector?.Invoke(value) ?? value.Name;
-    private bool predicateSelector(CConstant value) => predicate?.Invoke(value) ?? true;
+    private string NameSelector(CConstant value) => customNameSelector?.Invoke(value) ?? value.Name;
+    private bool PredicateSelector(CConstant value) => predicate?.Invoke(value) ?? true;
 
 
     public override void Translator(
@@ -25,7 +25,14 @@ public class CConstTranslator(
         BaseTranslatorOutputChannel outputChannel)
     {
         List<CSField> fields = [];
+        foreach (var compilationUnit in compilationUnits)
+        {
+            foreach (var constItem in compilationUnit.GetConstantEnumerable())
+            {
+                
+            }
+        }
 
-        CSStaticClass newCSStaticClass = new(className,);   
+
     }
 }

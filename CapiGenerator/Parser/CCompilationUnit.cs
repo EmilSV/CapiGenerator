@@ -128,7 +128,7 @@ public sealed class CCompilationUnit
 
     public CCompilationUnit()
     {
-        foreach (var item in PrimitiveType.GetAllTypes())
+        foreach (var item in CPrimitiveType.GetAllTypes())
         {
             _types.Add(item.Name, item);
         }

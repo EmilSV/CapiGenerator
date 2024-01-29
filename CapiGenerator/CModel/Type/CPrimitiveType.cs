@@ -2,7 +2,7 @@ using System.Collections;
 
 namespace CapiGenerator.CModel.Type;
 
-public sealed class PrimitiveType : ICType
+public sealed class CPrimitiveType : ICType
 {
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
     private sealed class NameAttribute : System.Attribute
@@ -44,35 +44,20 @@ public sealed class PrimitiveType : ICType
         [Name("signed char")] SignedChar,
         [Name("unsigned char")] UnsignedChar,
 
-        [Name("short")] Short,
-        [Name("short int")] ShortInt,
-        [Name("signed short")] SignedShort,
-        [Name("signed short int")] SignedShortInt,
+        [Name("short", "short int", "signed short", "signed short int")] Short,
+        [Name("unsigned short", "unsigned short int")] UnsignedShortInt,
 
-        [Name("unsigned short")] UnsignedShort,
-        [Name("unsigned short int")] UnsignedShortInt,
+        [Name("signed", "int", "signed int")] Signed,
 
-        [Name("int")] Int,
-        [Name("signed")] Signed,
-        [Name("signed int")] SignedInt,
+        [Name("unsigned", "unsigned int")] UnsignedInt,
 
-        [Name("unsigned")] Unsigned,
-        [Name("unsigned int")] UnsignedInt,
+        [Name("long", "long int", "signed long", "signed long int")] Long,
 
-        [Name("long")] Long,
-        [Name("long int")] LongInt,
-        [Name("signed long")] SignedLong,
-        [Name("signed long int")] SignedLongInt,
+        [Name("unsigned long", "unsigned long int")] UnsignedLong,
 
-        [Name("unsigned long")] UnsignedLong,
-        [Name("unsigned long int")] UnsignedLongInt,
-        [Name("long long")] LongLong,
-        [Name("long long int")] LongLongInt,
-        [Name("signed long long")] SignedLongLong,
-        [Name("signed long long int")] SignedLongLongInt,
+        [Name("long long", "long long int", "signed long long", "signed long long int")] LongLong,
 
-        [Name("unsigned long long")] UnsignedLongLong,
-        [Name("unsigned long long int")] UnsignedLongLongInt,
+        [Name("unsigned long long", "unsigned long long int")] UnsignedLongLong,
 
         [Name("float")] Float,
         [Name("double")] Double,
@@ -80,6 +65,7 @@ public sealed class PrimitiveType : ICType
 
         [Name("_Bool")] _Bool,
         [Name("bool")] Bool,
+        [Name("CString")] CString,
 
         Other
     }
@@ -94,16 +80,16 @@ public sealed class PrimitiveType : ICType
     public ReadOnlySpan<string> Names => _names;
     public Kind KindValue => _kind;
 
-    private PrimitiveType(Kind kind, ReadOnlySpan<string> names)
+    private CPrimitiveType(Kind kind, ReadOnlySpan<string> names)
     {
         _kind = kind;
         _names = names.ToArray();
     }
 
-    private static PrimitiveType[]? _allTypes = null;
-    private static Dictionary<Kind, PrimitiveType>? _typesByKind = null;
+    private static CPrimitiveType[]? _allTypes = null;
+    private static Dictionary<Kind, CPrimitiveType>? _typesByKind = null;
 
-    public static PrimitiveType GetByKind(Kind kind)
+    public static CPrimitiveType GetByKind(Kind kind)
     {
         if (_typesByKind == null)
         {
@@ -117,13 +103,22 @@ public sealed class PrimitiveType : ICType
         return _typesByKind[kind];
     }
 
-    public static ReadOnlySpan<PrimitiveType> GetAllTypes() => _allTypes ??= typeof(Kind)
+    public static ReadOnlySpan<CPrimitiveType> GetAllTypes() => _allTypes ??= typeof(Kind)
         .GetFields()
         .Where(field => field.GetCustomAttributes(typeof(NameAttribute), false).Length > 0)
         .Select(field =>
         {
             var names = ((NameAttribute)field.GetCustomAttributes(typeof(NameAttribute), false)[0]).Names;
             var kind = (Kind)field.GetRawConstantValue()!;
-            return new PrimitiveType(kind, names);
+            return new CPrimitiveType(kind, names);
         }).ToArray();
+
+    public static CPrimitiveType FromCConstType(CConstantType constType) => constType switch
+    {
+        CConstantType.Int => GetByKind(Kind.LongLong),
+        CConstantType.String => GetByKind(Kind.CString),
+        CConstantType.Char => GetByKind(Kind.Char),
+        CConstantType.Float => GetByKind(Kind.Double),
+        _ => throw new ArgumentOutOfRangeException(nameof(constType))
+    };
 }

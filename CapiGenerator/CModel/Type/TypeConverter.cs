@@ -5,18 +5,18 @@ namespace CapiGenerator.CModel.Type;
 
 public static class TypeConverter
 {
-    [ThreadStatic] private static List<TypeModifier>? cachedModifiersList;
+    [ThreadStatic] private static List<CTypeModifier>? cachedModifiersList;
     public static CTypeInstance PartialConvert(Guid compilationUnitId, CppType type)
     {
         cachedModifiersList ??= [];
-        List<TypeModifier> modifiers = cachedModifiersList;
+        List<CTypeModifier> modifiers = cachedModifiersList;
         modifiers.Clear();
 
         CppType convertedType = InnerConvert(type, modifiers, null);
         return new CTypeInstance(compilationUnitId, convertedType.FullName, CollectionsMarshal.AsSpan(modifiers));
     }
 
-    private static CppType InnerConvert(CppType type, List<TypeModifier> modifiers, TypeModifier? modifierToAdd)
+    private static CppType InnerConvert(CppType type, List<CTypeModifier> modifiers, CTypeModifier? modifierToAdd)
     {
         if (modifierToAdd != null)
         {

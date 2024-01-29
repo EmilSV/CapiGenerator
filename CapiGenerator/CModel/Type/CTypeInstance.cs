@@ -6,12 +6,12 @@ namespace CapiGenerator.CModel.Type;
 public class CTypeInstance : BaseCAstItem
 {
     private object? _cTypeOrTypeName;
-    private TypeModifier[]? _modifiers;
+    private CTypeModifier[]? _modifiers;
     public ICType? CType => _cTypeOrTypeName is ICType cType ? cType : null;
     public string? TypeName => _cTypeOrTypeName is string typeName ? typeName :
         _cTypeOrTypeName is ICType cType ? cType.Name : null;
-    public ReadOnlySpan<TypeModifier> Modifiers =>
-        _modifiers ?? ReadOnlySpan<TypeModifier>.Empty;
+    public ReadOnlySpan<CTypeModifier> Modifiers =>
+        _modifiers ?? ReadOnlySpan<CTypeModifier>.Empty;
 
     public bool GetIsCompletedType()
     {
@@ -28,14 +28,14 @@ public class CTypeInstance : BaseCAstItem
         return false;
     }
 
-    public CTypeInstance(Guid compilationUnitId, ICType cType, ReadOnlySpan<TypeModifier> modifiers)
+    public CTypeInstance(Guid compilationUnitId, ICType cType, ReadOnlySpan<CTypeModifier> modifiers)
         : base(compilationUnitId)
     {
         _cTypeOrTypeName = cType;
         _modifiers = modifiers.ToArray();
     }
 
-    public CTypeInstance(Guid compilationUnitId, string typeName, ReadOnlySpan<TypeModifier> modifiers)
+    public CTypeInstance(Guid compilationUnitId, string typeName, ReadOnlySpan<CTypeModifier> modifiers)
         : base(compilationUnitId)
     {
         _cTypeOrTypeName = typeName;

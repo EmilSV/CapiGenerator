@@ -9,24 +9,25 @@ public class CSStructTranslator : BaseTranslator
 {
     public override void Translator(
         ReadOnlySpan<CCompilationUnit> compilationUnits,
+        BaseCSTypeResolver typeResolver,
         BaseTranslatorOutputChannel outputChannel)
     {
         foreach (var compilationUnit in compilationUnits)
         {
             foreach (var structItem in compilationUnit.GetStructEnumerable())
             {
-                outputChannel.OnReceiveStruct(TranslateStruct(structItem));
+                outputChannel.OnReceiveStruct(TranslateStruct(structItem, typeResolver));
             }
         }
     }
 
-    private static CSStruct TranslateStruct(CStruct structItem)
+    private static CSStruct TranslateStruct(CStruct structItem, BaseCSTypeResolver typeResolver)
     {
         List<CSField> fields = [];
 
         foreach (var field in structItem.Fields)
         {
-            fields.Add(TranslateField(field));
+            fields.Add(TranslateField(field, typeResolver));
         }
 
         var newCSStruct = new CSStruct(structItem.Name, fields.ToArray(), []);
@@ -35,9 +36,10 @@ public class CSStructTranslator : BaseTranslator
         return newCSStruct;
     }
 
-    private static CSField TranslateField(CField field)
+    private static CSField TranslateField(CField field, BaseCSTypeResolver typeResolver)
     {
-        var newField = new CSField(field.Name, new(field.GetFieldType()), null);
+        CSResolveType fieldType = new(field.GetFieldType(), typeResolver);
+        var newField = new CSField(field.Name, fieldType, null);
         newField.EnrichingDataStore.Add(new CSTranslationCAstData(field));
         return newField;
     }

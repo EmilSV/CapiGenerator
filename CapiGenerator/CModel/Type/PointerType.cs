@@ -1,6 +1,6 @@
 namespace CapiGenerator.CModel.Type;
 
-public sealed class PointerType : TypeModifier
+public sealed class PointerType : CTypeModifier
 {
     public override string GetTypeString()
     {

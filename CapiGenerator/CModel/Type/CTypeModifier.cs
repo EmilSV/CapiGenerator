@@ -1,6 +1,6 @@
 namespace CapiGenerator.CModel.Type;
 
-public abstract class TypeModifier
+public abstract class CTypeModifier
 {
     public abstract string GetTypeString();
 }

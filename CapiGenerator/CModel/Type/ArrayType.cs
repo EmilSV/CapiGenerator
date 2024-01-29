@@ -4,7 +4,7 @@ using CapiGenerator.CModel;
 
 namespace CapiGenerator.CModel.Type;
 
-public class ArrayType(ArrayType.Size size) : TypeModifier
+public class ArrayType(ArrayType.Size size) : CTypeModifier
 {
     public readonly record struct Size
     {

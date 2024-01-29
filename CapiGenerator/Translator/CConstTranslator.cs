@@ -8,20 +8,14 @@ using CapiGenerator.Parser;
 namespace CapiGenerator.Translator;
 
 
-public class CConstTranslator(
-    string className,
-    Func<CConstant, bool>? predicate,
-    Func<CConstant, string>? customNameSelector = null
-)
-    : BaseTranslator
+public class CConstTranslator(string className) : BaseTranslator
 {
-
-    private string NameSelector(CConstant value) => customNameSelector?.Invoke(value) ?? value.Name;
-    private bool PredicateSelector(CConstant value) => predicate?.Invoke(value) ?? true;
-
+    protected virtual string NameSelector(CConstant value) => value.Name;
+    protected virtual bool PredicateSelector(CConstant value) => true;
 
     public override void Translator(
         ReadOnlySpan<CCompilationUnit> compilationUnits,
+        BaseCSTypeResolver typeResolver,
         BaseTranslatorOutputChannel outputChannel)
     {
         List<CSField> fields = [];
@@ -29,10 +23,24 @@ public class CConstTranslator(
         {
             foreach (var constItem in compilationUnit.GetConstantEnumerable())
             {
-                
+                if (PredicateSelector(constItem))
+                {
+                    fields.Add(TranslateConstant(constItem, typeResolver));
+                }
             }
         }
+        outputChannel.OnReceiveStaticClass(new CSStaticClass(className, fields.ToArray(), []));
 
+    }
 
+    private CSField TranslateConstant(CConstant constItem, BaseCSTypeResolver typeResolver)
+    {
+        CSResolveType fieldType = new(
+            cType: CPrimitiveType.FromCConstType(constItem.GetConstantType()),
+            resolvedType: CSPrimitiveType.FromCConstType(constItem.GetConstantType())
+        );
+        var newField = new CSField(NameSelector(constItem), fieldType, null, new() { Const = true });
+        newField.EnrichingDataStore.Add(new CSTranslationCAstData(constItem));
+        return newField;
     }
 }

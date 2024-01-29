@@ -1,6 +1,6 @@
 using CapiGenerator.CModel;
 
-namespace CapiGenerator.CSModel.Type;
+namespace CapiGenerator.CSModel;
 
 public class CSTypeResolver
 {

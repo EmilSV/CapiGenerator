@@ -11,6 +11,7 @@ public class CSEnumTranslator : BaseTranslator
 {
     public override void Translator(
         ReadOnlySpan<CCompilationUnit> compilationUnits,
+        BaseCSTypeResolver typeResolver,
         BaseTranslatorOutputChannel outputChannel)
     {
         foreach (var compilationUnit in compilationUnits)
@@ -31,7 +32,12 @@ public class CSEnumTranslator : BaseTranslator
             enumValue.Add(TranslateEnumValue(value));
         }
 
-        var newCSEnum = new CSEnum(enumItem.Name, null, enumValue.ToArray());
+        CSResolveType resolvedType = new(
+            cType: CPrimitiveType.GetByKind(CPrimitiveType.Kind.Int),
+            resolvedType: CSPrimitiveType.Get(CSPrimitiveType.Kind.Int)
+        );
+
+        var newCSEnum = new CSEnum(enumItem.Name, resolvedType, enumValue.ToArray());
         newCSEnum.EnrichingDataStore.Add(new CSTranslationCAstData(enumItem));
         enumItem.EnrichingDataStore.Add(new CSTranslationsTypeData(newCSEnum));
         return newCSEnum;

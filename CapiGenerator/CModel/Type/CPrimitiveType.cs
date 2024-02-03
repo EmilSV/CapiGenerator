@@ -47,7 +47,7 @@ public sealed class CPrimitiveType : ICType
         [Name("short", "short int", "signed short", "signed short int")] Short,
         [Name("unsigned short", "unsigned short int")] UnsignedShortInt,
 
-        [Name("signed", "int", "signed int")] Signed,
+        [Name("signed", "int", "signed int")] Int,
 
         [Name("unsigned", "unsigned int")] UnsignedInt,
 

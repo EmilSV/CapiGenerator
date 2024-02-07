@@ -1,6 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text;
-using CapiGenerator.CModel;
 
 namespace CapiGenerator.CModel.Type;
 

@@ -3,64 +3,16 @@ using CapiGenerator.Parser;
 
 namespace CapiGenerator.CModel;
 
-public class CConstant(Guid compilationUnitId, string name, bool isFromEnum, ReadOnlySpan<BaseCConstantToken> tokens)
+public class CConstant(
+    Guid compilationUnitId, string name, CConstantExpression constantExpression)
     : BaseCAstItem(compilationUnitId)
 {
-    public readonly string Name = name;
-    public readonly bool IsFromEnum = isFromEnum;
-    private readonly BaseCConstantToken[] _tokens = tokens.ToArray();
-    public ReadOnlySpan<BaseCConstantToken> GetTokens() => _tokens;
-    private CConstantType _constantType = CConstantType.NONE;
-
-    public CConstantType GetConstantType()
-    {
-        if (_constantType != CConstantType.NONE)
-        {
-            return _constantType;
-        }
-
-        CConstantType constantType = CConstantType.NONE;
-        foreach (var token in _tokens)
-        {
-            if (token is CConstLiteralToken literalToken)
-            {
-                constantType = literalToken.Type switch
-                {
-                    CConstantType.Int
-                        when _constantType is CConstantType.NONE or CConstantType.Int =>
-                            CConstantType.Int,
-
-                    CConstantType.Float or CConstantType.Int
-                        when _constantType is CConstantType.NONE or CConstantType.Float or CConstantType.Int =>
-                            CConstantType.Float,
-
-                    CConstantType.Char
-                        when _constantType is CConstantType.NONE or CConstantType.Char =>
-                        CConstantType.Char,
-
-                    CConstantType.String or CConstantType.Char
-                        when _constantType is CConstantType.NONE or CConstantType.String or CConstantType.Char =>
-                            CConstantType.String,
-
-                    _ => CConstantType.Unknown
-                };
-
-            }
-
-            if (constantType is CConstantType.Unknown)
-            {
-                break;
-            }
-        }
-
-        _constantType = constantType;
-
-        return _constantType;
-    }
+    public string Name => name;
+    public CConstantExpression ConstantExpression => constantExpression;
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        foreach (var token in _tokens)
+        foreach (var token in constantExpression.Tokens)
         {
             token.OnSecondPass(compilationUnit);
         }

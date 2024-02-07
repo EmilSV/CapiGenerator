@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.Parser;
-
-using ObjectType = System.Type;
 
 namespace CapiGenerator.CModel;
 

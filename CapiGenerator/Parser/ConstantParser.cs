@@ -57,7 +57,7 @@ public class ConstantParser : BaseParser
             return null;
         }
 
-        return new CConstant(compilationUnitId, macro.Name, false, constantTokens!);
+        return new(compilationUnitId, macro.Name, new(constantTokens!));
     }
 
     protected virtual bool ShouldSkip(CppMacro constant) => false;

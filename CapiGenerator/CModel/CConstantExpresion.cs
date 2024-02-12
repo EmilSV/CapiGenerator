@@ -1,11 +1,22 @@
+using System.Collections;
+using System.Runtime.CompilerServices;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.Parser;
 
 namespace CapiGenerator.CModel;
 
 
-public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
+[CollectionBuilder(typeof(CConstantExpressionBuilder), "Create")]
+public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens) : IEnumerable<BaseCConstantToken>
 {
+    internal static class CConstantExpressionBuilder
+    {
+        internal static CConstantExpression Create(ReadOnlySpan<BaseCConstantToken> tokens)
+        {
+            return new CConstantExpression(tokens);
+        }
+    }
+
     private readonly BaseCConstantToken[] _tokens = tokens.ToArray();
     public ReadOnlySpan<BaseCConstantToken> Tokens => _tokens;
     public CConstantType _constantType = CConstantType.NONE;
@@ -62,5 +73,15 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
         {
             token.OnSecondPass(compilationUnit);
         }
+    }
+
+    public IEnumerator<BaseCConstantToken> GetEnumerator()
+    {
+        return ((IEnumerable<BaseCConstantToken>)_tokens).GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _tokens.GetEnumerator();
     }
 }

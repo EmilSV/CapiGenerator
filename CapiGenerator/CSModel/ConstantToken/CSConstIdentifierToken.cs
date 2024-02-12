@@ -1,4 +1,5 @@
 using CapiGenerator.Parser;
+using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel.ConstantToken;
 
@@ -22,11 +23,11 @@ public class CConstIdentifierToken : BaseCSConstantToken
         return _constantField;
     }
 
-    public override void OnSecondPass(CCompilationUnit compilationUnit)
+    public override void OnSecondPass(CSTranslationUnit translationUnit)
     {
         if (_constIdentifierName != null)
         {
-            _constantModel = compilationUnit.GetConstantByName(_constIdentifierName);
+            _constantModel = translationUnit.GetConstantByName(_constIdentifierName);
         }
     }
 }

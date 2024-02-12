@@ -1,10 +1,11 @@
 using CapiGenerator.Parser;
+using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel.ConstantToken;
 
 public abstract class BaseCSConstantToken
 {
-    public virtual void OnSecondPass(CCompilationUnit compilationUnit)
+    public virtual void OnSecondPass(CSTranslationUnit compilationUnit)
     {
 
     }

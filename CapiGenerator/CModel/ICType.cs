@@ -1,6 +1,6 @@
 namespace CapiGenerator.CModel;
 
-public interface ICType
+public interface ICType : IResolveItem<string>
 {
     string Name { get; }
 }

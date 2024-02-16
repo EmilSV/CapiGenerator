@@ -1,10 +1,13 @@
+using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
 using CppAst;
 
 namespace CapiGenerator.Parser;
 
-public sealed class CCompilationUnit
+public sealed class CCompilationUnit:
+    IResolver<ICType, string>,
+    IResolver<CConstant, string>
 {
     private class ParserOutputChannel(CCompilationUnit compilationUnit) : BaseParserOutputChannel
     {
@@ -235,4 +238,14 @@ public sealed class CCompilationUnit
     public IEnumerable<CStruct> GetStructEnumerable() => _structs.Values;
     public IEnumerable<CFunction> GetFunctionEnumerable() => _functions.Values;
     public IEnumerable<CTypedef> GetTypedefEnumerable() => _typedefs.Values;
+
+    ICType? IResolver<ICType, string>.Resolve([DisallowNull] string key)
+    {
+        return GetTypeByName(key);
+    }
+
+    CConstant? IResolver<CConstant, string>.Resolve(string key)
+    {
+        return GetConstantByName(key);
+    }
 }

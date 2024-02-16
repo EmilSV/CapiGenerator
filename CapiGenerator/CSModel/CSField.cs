@@ -4,7 +4,7 @@ namespace CapiGenerator.CSModel;
 
 public class CSField(
     string name,
-    CSResolveType type,
+    CSResolveType ,
     CSDefaultValue? defaultValue
 ) : BaseCSAstItem
 {

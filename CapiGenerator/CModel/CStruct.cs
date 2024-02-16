@@ -16,4 +16,6 @@ public class CStruct(Guid compilationUnitId, string name, ReadOnlySpan<CField> f
             field.OnSecondPass(compilationUnit);
         }
     }
+
+    string IResolveItem<string>.GetResolveKey() => Name;
 }

@@ -14,4 +14,6 @@ public sealed class CEnumField(
     {
         expression.OnSecondPass(compilationUnit);
     }
+
+    string IResolveItem<string>.GetResolveKey() => Name;
 }

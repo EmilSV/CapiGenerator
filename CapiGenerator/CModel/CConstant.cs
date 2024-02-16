@@ -5,7 +5,7 @@ namespace CapiGenerator.CModel;
 
 public class CConstant(
     Guid compilationUnitId, string name, CConstantExpression constantExpression)
-    : BaseCAstItem(compilationUnitId)
+    : BaseCAstItem(compilationUnitId) , ICType
 {
     public string Name => name;
     public CConstantExpression ConstantExpression => constantExpression;
@@ -17,4 +17,6 @@ public class CConstant(
             token.OnSecondPass(compilationUnit);
         }
     }
+
+    string IResolveItem<string>.GetResolveKey() => name;
 }

@@ -5,40 +5,27 @@ namespace CapiGenerator.CModel.Type;
 
 public class CTypeInstance : BaseCAstItem
 {
-    private object? _cTypeOrTypeName;
-    private CTypeModifier[]? _modifiers;
-    public ICType? CType => _cTypeOrTypeName is ICType cType ? cType : null;
-    public string? TypeName => _cTypeOrTypeName is string typeName ? typeName :
-        _cTypeOrTypeName is ICType cType ? cType.Name : null;
+    private readonly CTypeModifier[]? _modifiers;
+    public ResoleRef<ICType, string> CTypeRef { get; }
     public ReadOnlySpan<CTypeModifier> Modifiers =>
         _modifiers ?? ReadOnlySpan<CTypeModifier>.Empty;
 
     public bool GetIsCompletedType()
     {
-        if (_cTypeOrTypeName is BaseAnonymousType anonymousType)
-        {
-            return anonymousType.GetIsCompletedType();
-        }
-
-        if (_cTypeOrTypeName is ICType)
-        {
-            return true;
-        }
-
-        return false;
+        return CTypeRef.IsOutputResolved();
     }
 
     public CTypeInstance(Guid compilationUnitId, ICType cType, ReadOnlySpan<CTypeModifier> modifiers)
         : base(compilationUnitId)
     {
-        _cTypeOrTypeName = cType;
+        CTypeRef = new(cType);
         _modifiers = modifiers.ToArray();
     }
 
     public CTypeInstance(Guid compilationUnitId, string typeName, ReadOnlySpan<CTypeModifier> modifiers)
         : base(compilationUnitId)
     {
-        _cTypeOrTypeName = typeName;
+        CTypeRef = new(typeName);
         _modifiers = modifiers.ToArray();
     }
 
@@ -49,25 +36,6 @@ public class CTypeInstance : BaseCAstItem
             throw new InvalidOperationException("Compilation unit id mismatch");
         }
 
-        if (GetIsCompletedType())
-        {
-            return;
-        }
-
-        if (_cTypeOrTypeName is BaseAnonymousType anonymousType)
-        {
-            anonymousType.OnSecondPass(compilationUnit);
-            return;
-        }
-        
-        if(_cTypeOrTypeName is string typeName)
-        {
-            var newType = compilationUnit.GetTypeByName(typeName);
-            if (newType != null)
-            {
-                _cTypeOrTypeName = newType;
-            }
-            return;
-        }
+        CTypeRef.TrySetOutputFromResolver(compilationUnit);
     }
 }

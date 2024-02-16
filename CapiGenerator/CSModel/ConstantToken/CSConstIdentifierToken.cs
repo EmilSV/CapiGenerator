@@ -1,3 +1,4 @@
+using CapiGenerator.CModel;
 using CapiGenerator.Parser;
 using CapiGenerator.Translator;
 
@@ -5,7 +6,7 @@ namespace CapiGenerator.CSModel.ConstantToken;
 
 public class CConstIdentifierToken : BaseCSConstantToken
 {
-    private CSField? _constantField;
+    private ResoleRef<CSField, BaseCAstItem>? _constantField;
     private readonly string? _constIdentifierName;
 
     public CConstIdentifierToken(string constIdentifierName)

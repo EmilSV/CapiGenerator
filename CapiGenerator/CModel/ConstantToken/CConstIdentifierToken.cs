@@ -4,29 +4,25 @@ namespace CapiGenerator.CModel.ConstantToken;
 
 public class CConstIdentifierToken : BaseCConstantToken
 {
-    private CConstant? _constantModel;
-    private readonly string? _constIdentifierName;
+    private readonly ResoleRef<CConstant, string> _constantRef;
 
     public CConstIdentifierToken(string constIdentifierName)
     {
-        _constIdentifierName = constIdentifierName;
+        _constantRef = new(constIdentifierName);
     }
 
     public CConstIdentifierToken(CConstant constantIdentifier)
     {
-        _constantModel = constantIdentifier;
+        _constantRef = new(constantIdentifier);
     }
 
     public CConstant? GetConstantModel()
     {
-        return _constantModel;
+        return _constantRef.IsOutputResolved() ? _constantRef.Output : null;
     }
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        if (_constIdentifierName != null)
-        {
-            _constantModel = compilationUnit.GetConstantByName(_constIdentifierName);
-        }
+        _constantRef.TrySetOutputFromResolver(compilationUnit);
     }
 }

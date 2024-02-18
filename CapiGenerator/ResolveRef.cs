@@ -8,7 +8,6 @@ public sealed class ResoleRef<TOutput, TKey>
 {
     private TOutput? _output = null;
     private readonly TKey _key = default!;
-    private readonly bool _isKeySet;
 
     public TKey Key
     {
@@ -21,22 +20,18 @@ public sealed class ResoleRef<TOutput, TKey>
 
     public bool TrySetOutputFromResolver(IResolver<TOutput, TKey> resolver)
     {
-        if (_isKeySet)
-        {
-            _output = resolver.Resolve(_key!);
-        }
+        _output ??= resolver.Resolve(_key!);
         return _output != null;
     }
 
     public ResoleRef([DisallowNull] TKey key)
     {
-        _key = key!;
-        _isKeySet = true;
+        _key = key;
     }
 
     public ResoleRef(TOutput output)
     {
         _output = output;
-        _isKeySet = false;
+        _key = output.GetResolveKey();
     }
 }

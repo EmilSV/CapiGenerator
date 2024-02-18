@@ -4,7 +4,7 @@ using CapiGenerator.CSModel;
 namespace CapiGenerator;
 
 public sealed class ResoleRef<TOutput, TKey>
-    where TOutput : class, IResolveItem<TKey>
+    where TOutput : class
 {
     private TOutput? _output = null;
     private readonly TKey _key = default!;
@@ -32,6 +32,5 @@ public sealed class ResoleRef<TOutput, TKey>
     public ResoleRef(TOutput output)
     {
         _output = output;
-        _key = output.GetResolveKey();
     }
 }

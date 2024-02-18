@@ -81,10 +81,10 @@ public sealed class CSPrimitiveType : CSBaseType
 
     public static CSPrimitiveType FromCConstType(CConstantType constType) => constType switch
     {
-        CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
-        CConstantType.String => CSPrimitiveType.Get(CSPrimitiveType.Kind.String),
-        CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
-        CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Double),
+        CConstantType.Int => Get(Kind.Long),
+        CConstantType.String => Get(Kind.String),
+        CConstantType.Char => Get(Kind.Byte),
+        CConstantType.Float => Get(Kind.Double),
         _ => throw new ArgumentOutOfRangeException(nameof(constType))
     };
 }

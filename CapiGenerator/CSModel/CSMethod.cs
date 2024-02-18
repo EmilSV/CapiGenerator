@@ -1,4 +1,5 @@
 using CapiGenerator.CModel;
+using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
 
@@ -26,4 +27,13 @@ public class CSMethod : BaseCSAstItem
     public ResoleRef<ICSType, ICType> RRefReturnType => _rRefReturnType;
     public ICSType? ReturnType => _rRefReturnType.Output;
     public ReadOnlySpan<CSParameter> Parameters => _parameters;
+
+    public override void OnSecondPass(CSTranslationUnit unit)
+    {
+        _rRefReturnType.TrySetOutputFromResolver(unit);
+        foreach (var parameter in _parameters)
+        {
+            parameter.OnSecondPass(unit);
+        }
+    }
 }

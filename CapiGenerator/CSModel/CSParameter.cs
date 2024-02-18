@@ -31,6 +31,6 @@ public sealed class CSParameter : BaseCSAstItem
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-           
+        _rRefType.TrySetOutputFromResolver(unit);
     }
 }

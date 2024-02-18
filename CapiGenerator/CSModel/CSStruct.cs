@@ -1,3 +1,5 @@
+using CapiGenerator.Translator;
+
 namespace CapiGenerator.CSModel;
 
 public class CSStruct(
@@ -11,5 +13,17 @@ public class CSStruct(
 
     public ReadOnlySpan<CSField> Fields => _fields;
     public ReadOnlySpan<CSMethod> Methods => _methods;
+
+    public override void OnSecondPass(CSTranslationUnit unit)
+    {
+        foreach (var field in _fields)
+        {
+            field.OnSecondPass(unit);
+        }
+        foreach (var method in _methods)
+        {
+            method.OnSecondPass(unit);
+        }
+    }
 }
 

@@ -6,29 +6,25 @@ namespace CapiGenerator.CSModel.ConstantToken;
 
 public class CConstIdentifierToken : BaseCSConstantToken
 {
-    private ResoleRef<CSField, BaseCAstItem>? _constantField;
-    private readonly string? _constIdentifierName;
+    private readonly ResoleRef<CSField, BaseCAstItem> _constantField;
 
-    public CConstIdentifierToken(string constIdentifierName)
+    public CConstIdentifierToken(BaseCAstItem cConstIdentifier)
     {
-        _constIdentifierName = constIdentifierName;
+        _constantField = new(cConstIdentifier);
     }
 
     public CConstIdentifierToken(CSField constantField)
     {
-        _constantField = constantField;
+        _constantField = new(constantField);
     }
 
     public CSField? GetField()
     {
-        return _constantField;
+        return _constantField.Output;
     }
 
     public override void OnSecondPass(CSTranslationUnit translationUnit)
     {
-        if (_constIdentifierName != null)
-        {
-            _constantModel = translationUnit.GetConstantByName(_constIdentifierName);
-        }
+        _constantField.TrySetOutputFromResolver(translationUnit);
     }
 }

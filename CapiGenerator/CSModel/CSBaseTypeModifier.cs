@@ -1,6 +1,6 @@
 namespace CapiGenerator.CSModel;
 
-public abstract class CSBaseTypeModifier
+public abstract class BaseCSTypeModifier
 {
     public abstract string GetTypeString();
 }

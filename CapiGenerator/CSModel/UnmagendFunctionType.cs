@@ -2,7 +2,8 @@ namespace CapiGenerator.CSModel;
 
 
 public class CSUnmanagedFunctionType(
-     ReadOnlySpan<> parameterTypes)
+    
+     ReadOnlySpan<CSParameter> parameterTypes)
     : BaseCSAstItem()
 {
     private readonly CSResolveType[] _parameterTypes = parameterTypes.ToArray();

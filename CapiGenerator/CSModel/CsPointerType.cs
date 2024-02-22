@@ -1,6 +1,6 @@
 namespace CapiGenerator.CSModel;
 
-public class CsPointerType : CSBaseTypeModifier
+public class CsPointerType : BaseCSTypeModifier
 {
     public override string GetTypeString()
     {

@@ -17,6 +17,4 @@ public class CConstant(
             token.OnSecondPass(compilationUnit);
         }
     }
-
-    string IResolveItem<string>.GetResolveKey() => name;
 }

@@ -7,7 +7,7 @@ namespace CapiGenerator.Translator;
 
 public class CSStructTranslator : BaseTranslator
 {
-    public override void Translator(
+    public override void FirstPass(
         ReadOnlySpan<CCompilationUnit> compilationUnits,
         BaseCSTypeResolver typeResolver,
         BaseTranslatorOutputChannel outputChannel)

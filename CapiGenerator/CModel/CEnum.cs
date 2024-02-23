@@ -17,9 +17,4 @@ public sealed class CEnum(Guid compilationUnitId, string name, ReadOnlySpan<CEnu
             value.OnSecondPass(compilationUnit);
         }
     }
-
-    string IResolveItem<string>.GetResolveKey()
-    {
-        return Name;
-    }
 }

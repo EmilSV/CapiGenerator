@@ -13,7 +13,7 @@ public class CConstTranslator(string className) : BaseTranslator
     protected virtual string NameSelector(CConstant value) => value.Name;
     protected virtual bool PredicateSelector(CConstant value) => true;
 
-    public override void Translator(
+    public override void FirstPass(
         ReadOnlySpan<CCompilationUnit> compilationUnits,
         BaseCSTypeResolver typeResolver,
         BaseTranslatorOutputChannel outputChannel)

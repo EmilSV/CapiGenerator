@@ -15,7 +15,6 @@ public abstract class BaseTranslatorOutputChannel
         OnReceiveEnum([enumValue]);
     }
 
-
     public abstract void OnReceiveStaticClass(ReadOnlySpan<CSStaticClass> staticClasses);
     public virtual void OnReceiveStaticClass(CSStaticClass staticClass)
     {

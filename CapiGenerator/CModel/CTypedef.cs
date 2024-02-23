@@ -19,6 +19,4 @@ public class CTypedef(Guid compilationUnitId, string name, CTypeInstance innerTy
 
         _innerType.OnSecondPass(compilationUnit);
     }
-    
-    string IResolveItem<string>.GetResolveKey() => Name;
 }

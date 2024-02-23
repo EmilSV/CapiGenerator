@@ -9,7 +9,7 @@ namespace CapiGenerator.Translator;
 
 public class CSEnumTranslator : BaseTranslator
 {
-    public override void Translator(
+    public override void FirstPass(
         ReadOnlySpan<CCompilationUnit> compilationUnits,
         BaseCSTypeResolver typeResolver,
         BaseTranslatorOutputChannel outputChannel)

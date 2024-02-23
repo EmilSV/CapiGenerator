@@ -21,8 +21,6 @@ public sealed class CPrimitiveType : ICType
         }
     }
 
-    string IResolveItem<string>.GetResolveKey() => Name;
-
     public enum Kind
     {
         [Name("int8_t")] Int8_t,

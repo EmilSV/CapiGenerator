@@ -6,5 +6,5 @@ public abstract class BaseTranslatorInputChannel
 {
     public abstract ReadOnlySpan<CSEnum> GetEnums();
     public abstract ReadOnlySpan<CSStruct> GetStructs();
-    public abstract ReadOnlySpan<CSStaticClass> GetStaticClass();
+    public abstract ReadOnlySpan<CSStaticClass> GetStaticClasses();
 }

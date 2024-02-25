@@ -31,7 +31,7 @@ public class CSStructTranslator : BaseTranslator
         }
 
         var newCSStruct = new CSStruct(structItem.Name, fields.ToArray(), []);
-        newCSStruct.EnrichingDataStore.Add(new CSTranslationCAstData(structItem));
+        newCSStruct.EnrichingDataStore.Add(new CSTranslationFromCAstData(structItem));
         structItem.EnrichingDataStore.Add(new CSTranslationsTypeData(newCSStruct));
         return newCSStruct;
     }
@@ -40,7 +40,7 @@ public class CSStructTranslator : BaseTranslator
     {
         CSResolveType fieldType = new(field.GetFieldType(), typeResolver);
         var newField = new CSField(field.Name, fieldType, null);
-        newField.EnrichingDataStore.Add(new CSTranslationCAstData(field));
+        newField.EnrichingDataStore.Add(new CSTranslationFromCAstData(field));
         return newField;
     }
 }

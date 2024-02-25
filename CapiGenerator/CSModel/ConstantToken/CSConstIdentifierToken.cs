@@ -6,9 +6,9 @@ namespace CapiGenerator.CSModel.ConstantToken;
 
 public class CConstIdentifierToken : BaseCSConstantToken
 {
-    private readonly ResoleRef<CSField, BaseCAstItem> _constantField;
+    private readonly ResoleRef<CSField, CConstant> _constantField;
 
-    public CConstIdentifierToken(BaseCAstItem cConstIdentifier)
+    public CConstIdentifierToken(CConstant cConstIdentifier)
     {
         _constantField = new(cConstIdentifier);
     }

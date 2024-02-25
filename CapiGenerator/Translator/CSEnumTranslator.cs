@@ -38,7 +38,7 @@ public class CSEnumTranslator : BaseTranslator
         );
 
         var newCSEnum = new CSEnum(enumItem.Name, resolvedType, enumValue.ToArray());
-        newCSEnum.EnrichingDataStore.Add(new CSTranslationCAstData(enumItem));
+        newCSEnum.EnrichingDataStore.Add(new CSTranslationFromCAstData(enumItem));
         enumItem.EnrichingDataStore.Add(new CSTranslationsTypeData(newCSEnum));
         return newCSEnum;
     }
@@ -56,7 +56,7 @@ public class CSEnumTranslator : BaseTranslator
             newCSEnumValue = new CSEnumValue(constant.Name, constant);
         }
 
-        newCSEnumValue.EnrichingDataStore.Add(new CSTranslationCAstData(constant));
+        newCSEnumValue.EnrichingDataStore.Add(new CSTranslationFromCAstData(constant));
         return newCSEnumValue;
     }
 }

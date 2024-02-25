@@ -40,7 +40,7 @@ public class CConstTranslator(string className) : BaseTranslator
             resolvedType: CSPrimitiveType.FromCConstType(constItem.GetConstantType())
         );
         var newField = new CSField(NameSelector(constItem), fieldType, null, new() { Const = true });
-        newField.EnrichingDataStore.Add(new CSTranslationCAstData(constItem));
+        newField.EnrichingDataStore.Add(new CSTranslationFromCAstData(constItem));
         return newField;
     }
 }

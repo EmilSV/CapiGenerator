@@ -7,6 +7,7 @@ public class CSEnum : CSBaseType
 {
     private readonly ResoleRef<ICSType, ICType> _rRefType;
     private readonly CSEnumValue[] _values;
+    private string? _fullName;
 
     public CSEnum(string name, ICType type, ReadOnlySpan<CSEnumValue> values)
         : base(name)
@@ -26,6 +27,9 @@ public class CSEnum : CSBaseType
     public ResoleRef<ICSType, ICType> RRefType => _rRefType;
     public ICSType? Type => _rRefType.Output;
     public ReadOnlySpan<CSEnumValue> Values => _values;
+
+    public string? Namespace { get; init; }
+    public string FullName => _fullName ??= Namespace is null ? Name : $"{Namespace}.{Name}";
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

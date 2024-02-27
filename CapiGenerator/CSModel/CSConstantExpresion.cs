@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.CSModel.ConstantToken;
 using CapiGenerator.Translator;
 
@@ -46,17 +47,18 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
         var tokens = new BaseCSConstantToken[expression.Tokens.Length];
         for (int i = 0; i < expression.Tokens.Length; i++)
         {
-            tokens[i] = BaseCSConstantToken.FromCConstantToken(expression.Tokens[i]);
+            tokens[i] = CConstantTokenToCSConstantToken(expression.Tokens[i]);
         }
         return new CSConstantExpression(tokens);
     }
 
-    private BaseCSConstantToken CConstantTokenToCSConstantToken(BaseCConstantToken token)
+    private static BaseCSConstantToken CConstantTokenToCSConstantToken(BaseCConstantToken token)
     {
         return token switch
         {
-            CConstIdentifierToken identifierToken => new CConstIdentifierToken(identifierToken.GetField()),
-            CConstLiteralToken literalToken => new CConstLiteralToken(literalToken.Value, literalToken.Type),
+            CConstantPunctuationToken punctuationToken => CSConstantPunctuationToken.FromCConstantPunctuationToken(punctuationToken),
+            CConstLiteralToken literalToken => CSConstLiteralToken.FromCConstantLiteralToken(literalToken),
+            CConstIdentifierToken identifierToken => CSConstIdentifierToken.FromCConstantToken(identifierToken),
             _ => throw new NotImplementedException()
         };
     }

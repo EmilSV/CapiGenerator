@@ -8,7 +8,7 @@ public readonly struct CSDefaultValue
     private readonly object? _value;
     public readonly object? Value => _value;
 
-    public CSDefaultValue(CConstant value)
+    public CSDefaultValue(CSConstantExpression value)
     {
         _value = value;
     }
@@ -32,4 +32,6 @@ public readonly struct CSDefaultValue
     {
         _value = value;
     }
+
+    
 }

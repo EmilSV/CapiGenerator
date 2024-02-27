@@ -8,13 +8,13 @@ public class CSTypeInstance : BaseCSAstItem
     private readonly ResoleRef<ICSType, ICType> _rRefType;
     private readonly BaseCSTypeModifier[] _modifier;
 
-    public CSTypeInstance(ICType cType, ReadOnlySpan<BaseCSTypeModifier> modifiers)
+    public CSTypeInstance(ICType cType, ReadOnlySpan<BaseCSTypeModifier> modifiers = default)
     {
         _rRefType = new(cType);
         _modifier = modifiers.ToArray();
     }
 
-    public CSTypeInstance(ICSType type, ReadOnlySpan<BaseCSTypeModifier> modifiers)
+    public CSTypeInstance(ICSType type, ReadOnlySpan<BaseCSTypeModifier> modifiers = default)
     {
         _rRefType = new(type);
         _modifier = modifiers.ToArray();

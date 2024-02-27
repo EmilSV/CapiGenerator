@@ -18,8 +18,8 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
     }
 
     private readonly BaseCConstantToken[] _tokens = tokens.ToArray();
+    private CConstantType _constantType = CConstantType.NONE;
     public ReadOnlySpan<BaseCConstantToken> Tokens => _tokens;
-    public CConstantType _constantType = CConstantType.NONE;
 
     public CConstantType GetTypeOfExpression()
     {

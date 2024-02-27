@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using CapiGenerator.CModel;
+using CapiGenerator.CModel.ConstantToken;
 
 namespace CapiGenerator.CSModel.ConstantToken;
 
@@ -56,4 +58,24 @@ public sealed class CSConstantPunctuationToken : BaseCSConstantToken
 
         return constantPunctuation is not null;
     }
+
+
+    public static CSConstantPunctuationToken FromCConstantPunctuationToken(CConstantPunctuationToken token) =>
+        token.Type switch
+        {
+            CPunctuationType.Plus => new() { Type = CSPunctuationType.Plus },
+            CPunctuationType.Minus => new() { Type = CSPunctuationType.Minus },
+            CPunctuationType.Multiply => new() { Type = CSPunctuationType.Multiply },
+            CPunctuationType.Divide => new() { Type = CSPunctuationType.Divide },
+            CPunctuationType.Modulo => new() { Type = CSPunctuationType.Modulo },
+            CPunctuationType.BitwiseAnd => new() { Type = CSPunctuationType.BitwiseAnd },
+            CPunctuationType.BitwiseOr => new() { Type = CSPunctuationType.BitwiseOr },
+            CPunctuationType.BitwiseXor => new() { Type = CSPunctuationType.BitwiseXor },
+            CPunctuationType.BitwiseNot => new() { Type = CSPunctuationType.BitwiseNot },
+            CPunctuationType.BitwiseLeftShift => new() { Type = CSPunctuationType.BitwiseLeftShift },
+            CPunctuationType.BitwiseRightShift => new() { Type = CSPunctuationType.BitwiseRightShift },
+            CPunctuationType.LeftParenthesis => new() { Type = CSPunctuationType.LeftParenthesis },
+            CPunctuationType.RightParenthesis => new() { Type = CSPunctuationType.RightParenthesis },
+            _ => throw new ArgumentOutOfRangeException(nameof(token), token.Type, null)
+        };
 }

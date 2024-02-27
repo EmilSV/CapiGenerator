@@ -13,34 +13,43 @@ public class CConstTranslator(string className) : BaseTranslator
     protected virtual string NameSelector(CConstant value) => value.Name;
     protected virtual bool PredicateSelector(CConstant value) => true;
 
+
     public override void FirstPass(
+        CSTranslationUnit translationUnit,
         ReadOnlySpan<CCompilationUnit> compilationUnits,
-        BaseCSTypeResolver typeResolver,
         BaseTranslatorOutputChannel outputChannel)
     {
-        List<CSField> fields = [];
+        List<CSField> constantFields = [];
         foreach (var compilationUnit in compilationUnits)
         {
-            foreach (var constItem in compilationUnit.GetConstantEnumerable())
+            foreach (var constant in compilationUnit.GetConstantEnumerable())
             {
-                if (PredicateSelector(constItem))
+                if (PredicateSelector(constant))
                 {
-                    fields.Add(TranslateConstant(constItem, typeResolver));
+                    constantFields.Add(TranslateConstant(constant));
                 }
             }
         }
-        outputChannel.OnReceiveStaticClass(new CSStaticClass(className, fields.ToArray(), []));
-
     }
 
-    private CSField TranslateConstant(CConstant constItem, BaseCSTypeResolver typeResolver)
+    private CSField TranslateConstant(CConstant constant)
     {
-        CSResolveType fieldType = new(
-            cType: CPrimitiveType.FromCConstType(constItem.GetConstantType()),
-            resolvedType: CSPrimitiveType.FromCConstType(constItem.GetConstantType())
-        );
-        var newField = new CSField(NameSelector(constItem), fieldType, null, new() { Const = true });
-        newField.EnrichingDataStore.Add(new CSTranslationFromCAstData(constItem));
-        return newField;
+        var cType = constant.ConstantExpression.GetTypeOfExpression();
+        CSPrimitiveType csType = cType switch
+        {
+            CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Char),
+            CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
+            CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Float),
+            CConstantType.String => CSPrimitiveType.Get(CSPrimitiveType.Kind.String),
+            _ => throw new Exception("Unknown constant type"),
+        };
+
+        var typeInstance = new CSTypeInstance(csType);
+        var newCSField = new CSField(NameSelector(constant), typeInstance, );
+        newCSField.EnrichingDataStore.Add(new CSTranslationFromCAstData(constant));
+        constant.EnrichingDataStore.Add(new CSTranslationsTypeData(newCSField));
+        return newCSField;
     }
+
+
 }

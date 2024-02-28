@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.CModel.Type;
@@ -30,6 +31,10 @@ public class CConstTranslator(string className) : BaseTranslator
                 }
             }
         }
+
+        var csStaticClass = new CSStaticClass(className, CollectionsMarshal.AsSpan(constantFields), []);
+
+        outputChannel.OnReceiveStaticClass(csStaticClass);
     }
 
     private CSField TranslateConstant(CConstant constant)
@@ -37,7 +42,7 @@ public class CConstTranslator(string className) : BaseTranslator
         var cType = constant.ConstantExpression.GetTypeOfExpression();
         CSPrimitiveType csType = cType switch
         {
-            CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Char),
+            CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
             CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
             CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Float),
             CConstantType.String => CSPrimitiveType.Get(CSPrimitiveType.Kind.String),
@@ -45,9 +50,9 @@ public class CConstTranslator(string className) : BaseTranslator
         };
 
         var typeInstance = new CSTypeInstance(csType);
-        var newCSField = new CSField(NameSelector(constant), typeInstance, );
+        var csConstantExpression = CSConstantExpression.FromCConstantExpression(constant.ConstantExpression);
+        var newCSField = new CSField(NameSelector(constant), typeInstance, new(csConstantExpression));
         newCSField.EnrichingDataStore.Add(new CSTranslationFromCAstData(constant));
-        constant.EnrichingDataStore.Add(new CSTranslationsTypeData(newCSField));
         return newCSField;
     }
 

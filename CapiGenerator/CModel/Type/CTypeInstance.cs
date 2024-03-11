@@ -10,11 +10,6 @@ public class CTypeInstance : BaseCAstItem
     public ReadOnlySpan<CTypeModifier> Modifiers =>
         _modifiers ?? ReadOnlySpan<CTypeModifier>.Empty;
 
-    public bool GetIsCompletedType()
-    {
-        return CTypeRef.IsOutputResolved();
-    }
-
     public CTypeInstance(Guid compilationUnitId, ICType cType, ReadOnlySpan<CTypeModifier> modifiers)
         : base(compilationUnitId)
     {
@@ -27,6 +22,16 @@ public class CTypeInstance : BaseCAstItem
     {
         CTypeRef = new(typeName);
         _modifiers = modifiers.ToArray();
+    }
+
+    public bool GetIsCompletedType()
+    {
+        return CTypeRef.IsOutputResolved();
+    }
+
+    public ICType? GetCType()
+    {
+        return CTypeRef.Output;
     }
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)

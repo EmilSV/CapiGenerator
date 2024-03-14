@@ -19,7 +19,6 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
     }
 
     private readonly BaseCSConstantToken[] _tokens = tokens.ToArray();
-    private CSConstantType _constantType = CSConstantType.NONE;
     public ReadOnlySpan<BaseCSConstantToken> Tokens => _tokens;
 
 

@@ -9,7 +9,7 @@ using CapiGenerator.Parser;
 namespace CapiGenerator.Translator;
 
 
-public class CConstTranslator(string className) : BaseTranslator
+public class CSConstTranslator(string className) : BaseTranslator
 {
     protected virtual string NameSelector(CConstant value) => value.Name;
     protected virtual bool PredicateSelector(CConstant value) => true;
@@ -21,20 +21,33 @@ public class CConstTranslator(string className) : BaseTranslator
         BaseTranslatorOutputChannel outputChannel)
     {
         List<CSField> constantFields = [];
+        
         foreach (var compilationUnit in compilationUnits)
         {
             foreach (var constant in compilationUnit.GetConstantEnumerable())
             {
-                if (PredicateSelector(constant))
+                if (!PredicateSelector(constant))
                 {
-                    constantFields.Add(TranslateConstant(constant));
+                    break;
                 }
+
+                constantFields.Add(TranslateConstant(constant));
             }
         }
 
         var csStaticClass = new CSStaticClass(className, CollectionsMarshal.AsSpan(constantFields), []);
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
+    }
+
+    public override void SecondPass(
+        CSTranslationUnit translationUnit,
+        BaseTranslatorInputChannel inputChannel)
+    {
+        foreach (var staticClass in inputChannel.GetStaticClasses())
+        {
+            staticClass.OnSecondPass(translationUnit);
+        }
     }
 
     private CSField TranslateConstant(CConstant constant)

@@ -24,6 +24,16 @@ public class CSEnumTranslator : BaseTranslator
         }
     }
 
+    public override void SecondPass(
+        CSTranslationUnit translationUnit, 
+        BaseTranslatorInputChannel inputChannel)
+    {
+        foreach (var enumItem in inputChannel.GetEnums())
+        {
+            enumItem.OnSecondPass(translationUnit);
+        }
+    }
+
     private static CSEnum TranslateEnum(CEnum enumItem)
     {
         List<CSEnumField> enumValue = [];

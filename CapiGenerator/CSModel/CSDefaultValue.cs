@@ -83,7 +83,7 @@ public readonly struct CSDefaultValue
         return false;
     }
 
-    public bool TryGetCSConstantExpression([MaybeNullWhen(false)]  out CSConstantExpression value)
+    public bool TryGetCSConstantExpression([MaybeNullWhen(false)] out CSConstantExpression value)
     {
         if (_value is CSConstantExpression c)
         {
@@ -94,4 +94,6 @@ public readonly struct CSDefaultValue
         value = default;
         return false;
     }
+
+    public static CSDefaultValue NullValue = default;
 }

@@ -17,12 +17,22 @@ public class CSStructTranslator : BaseTranslator
         {
             foreach (var structItem in compilationUnit.GetStructEnumerable())
             {
-                outputChannel.OnReceiveStruct(TranslateStruct(structItem, translationUnit));
+                outputChannel.OnReceiveStruct(TranslateStruct(structItem));
             }
         }
     }
 
-    protected static CSStruct TranslateStruct(CStruct structItem, CSTranslationUnit translationUnit)
+    public override void SecondPass(
+        CSTranslationUnit translationUnit,
+        BaseTranslatorInputChannel inputChannel)
+    {
+        foreach (var structItem in inputChannel.GetStructs())
+        {
+            structItem.OnSecondPass(translationUnit);
+        }
+    }
+
+    protected static CSStruct TranslateStruct(CStruct structItem)
     {
         List<CSField> fields = [];
 

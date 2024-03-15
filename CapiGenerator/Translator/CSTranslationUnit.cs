@@ -190,7 +190,7 @@ public sealed class CSTranslationUnit :
         foreach (var (channel, translator) in channels)
         {
             channel.Close();
-            translator.SecondPass(this, compilationUnits, channel.CreateInputChannel());
+            translator.SecondPass(this, channel.CreateInputChannel());
         }
     }
 

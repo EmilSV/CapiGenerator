@@ -23,11 +23,11 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
         {
             foreach (var function in compilationUnit.GetFunctionEnumerable())
             {
-                if (!PredicateSelector(function))
+                if (!PredicateSelector(function)) 
                 {
                     break;
                 }
-                
+
                 methods.Add(TranslateFunction(function));
             }
         }

@@ -1,5 +1,6 @@
 using CapiGenerator.Parser;
 using CapiGenerator.CModel.Type;
+using CppAst;
 
 namespace CapiGenerator.CModel;
 
@@ -21,5 +22,11 @@ public sealed class CParameter(
         }
         
         _type.OnSecondPass(compilationUnit);
+    }
+
+    public static CParameter FromCPPParameter(Guid compilationUnitId, CppParameter parameter)
+    {
+        var type = TypeConverter.PartialConvert(compilationUnitId, parameter.Type);
+        return new CParameter(compilationUnitId, parameter.Name, type);
     }
 }

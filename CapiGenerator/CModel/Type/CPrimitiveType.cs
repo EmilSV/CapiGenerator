@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Security.Cryptography;
+using CppAst;
 
 namespace CapiGenerator.CModel.Type;
 
@@ -112,6 +114,24 @@ public sealed class CPrimitiveType : ICType
             var kind = (Kind)field.GetRawConstantValue()!;
             return new CPrimitiveType(kind, names);
         }).ToArray();
+
+    public static CPrimitiveType FromCppPrimitiveType(CppPrimitiveType cppType) => cppType.Kind switch
+    {
+        CppPrimitiveKind.Void => GetByKind(Kind.Other),
+        CppPrimitiveKind.Bool => GetByKind(Kind.Bool),
+        CppPrimitiveKind.Char => GetByKind(Kind.Char),
+        CppPrimitiveKind.Short => GetByKind(Kind.Short),
+        CppPrimitiveKind.Int => GetByKind(Kind.Int),
+        CppPrimitiveKind.LongLong => GetByKind(Kind.LongLong),
+        CppPrimitiveKind.Float => GetByKind(Kind.Float),
+        CppPrimitiveKind.Double => GetByKind(Kind.Double),
+        CppPrimitiveKind.LongDouble => GetByKind(Kind.LongDouble),
+        CppPrimitiveKind.UnsignedChar => GetByKind(Kind.UnsignedChar),
+        CppPrimitiveKind.UnsignedShort => GetByKind(Kind.UnsignedShortInt),
+        CppPrimitiveKind.UnsignedInt => GetByKind(Kind.UnsignedInt),
+        CppPrimitiveKind.UnsignedLongLong => GetByKind(Kind.UnsignedLongLong),
+        _ => throw new NotImplementedException(),
+    };
 
     public static CPrimitiveType FromCConstType(CConstantType constType) => constType switch
     {

@@ -1,4 +1,5 @@
 using CapiGenerator.Parser;
+using CppAst;
 
 namespace CapiGenerator.CModel.Type;
 
@@ -26,7 +27,7 @@ public class AnonymousFunctionType(
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        if(GetIsCompletedType())
+        if (GetIsCompletedType())
         {
             return;
         }
@@ -36,5 +37,17 @@ public class AnonymousFunctionType(
             parameter.OnSecondPass(compilationUnit);
         }
         returnType.OnSecondPass(compilationUnit);
+    }
+
+    public static AnonymousFunctionType FromCFunctionType(Guid compilationUnitId, CppFunctionType function)
+    {
+        var returnType = TypeConverter.PartialConvert(compilationUnitId, function.ReturnType);
+        var parameters = function.Parameters.Select(i => CParameter.FromCPPParameter(compilationUnitId, i)).ToArray();
+
+        return new AnonymousFunctionType(
+            compilationUnitId: compilationUnitId,
+            returnType: returnType,
+            parameters: parameters
+        );
     }
 }

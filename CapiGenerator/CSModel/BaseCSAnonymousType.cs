@@ -1,6 +1,6 @@
 namespace CapiGenerator.CSModel;
 
-public abstract class BaseAnonymousType() 
+public abstract class BaseCSAnonymousType() 
     : BaseCSAstItem()
 {
 }

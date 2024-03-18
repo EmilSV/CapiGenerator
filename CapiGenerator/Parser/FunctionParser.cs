@@ -53,7 +53,7 @@ public class FunctionParser : BaseParser
             return null;
         }
 
-        var returnType = TypeConverter.PartialConvert(compilationUnitId, function.ReturnType);
+        var returnType = CTypeInstance.FromCppType(function.ReturnType, compilationUnitId);
 
         return new CFunction(compilationUnitId, returnType, function.Name, parameters!);
 
@@ -67,7 +67,7 @@ public class FunctionParser : BaseParser
 
     private static CParameter CppParameterToCParameter(Guid compilationUnitId, CppParameter parameter)
     {
-        var parameterType = TypeConverter.PartialConvert(compilationUnitId, parameter.Type);
+        var parameterType = CTypeInstance.FromCppType(parameter.Type, compilationUnitId);
         return new CParameter(compilationUnitId, parameter.Name, parameterType);
     }
 }

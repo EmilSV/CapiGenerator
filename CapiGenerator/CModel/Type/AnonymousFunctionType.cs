@@ -6,7 +6,7 @@ namespace CapiGenerator.CModel.Type;
 
 public class AnonymousFunctionType(
     Guid compilationUnitId, CTypeInstance returnType, ReadOnlySpan<CParameter> parameters)
-    : BaseAnonymousType(compilationUnitId)
+    : BaseCSAnonymousType(compilationUnitId)
 {
     private readonly CParameter[] _parameters = parameters.ToArray();
     public CTypeInstance ReturnType => returnType;
@@ -41,7 +41,7 @@ public class AnonymousFunctionType(
 
     public static AnonymousFunctionType FromCFunctionType(Guid compilationUnitId, CppFunctionType function)
     {
-        var returnType = TypeConverter.PartialConvert(compilationUnitId, function.ReturnType);
+        var returnType = CTypeInstance.FromCppType(function.ReturnType, compilationUnitId);
         var parameters = function.Parameters.Select(i => CParameter.FromCPPParameter(compilationUnitId, i)).ToArray();
 
         return new AnonymousFunctionType(

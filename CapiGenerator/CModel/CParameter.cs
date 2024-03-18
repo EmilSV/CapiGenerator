@@ -5,7 +5,7 @@ using CppAst;
 namespace CapiGenerator.CModel;
 
 public sealed class CParameter(
-    Guid compilationUnitId, string name, CTypeInstance type) 
+    Guid compilationUnitId, string name, CTypeInstance type)
     : BaseCAstItem(compilationUnitId)
 {
     public readonly string Name = name;
@@ -20,13 +20,13 @@ public sealed class CParameter(
         {
             return;
         }
-        
+
         _type.OnSecondPass(compilationUnit);
     }
 
     public static CParameter FromCPPParameter(Guid compilationUnitId, CppParameter parameter)
     {
-        var type = TypeConverter.PartialConvert(compilationUnitId, parameter.Type);
+        var type = CTypeInstance.FromCppType(parameter.Type, compilationUnitId);
         return new CParameter(compilationUnitId, parameter.Name, type);
     }
 }

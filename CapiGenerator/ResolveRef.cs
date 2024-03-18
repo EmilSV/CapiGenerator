@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using CapiGenerator.CSModel;
 
 namespace CapiGenerator;
 

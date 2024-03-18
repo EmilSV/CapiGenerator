@@ -17,7 +17,7 @@ public class TypedefParser : BaseParser
             {
                 FindTypeDefs(cppTypedef, typedef =>
                 {
-                    var type = TypeConverter.PartialConvert(compilationUnitId, typedef.ElementType);
+                    var type = CTypeInstance.FromCppType(typedef.ElementType, compilationUnitId);
                     var typedefName = typedef.Name;
                     outputChannel.OnReceiveTypedef(new CTypedef(compilationUnitId, typedefName, type));
                 });

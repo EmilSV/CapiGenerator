@@ -6,7 +6,7 @@ namespace CapiGenerator.CModel.Type;
 
 public class AnonymousFunctionType(
     Guid compilationUnitId, CTypeInstance returnType, ReadOnlySpan<CParameter> parameters)
-    : BaseCSAnonymousType(compilationUnitId)
+    : BaseCAnonymousType(compilationUnitId)
 {
     private readonly CParameter[] _parameters = parameters.ToArray();
     public CTypeInstance ReturnType => returnType;

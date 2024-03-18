@@ -51,7 +51,29 @@ public class CSTypeInstance : BaseCSAstItem
     public static CSTypeInstance CreateFromCTypeInstance(CTypeInstance cTypeInstance)
     {
         var cType = cTypeInstance.GetCType() ?? throw new Exception("cType is null");
-        var csTypeInstance = new CSTypeInstance(cType, TranslateModifiers(cTypeInstance.Modifiers));
+        var modifiers = TranslateModifiers(cTypeInstance.Modifiers);
+
+        if (cType.IsAnonymous)
+        {
+            return HandleAnonymousType(cType, modifiers);
+        }
+
+        var csTypeInstance = new CSTypeInstance(cType, modifiers);
         return csTypeInstance;
+    }
+
+    private static CSTypeInstance HandleAnonymousType(ICType cType, ReadOnlySpan<BaseCSTypeModifier> modifiers)
+    {
+        switch (cType)
+        {
+            case AnonymousFunctionType functionType:
+                var returnType = CreateFromCTypeInstance(functionType.ReturnType);
+                var parameters = functionType.Parameters.ToArray().Select(
+                    i => CreateFromCTypeInstance(i.GetParameterType())
+                ).ToArray();
+                var csFunctionType = new CSUnmanagedFunctionType(returnType, parameters);
+                return new CSTypeInstance(csFunctionType, modifiers);
+            default: throw new Exception("unsupported anonymous type");
+        }
     }
 }

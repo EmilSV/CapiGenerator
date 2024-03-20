@@ -8,5 +8,3 @@ enum Test
     B = 3,
     C = 2
 };
-
-int *((*t)[4]);

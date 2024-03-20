@@ -6,7 +6,7 @@ using CapiGenerator.Parser;
 namespace CapiGenerator.CModel;
 
 
-[CollectionBuilder(typeof(CConstantExpressionBuilder), "Create")]
+[CollectionBuilder(typeof(CConstantExpressionBuilder), nameof(CConstantExpressionBuilder.Create))]
 public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens) : IEnumerable<BaseCConstantToken>
 {
     internal static class CConstantExpressionBuilder

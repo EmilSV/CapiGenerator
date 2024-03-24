@@ -60,6 +60,8 @@ public sealed class CSPrimitiveType : CSBaseType
 
     public readonly Kind KindValue;
 
+    public override string FullName => Name;
+
     private CSPrimitiveType(Kind kind, string name) : base(name)
     {
         KindValue = kind;

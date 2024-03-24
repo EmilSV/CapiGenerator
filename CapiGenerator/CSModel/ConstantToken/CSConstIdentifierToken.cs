@@ -7,7 +7,7 @@ namespace CapiGenerator.CSModel.ConstantToken;
 
 public class CSConstIdentifierToken : BaseCSConstantToken
 {
-    private readonly ResoleRef<CSField, CConstant> _constantField;
+    private readonly ResoleRef<ICSField, CConstant> _constantField;
 
     public CSConstIdentifierToken(CConstant cConstIdentifier)
     {
@@ -34,4 +34,8 @@ public class CSConstIdentifierToken : BaseCSConstantToken
         return new CSConstIdentifierToken(token.GetConstantModel() ?? throw new InvalidOperationException("Constant model is not resolved"));
     }
 
+    public override string ToString()
+    {
+        return _constantField.Output.Name
+    }
 }

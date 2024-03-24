@@ -194,4 +194,7 @@ public sealed class CSTranslationUnit :
         }
     }
 
+    public IEnumerable<CSStaticClass> GetCSStaticClassesEnumerable() => _staticClassesByName.Values;
+    public IEnumerable<CSStruct> GetCSStructEnumerable() => _structByName.Values;
+    public IEnumerable<CSEnum> GetCSEnumEnumerable() => _enumByName.Values;
 }

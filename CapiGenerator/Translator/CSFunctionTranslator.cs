@@ -67,7 +67,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
             new DllImportAttribute(dllName)
             {
                 CallingConvention = CallingConvention.Cdecl,
-                EntryPoint = function.Name
+                EntryPoint = function.Name,   
             }
         ]));
         function.EnrichingDataStore.Add(new CTranslationToCSAstData(method));

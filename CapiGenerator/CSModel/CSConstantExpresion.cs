@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Text;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.CSModel.ConstantToken;
@@ -60,5 +61,22 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
             CConstIdentifierToken identifierToken => CSConstIdentifierToken.FromCConstantToken(identifierToken),
             _ => throw new NotImplementedException()
         };
+    }
+
+    public override string ToString()
+    {
+        if (_tokens.Length == 0)
+            return string.Empty;
+
+        var builder = new StringBuilder();
+        foreach (var token in _tokens[..^1])
+        {
+            builder.Append(token);
+            builder.Append(' ');
+        }
+        builder.Append(_tokens[^1]);
+        builder.Append(';');
+
+        return builder.ToString();
     }
 }

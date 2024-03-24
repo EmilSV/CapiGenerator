@@ -10,6 +10,7 @@ public class CSMethod(
 )
     : BaseCSAstItem
 {
+    private CSBaseType? _parent;
     private readonly CSParameter[] _parameters = parameters.ToArray();
 
     public CSTypeInstance ReturnType => returnType;
@@ -20,6 +21,16 @@ public class CSMethod(
     public bool IsStatic { get; init; }
     public bool IsExtern { get; init; }
     public CSAccessModifier AccessModifier { get; init; } = CSAccessModifier.Public;
+
+    public void SetParent(CSBaseType parent)
+    {
+        if (_parent is not null)
+        {
+            throw new InvalidOperationException("Parent is already set");
+        }
+
+        _parent = parent;
+    }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

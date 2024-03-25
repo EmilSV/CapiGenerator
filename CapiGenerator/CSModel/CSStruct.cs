@@ -27,7 +27,7 @@ public class CSStruct : CSBaseType
     public ReadOnlySpan<CSMethod> Methods => _methods;
 
     public string? Namespace { get; init; }
-    public string FullName => _fullName ??= Namespace is null ? Name : $"{Namespace}.{Name}";
+    public override string FullName => _fullName ??= Namespace is null ? Name : $"{Namespace}.{Name}";
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

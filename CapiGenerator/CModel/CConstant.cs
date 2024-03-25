@@ -4,15 +4,15 @@ using CapiGenerator.Parser;
 namespace CapiGenerator.CModel;
 
 public class CConstant(
-    Guid compilationUnitId, string name, CConstantExpression constantExpression)
-    : BaseCAstItem(compilationUnitId) , ICType
+    Guid compilationUnitId, string name, CConstantExpression expression)
+    : BaseCAstItem(compilationUnitId), ICConstAssignable
 {
     public string Name => name;
-    public CConstantExpression ConstantExpression => constantExpression;
+    public CConstantExpression Expression => expression;
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        foreach (var token in constantExpression.Tokens)
+        foreach (var token in expression.Tokens)
         {
             token.OnSecondPass(compilationUnit);
         }

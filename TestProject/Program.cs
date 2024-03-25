@@ -1,4 +1,6 @@
 ﻿using CapiGenerator.Parser;
+using CapiGenerator.Translator;
+using CapiGenerator.Writer;
 using CppAst;
 
 string headerFile = Path.Combine(Directory.GetCurrentDirectory(), args[0]);
@@ -41,10 +43,34 @@ compilationUnit.AddParser([
 
 compilationUnit.Parse([cppCompilation]);
 
-foreach (var constant in compilationUnit.GetConstantEnumerable())
+foreach (var constant in compilationUnit.GetEnumEnumerable())
 {
     Console.WriteLine(constant.Name);
 }
 
+var translationUnit = new CSTranslationUnit();
+
+translationUnit.AddTranslator([
+    new CSConstTranslator("TestProject"),
+    new CSEnumTranslator(),
+    new CSFunctionTranslator("TestProject", "TestProject.Interop"),
+    new CSStructTranslator(),
+    new CSTypedefTranslator()
+]);
+
+translationUnit.Translate([compilationUnit]);
+
+var writer = new CSEnumWriter();
+
+foreach (var csEnum in translationUnit.GetCSEnumEnumerable())
+{
+    await writer.Write(csEnum, new CSWriteConfig
+    {
+        OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output"),
+        Usings = [
+            "System"
+        ]
+    });
+}
 
 return 0;

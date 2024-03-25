@@ -100,9 +100,13 @@ public sealed class EnrichingDataStore
 
         if (enrichingData.TryGetValue(typeof(T), out var currentData))
         {
-            if (currentData is List<T> currentDataList)
+            if (currentData is List<object> currentDataList)
             {
-                output.AddRange(currentDataList);
+                foreach (var item in currentDataList)
+                {
+                    output.Add((T)item);
+                }
+
                 return currentDataList.Count;
             }
             else
@@ -125,9 +129,9 @@ public sealed class EnrichingDataStore
 
         if (enrichingData.TryGetValue(typeof(T), out var currentData))
         {
-            if (currentData is List<T> currentDataList)
+            if (currentData is List<object> currentDataList)
             {
-                return currentDataList[^1];
+                return (T)currentDataList[^1];
             }
             else
             {

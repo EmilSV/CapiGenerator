@@ -5,7 +5,7 @@ namespace CapiGenerator.CSModel;
 
 public sealed class CSField(
     string name, CSTypeInstance type, CSDefaultValue defaultValue = default
-) : BaseCSAstItem
+) : BaseCSAstItem, ICSField
 {
     private CSBaseType? _parent;
 

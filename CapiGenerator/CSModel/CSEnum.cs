@@ -14,6 +14,10 @@ public class CSEnum : CSBaseType
     {
         _values = values.ToArray();
         _rRefType = new(type);
+        foreach (var value in _values)
+        {
+            value.SetParent(this);
+        }
     }
 
     public CSEnum(string name, ICSType type, ReadOnlySpan<CSEnumField> values)
@@ -21,6 +25,10 @@ public class CSEnum : CSBaseType
     {
         _values = values.ToArray();
         _rRefType = new(type);
+        foreach (var value in _values)
+        {
+            value.SetParent(this);
+        }
     }
 
 
@@ -29,7 +37,7 @@ public class CSEnum : CSBaseType
     public ReadOnlySpan<CSEnumField> Values => _values;
 
     public string? Namespace { get; init; }
-    public string FullName => _fullName ??= Namespace is null ? Name : $"{Namespace}.{Name}";
+    public override string FullName => _fullName ??= Namespace is null ? Name : $"{Namespace}.{Name}";
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

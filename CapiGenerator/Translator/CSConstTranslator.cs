@@ -52,7 +52,7 @@ public class CSConstTranslator(string className) : BaseTranslator
 
     private CSField TranslateConstant(CConstant constant)
     {
-        var cType = constant.ConstantExpression.GetTypeOfExpression();
+        var cType = constant.Expression.GetTypeOfExpression();
         CSPrimitiveType csType = cType switch
         {
             CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
@@ -63,7 +63,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         };
 
         var typeInstance = new CSTypeInstance(csType);
-        var csConstantExpression = CSConstantExpression.FromCConstantExpression(constant.ConstantExpression);
+        var csConstantExpression = CSConstantExpression.FromCConstantExpression(constant.Expression);
         var newCSField = new CSField(NameSelector(constant), typeInstance, new(csConstantExpression));
         newCSField.EnrichingDataStore.Add(new CSTranslationFromCAstData(constant));
         return newCSField;

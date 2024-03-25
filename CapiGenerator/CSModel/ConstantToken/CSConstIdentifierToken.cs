@@ -1,13 +1,12 @@
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.ConstantToken;
-using CapiGenerator.Parser;
 using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel.ConstantToken;
 
 public class CSConstIdentifierToken : BaseCSConstantToken
 {
-    private readonly ResoleRef<ICSField, CConstant> _constantField;
+    private readonly ResoleRef<ICSField, ICConstAssignable> _constantField;
 
     public CSConstIdentifierToken(CConstant cConstIdentifier)
     {
@@ -19,7 +18,7 @@ public class CSConstIdentifierToken : BaseCSConstantToken
         _constantField = new(constantField);
     }
 
-    public CSField? GetField()
+    public ICSField? GetField()
     {
         return _constantField.Output;
     }
@@ -34,8 +33,8 @@ public class CSConstIdentifierToken : BaseCSConstantToken
         return new CSConstIdentifierToken(token.GetConstantModel() ?? throw new InvalidOperationException("Constant model is not resolved"));
     }
 
-    public override string ToString()
+    public override string? ToString()
     {
-        return _constantField.Output.Name
+        return _constantField?.Output?.FullName;
     }
 }

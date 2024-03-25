@@ -9,7 +9,7 @@ namespace CapiGenerator.Translator;
 
 public sealed class CSTranslationUnit :
     IResolver<ICSType, ICType>,
-    IResolver<CSField, CConstant>
+    IResolver<ICSField, ICConstAssignable>
 {
     private class TranslatorOutputChannel(CSTranslationUnit translationUnit) : BaseTranslatorOutputChannel
     {
@@ -136,7 +136,7 @@ public sealed class CSTranslationUnit :
     private readonly Dictionary<string, CSStruct> _structByName = [];
     private readonly Dictionary<string, CSEnum> _enumByName = [];
 
-    private readonly Dictionary<CConstant, CSField> _felidByCConst = [];
+    private readonly Dictionary<ICConstAssignable, ICSField> _felidByCConst = [];
     private readonly Dictionary<ICType, ICSType> _csTypeByCType = [];
 
     private readonly List<BaseTranslator> _translators = [];
@@ -151,8 +151,7 @@ public sealed class CSTranslationUnit :
 
         return null;
     }
-
-    CSField? IResolver<CSField, CConstant>.Resolve(CConstant key)
+    ICSField? IResolver<ICSField, ICConstAssignable>.Resolve(ICConstAssignable key)
     {
         if (_felidByCConst.TryGetValue(key, out var val))
         {

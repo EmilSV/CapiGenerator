@@ -15,7 +15,7 @@ public class EnumParser : BaseParser
         {
             foreach (var enumValue in compilation.Enums)
             {
-                if (enumValue == null || enumValue.Items.Count > 0)
+                if (enumValue == null || enumValue.Items.Count <= 0)
                 {
                     continue;
                 }

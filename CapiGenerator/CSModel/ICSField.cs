@@ -1,6 +1,6 @@
 namespace CapiGenerator.CSModel;
 
-interface ICSField
+public interface ICSField
 {
     CSBaseType? Parent { get; }
     string Name { get; }

@@ -75,8 +75,6 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
             builder.Append(' ');
         }
         builder.Append(_tokens[^1]);
-        builder.Append(';');
-
         return builder.ToString();
     }
 }

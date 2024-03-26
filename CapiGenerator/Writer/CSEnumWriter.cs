@@ -31,7 +31,7 @@ public class CSEnumWriter : BaseCSEnumWriter
 
         foreach (var enumValue in enumValues)
         {
-            stream.WriteLine($"{enumValue.Name} = {enumValue.Expression},");
+            stream.WriteLine($"\t{enumValue.Name} = {enumValue.Expression},");
             await stream.FlushAsync();
         }
 

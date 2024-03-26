@@ -64,6 +64,21 @@ var writer = new CSEnumWriter();
 
 foreach (var csEnum in translationUnit.GetCSEnumEnumerable())
 {
+
+    void updateNames()
+    {
+        foreach (var enumValue in csEnum.Values)
+        {
+            if (enumValue.Name.Value.StartsWith($"{csEnum.Name}_"))
+            {
+                enumValue.Name.SetValue(enumValue.Name.Value.Replace($"{csEnum.Name}_", ""));
+            }
+        }
+    }
+
+    updateNames();
+
+
     await writer.Write(csEnum, new CSWriteConfig
     {
         OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output"),

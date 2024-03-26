@@ -1,3 +1,4 @@
+using CapiGenerator.Collection;
 using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
@@ -8,8 +9,11 @@ public class CSEnumField(string name, CSConstantExpression expression) : BaseCSA
 
     public CSBaseType? Parent => _parent;
 
-    public string Name => name;
-    public CSConstantExpression Expression => expression;
+    private readonly HistoricValues<string> _name = new(name);
+    public HistoricValues<string> Name => _name;
+
+    private readonly HistoricValues<CSConstantExpression> _expression = new(expression);
+    public HistoricValues<CSConstantExpression> Expression => _expression;
 
     public void SetParent(CSBaseType parent)
     {
@@ -23,6 +27,9 @@ public class CSEnumField(string name, CSConstantExpression expression) : BaseCSA
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        expression.OnSecondPass(unit);
+        foreach (var expression in _expression.GetHistoricValues())
+        {
+            expression.OnSecondPass(unit);
+        }
     }
 }

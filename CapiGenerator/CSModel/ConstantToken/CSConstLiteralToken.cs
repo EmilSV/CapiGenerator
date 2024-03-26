@@ -32,5 +32,8 @@ public class CSConstLiteralToken(string value, CSConstantType type) : BaseCSCons
         };
     }
 
-
+    public override string ToString()
+    {
+        return Value;
+    }
 }

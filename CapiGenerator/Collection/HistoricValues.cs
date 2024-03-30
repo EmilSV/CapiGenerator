@@ -7,7 +7,7 @@ public class HistoricValues<T>
         _values.Add(value);
     }
 
-    private List<T> _values { get; set; } = new();
+    private List<T> _values = [];
 
     public T Value
     {
@@ -40,5 +40,5 @@ public class HistoricValues<T>
     public override string? ToString()
     {
         return Value?.ToString();
-    }    
+    }
 }

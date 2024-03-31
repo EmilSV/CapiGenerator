@@ -1,23 +1,23 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace CapiGenerator;
+namespace CapiGenerator.UtilTypes;
 
-public sealed class ResoleRef<TOutput, TKey>
+public class ResoleRef<TOutput, TKey> : BaseResolveRef<TOutput, TKey>
     where TOutput : class
 {
     private TOutput? _output = null;
     private readonly TKey _key = default!;
 
-    public TKey Key
+    public override TKey Key
     {
         [return: MaybeNull]
         get => _key;
     }
-    public TOutput? Output => _output;
+    public override TOutput? Output => _output;
 
-    public bool IsOutputResolved() => _output != null;
+    public override bool IsOutputResolved() => _output != null;
 
-    public bool TrySetOutputFromResolver(IResolver<TOutput, TKey> resolver)
+    public override bool TrySetOutputFromResolver(IResolver<TOutput, TKey> resolver)
     {
         _output ??= resolver.Resolve(_key!);
         return _output != null;

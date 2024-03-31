@@ -1,9 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using CapiGenerator.CModel;
 using CapiGenerator.CSModel;
 using CapiGenerator.CSModel.EnrichData;
 using CapiGenerator.Parser;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.Translator;
 

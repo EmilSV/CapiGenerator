@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using ObjectType = System.Type;
 
-namespace CapiGenerator;
+namespace CapiGenerator.UtilTypes;
 
 public sealed class EnrichingDataStore
 {

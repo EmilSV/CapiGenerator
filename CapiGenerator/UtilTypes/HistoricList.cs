@@ -1,24 +1,48 @@
 using System.Collections;
 
-namespace CapiGenerator.Collection;
+namespace CapiGenerator.UtilTypes;
 
 
-public sealed class HistoricList<T> : IReadOnlyList<T>
+public sealed class HistoricList<T> : IReadOnlyList<T>, IHistoricChangeNotify<IReadOnlyList<T>>
 {
     public delegate void ReplacePredicate(ref T value, int index, out bool remove);
 
     private readonly List<T[]> _values = [];
+    private event Action? TypelessOnChange;
     private int _version;
+
+    public event Action<IReadOnlyList<T>>? OnChange;
 
     public HistoricList(ReadOnlySpan<T> value)
     {
         _values.Add([.. value]);
     }
 
+    event Action? IHistoricChangeNotify.OnChange
+    {
+        add
+        {
+            TypelessOnChange += value;
+        }
+
+        remove
+        {
+            TypelessOnChange -= value;
+        }
+    }
+
     public void Add(ReadOnlySpan<T> value)
     {
-        _values.Add([.. CurrentValue, .. value]);
+        T[] newValues = [.. CurrentValue, .. value];
+        _values.Add(newValues);
         _version++;
+        OnChange?.Invoke(newValues);
+        TypelessOnChange?.Invoke();
+    }
+
+   public ReadOnlySpan<T> Slice(int start, int length)
+    {
+        return CurrentValue.Slice(start, length);
     }
 
     public int RemoveWhere(Func<T, bool> predicate)
@@ -40,6 +64,8 @@ public sealed class HistoricList<T> : IReadOnlyList<T>
         }
 
         _values.Add([.. newValues]);
+        OnChange?.Invoke(newValues);
+        TypelessOnChange?.Invoke();
 
         return originalValues.Length - newValues.Count;
     }
@@ -63,6 +89,7 @@ public sealed class HistoricList<T> : IReadOnlyList<T>
         }
 
         _values.Add([.. newValues]);
+        OnChange?.Invoke(newValues);
 
         return originalValues.Length - newValues.Count;
     }
@@ -88,6 +115,8 @@ public sealed class HistoricList<T> : IReadOnlyList<T>
         }
 
         _values.Add([.. newValues]);
+        OnChange?.Invoke(newValues);
+        TypelessOnChange?.Invoke();
 
         return originalValues.Length - newValues.Count;
     }
@@ -137,8 +166,6 @@ public sealed class HistoricList<T> : IReadOnlyList<T>
 
     public struct Enumerator : IEnumerator<T>, IEnumerator
     {
-        internal static IEnumerator<T>? s_emptyEnumerator;
-
         private readonly HistoricList<T> _list;
         private readonly T[] _array;
         private int _index;
@@ -154,7 +181,7 @@ public sealed class HistoricList<T> : IReadOnlyList<T>
             _current = default;
         }
 
-        public void Dispose()
+        public readonly void Dispose()
         {
         }
 
@@ -184,9 +211,9 @@ public sealed class HistoricList<T> : IReadOnlyList<T>
             return false;
         }
 
-        public T Current => _current!;
+        public readonly T Current => _current!;
 
-        object? IEnumerator.Current
+        readonly object? IEnumerator.Current
         {
             get
             {

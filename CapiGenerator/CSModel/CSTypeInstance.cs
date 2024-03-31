@@ -1,29 +1,30 @@
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.Translator;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
 public class CSTypeInstance : BaseCSAstItem
 {
-    private readonly ResoleRef<ICSType, ICType> _rRefType;
-    private readonly BaseCSTypeModifier[] _modifier;
+    private readonly HistoricResoleRef<ICSType, ICType> _rRefType;
+    private readonly HistoricList<BaseCSTypeModifier> _modifier;
 
     public CSTypeInstance(ICType cType, ReadOnlySpan<BaseCSTypeModifier> modifiers = default)
     {
         _rRefType = new(cType);
-        _modifier = modifiers.ToArray();
+        _modifier = new(modifiers);
     }
 
     public CSTypeInstance(ICSType type, ReadOnlySpan<BaseCSTypeModifier> modifiers = default)
     {
         _rRefType = new(type);
-        _modifier = modifiers.ToArray();
+        _modifier = new(modifiers);
     }
 
     public ICSType? Type => _rRefType.Output;
-    public ReadOnlySpan<BaseCSTypeModifier> Modifiers => _modifier;
-    public ResoleRef<ICSType, ICType> RRefType => _rRefType;
+    public HistoricList<BaseCSTypeModifier> Modifiers => _modifier;
+    public HistoricResoleRef<ICSType, ICType> RRefType => _rRefType;
 
     public override void OnSecondPass(CSTranslationUnit compilationUnit)
     {

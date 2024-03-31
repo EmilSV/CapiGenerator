@@ -1,4 +1,4 @@
-using CapiGenerator.Collection;
+using CapiGenerator.UtilTypes;
 using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
@@ -9,11 +9,11 @@ public class CSEnumField(string name, CSConstantExpression expression) : BaseCSA
 
     public CSBaseType? Parent => _parent;
 
-    private readonly HistoricValues<string> _name = new(name);
-    public HistoricValues<string> Name => _name;
+    private readonly HistoricValue<string> _name = new(name);
+    public HistoricValue<string> Name => _name;
 
-    private readonly HistoricValues<CSConstantExpression> _expression = new(expression);
-    public HistoricValues<CSConstantExpression> Expression => _expression;
+    private readonly HistoricValue<CSConstantExpression> _expression = new(expression);
+    public HistoricValue<CSConstantExpression> Expression => _expression;
 
     public void SetParent(CSBaseType parent)
     {

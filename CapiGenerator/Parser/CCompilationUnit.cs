@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
+using CapiGenerator.UtilTypes;
 using CppAst;
 
 namespace CapiGenerator.Parser;

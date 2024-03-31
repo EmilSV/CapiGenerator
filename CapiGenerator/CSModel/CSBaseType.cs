@@ -1,9 +1,11 @@
+using CapiGenerator.UtilTypes;
+
 namespace CapiGenerator.CSModel;
 
 
 public abstract class CSBaseType(string name)
     : BaseCSAstItem, ICSType
 {
-    public string Name => name;
-    public abstract string FullName { get; }
+    public HistoricValue<string> Name = new(name);
+    public abstract ComputedValue<string> FullName { get; }
 }

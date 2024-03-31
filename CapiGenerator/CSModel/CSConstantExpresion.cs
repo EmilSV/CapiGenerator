@@ -5,6 +5,7 @@ using CapiGenerator.CModel;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.CSModel.ConstantToken;
 using CapiGenerator.Translator;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 

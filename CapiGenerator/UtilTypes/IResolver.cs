@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace CapiGenerator;
+namespace CapiGenerator.UtilTypes;
 
 public interface IResolver<TOutput, TKey>
     where TOutput : class

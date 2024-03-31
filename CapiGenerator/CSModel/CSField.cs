@@ -1,24 +1,38 @@
 using CapiGenerator.CModel;
 using CapiGenerator.Translator;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSField(
-    string name, CSTypeInstance type, CSDefaultValue defaultValue = default
-) : BaseCSAstItem, ICSField
+public sealed class CSField : BaseCSAstItem, ICSField
 {
     private CSBaseType? _parent;
 
-    public CSBaseType? Parent => _parent;
-    public string Name => name;
-    public string FullName => Parent is not null ? $"{Parent.FullName}.{Name}" : Name;
-    public CSTypeInstance Type => type;
-    public CSDefaultValue DefaultValue => defaultValue;
+    public CSField(string name, CSTypeInstance type, CSDefaultValue defaultValue = default)
+    {
+        Name = new(name);
+        Type = new(type);
+        DefaultValue = new(defaultValue);
+        FullName = new(
+            dependencies: [Name],
+            compute: () => Parent is not null ? $"{Parent.FullName.Value}.{Name.Value}" : Name.Value
+        );
+    }
 
-    public bool IsConst { get; init; }
-    public bool IsStatic { get; init; }
-    public bool IsReadOnly { get; init; }
-    public CSAccessModifier AccessModifier { get; init; } = CSAccessModifier.Public;
+    public CSBaseType? Parent => _parent;
+    public HistoricValue<string> Name { get; }
+    public ComputedValue<string> FullName { get; }
+    public HistoricValue<CSTypeInstance> Type { get; }
+    public HistoricValue<CSDefaultValue> DefaultValue { get; }
+
+    public HistoricValue<bool> IsConst { get; } = new(false);
+    public HistoricValue<bool> IsStatic { get; } = new(false);
+    public HistoricValue<bool> IsReadOnly { get; } = new(false);
+    public HistoricValue<CSAccessModifier> AccessModifier { get; } = new(CSAccessModifier.Public);
+
+    string ICSField.Name => Name;
+
+    string ICSField.FullName => FullName;
 
     public void SetParent(CSBaseType parent)
     {
@@ -26,12 +40,12 @@ public sealed class CSField(
         {
             throw new InvalidOperationException("Parent is already set");
         }
-
         _parent = parent;
+        FullName.AddDependency(Parent!.FullName);
     }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        type.OnSecondPass(unit);
+        Type.Value.OnSecondPass(unit);
     }
 }

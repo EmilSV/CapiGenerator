@@ -1,9 +1,15 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace CapiGenerator.UtilTypes;
 
 public class HistoricValue<T> : IHistoricChangeNotify<T>
 {
     private readonly List<T> _values = [];
     private event Action? TypelessOnChange;
+
+    public HistoricValue()
+    {
+    }
 
     public HistoricValue(T value)
     {
@@ -26,13 +32,14 @@ public class HistoricValue<T> : IHistoricChangeNotify<T>
 
     public event Action<T>? OnChange;
 
+    [MaybeNull]
     public T Value
     {
         get
         {
             if (_values.Count == 0)
             {
-                throw new InvalidOperationException("No values in the collection");
+                return default;
             }
 
             return _values[^1];
@@ -51,6 +58,7 @@ public class HistoricValue<T> : IHistoricChangeNotify<T>
         return _values;
     }
 
+    [return: MaybeNull]
     public static implicit operator T(HistoricValue<T> historicValues)
     {
         return historicValues.Value;

@@ -1,14 +1,20 @@
 using CapiGenerator.Translator;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
 public class CSStruct : CSBaseType
 {
+    private readonly HistoricList<CSField> _fields;
+    private readonly HistoricList<CSMethod> _methods;
+    private readonly ComputedValue<string> _fullName;
+
+
     public CSStruct(string name, ReadOnlySpan<CSField> fields, ReadOnlySpan<CSMethod> methods)
         : base(name)
     {
-        _fields = fields.ToArray();
-        _methods = methods.ToArray();
+        _fields = new(fields);
+        _methods = new(methods);
         foreach (var field in _fields)
         {
             field.SetParent(this);
@@ -17,17 +23,20 @@ public class CSStruct : CSBaseType
         {
             method.SetParent(this);
         }
+
+        _fullName = new ComputedValue<string>(
+            dependencies: [Namespace, Name],
+            compute: () => Namespace != null ? $"{Namespace.Value}.{Name.Value}" : Name.Value!
+        );
     }
 
-    private readonly CSField[] _fields;
-    private readonly CSMethod[] _methods;
-    private string? _fullName;
 
-    public ReadOnlySpan<CSField> Fields => _fields;
-    public ReadOnlySpan<CSMethod> Methods => _methods;
+    public HistoricList<CSField> Fields => _fields;
+    public HistoricList<CSMethod> Methods => _methods;
 
-    public string? Namespace { get; init; }
-    public override string FullName => _fullName ??= Namespace is null ? Name : $"{Namespace}.{Name}";
+    public HistoricValue<string?> Namespace { get; } = new();
+    public override ComputedValueOrValue<string> FullName => _fullName;
+
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

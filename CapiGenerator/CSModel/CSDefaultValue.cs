@@ -4,40 +4,44 @@ using CapiGenerator.CModel;
 namespace CapiGenerator.CSModel;
 
 
-public readonly struct CSDefaultValue
+public readonly record struct CSDefaultValue
 {
-    private readonly object? _value;
-    public readonly object? Value => _value;
+    public readonly object? Value { get; }
 
     public CSDefaultValue(CSConstantExpression value)
     {
-        _value = value;
+        Value = value;
     }
 
     public CSDefaultValue(string value)
     {
-        _value = value;
+        Value = value;
     }
 
     public CSDefaultValue(double value)
     {
-        _value = value;
+        Value = value;
     }
 
     public CSDefaultValue(ulong value)
     {
-        _value = value;
+        Value = value;
+    }
+
+    public CSDefaultValue(long value)
+    {
+        Value = value;
     }
 
     public CSDefaultValue(bool value)
     {
-        _value = value;
+        Value = value;
     }
 
 
     public bool TryGetDouble(out double value)
     {
-        if (_value is double d)
+        if (Value is double d)
         {
             value = d;
             return true;
@@ -49,7 +53,7 @@ public readonly struct CSDefaultValue
 
     public bool TryGetString([MaybeNullWhen(false)] out string value)
     {
-        if (_value is string s)
+        if (Value is string s)
         {
             value = s;
             return true;
@@ -61,7 +65,7 @@ public readonly struct CSDefaultValue
 
     public bool TryGetBool(out bool value)
     {
-        if (_value is bool b)
+        if (Value is bool b)
         {
             value = b;
             return true;
@@ -73,7 +77,19 @@ public readonly struct CSDefaultValue
 
     public bool TryGetUlong(out ulong value)
     {
-        if (_value is ulong u)
+        if (Value is ulong u)
+        {
+            value = u;
+            return true;
+        }
+
+        value = default;
+        return false;
+    }
+
+    public bool TryGetLong(out long value)
+    {
+        if (Value is long u)
         {
             value = u;
             return true;
@@ -85,7 +101,7 @@ public readonly struct CSDefaultValue
 
     public bool TryGetCSConstantExpression([MaybeNullWhen(false)] out CSConstantExpression value)
     {
-        if (_value is CSConstantExpression c)
+        if (Value is CSConstantExpression c)
         {
             value = c;
             return true;
@@ -95,5 +111,5 @@ public readonly struct CSDefaultValue
         return false;
     }
 
-    public static CSDefaultValue NullValue = default;
+    public static readonly CSDefaultValue NullValue = default;
 }

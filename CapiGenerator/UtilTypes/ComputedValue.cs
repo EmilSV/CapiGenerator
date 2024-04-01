@@ -46,10 +46,11 @@ public class ComputedValue<T> : IHistoricChangeNotify<T>
         {
             _value = newValue;
             OnChange?.Invoke(newValue);
+            TypelessOnChange?.Invoke();
         }
     }
 
-    public void AddDependency(IHistoricChangeNotify dependency)
+    internal void AddDependency(IHistoricChangeNotify dependency)
     {
         dependency.OnChange += Recompute;
     }

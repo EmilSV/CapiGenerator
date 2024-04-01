@@ -1,28 +1,43 @@
 using CapiGenerator.Translator;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSMethod(
-    CSTypeInstance returnType,
-    string name,
-    ReadOnlySpan<CSParameter> parameters,
-    string? body = null
-)
-    : BaseCSAstItem
+public class CSMethod : BaseCSAstItem
 {
+    private readonly HistoricValue<CSTypeInstance> _returnType;
+    private readonly HistoricValue<string> _name;
+    private readonly HistoricList<CSParameter> _parameters;
+    private readonly HistoricValue<string?> _body;
     private CSBaseType? _parent;
-    private readonly CSParameter[] _parameters = parameters.ToArray();
 
-    public CSTypeInstance ReturnType => returnType;
-    public string Name => name;
-    public ReadOnlySpan<CSParameter> Parameters => _parameters;
-    public string? Body => body;
+    public CSMethod(
+        CSTypeInstance returnType, string name,
+        ReadOnlySpan<CSParameter> parameters, string? body = null)
+    {
+        _returnType = new(returnType);
+        _name = new(name);
+        _parameters = new(parameters);
+        _body = new(body);
+        FullName = new ComputedValue<string>(
+            dependencies: new[] { _name },
+            compute: () => _parent != null ? $"{_parent.FullName.Value}.{_name.Value}" : _name.Value
+        );
+    }
 
-    public bool IsStatic { get; init; }
-    public bool IsExtern { get; init; }
-    public CSAccessModifier AccessModifier { get; init; } = CSAccessModifier.Public;
+    public HistoricValue<CSTypeInstance> ReturnType => _returnType;
+    public HistoricValue<string> Name => _name;
+    public HistoricList<CSParameter> Parameters => _parameters;
+    public HistoricValue<string?> Body => _body;
 
-    public void SetParent(CSBaseType parent)
+    public HistoricValue<bool> IsStatic { get; } = new(false);
+    public HistoricValue<bool> IsExtern { get; } = new(false);
+
+    public HistoricValue<CSAccessModifier> AccessModifier { get; } = new(CSAccessModifier.Public);
+    public ComputedValue<string> FullName { get; }
+
+
+    internal void SetParent(CSBaseType parent)
     {
         if (_parent is not null)
         {
@@ -30,11 +45,15 @@ public class CSMethod(
         }
 
         _parent = parent;
+        if (parent.FullName.TryAsComputedValue(out var parentFullName))
+        {
+            FullName.AddDependency(parentFullName);
+        }
     }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        returnType.OnSecondPass(unit);
+        _returnType.Value.OnSecondPass(unit);
         foreach (var parameter in _parameters)
         {
             parameter.OnSecondPass(unit);

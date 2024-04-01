@@ -8,7 +8,7 @@ public class CSEnumWriter : BaseCSEnumWriter
     public override async Task Write(CSEnum csEnum, CSWriteConfig writeConfig)
     {
         var enumName = csEnum.Name;
-        var enumValues = csEnum.Values.ToArray();
+        var enumValues = csEnum.Values;
 
         using var stream = new StreamWriter(Path.Combine(writeConfig.OutputDirectory, $"{enumName}.cs"));
 

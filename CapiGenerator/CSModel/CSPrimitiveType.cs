@@ -1,4 +1,5 @@
 using CapiGenerator.CModel;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
@@ -59,8 +60,7 @@ public sealed class CSPrimitiveType : CSBaseType
     private static Dictionary<Kind, CSPrimitiveType>? _allTypes;
 
     public readonly Kind KindValue;
-
-    public override string FullName => Name;
+    public override ComputedValueOrValue<string> FullName => Name;
 
     private CSPrimitiveType(Kind kind, string name) : base(name)
     {

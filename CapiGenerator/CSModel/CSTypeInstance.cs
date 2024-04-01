@@ -1,3 +1,4 @@
+using System.Text;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.Translator;
@@ -7,24 +8,23 @@ namespace CapiGenerator.CSModel;
 
 public class CSTypeInstance : BaseCSAstItem
 {
-    private readonly HistoricResoleRef<ICSType, ICType> _rRefType;
-    private readonly HistoricList<BaseCSTypeModifier> _modifier;
+    private readonly ResoleRef<ICSType, ICType> _rRefType;
+    private readonly BaseCSTypeModifier[] _modifier;
 
     public CSTypeInstance(ICType cType, ReadOnlySpan<BaseCSTypeModifier> modifiers = default)
     {
         _rRefType = new(cType);
-        _modifier = new(modifiers);
+        _modifier = modifiers.ToArray();
     }
 
     public CSTypeInstance(ICSType type, ReadOnlySpan<BaseCSTypeModifier> modifiers = default)
     {
         _rRefType = new(type);
-        _modifier = new(modifiers);
+        _modifier = modifiers.ToArray();
     }
 
     public ICSType? Type => _rRefType.Output;
-    public HistoricList<BaseCSTypeModifier> Modifiers => _modifier;
-    public HistoricResoleRef<ICSType, ICType> RRefType => _rRefType;
+    public IReadOnlyList<BaseCSTypeModifier> Modifiers => _modifier;
 
     public override void OnSecondPass(CSTranslationUnit compilationUnit)
     {
@@ -77,4 +77,16 @@ public class CSTypeInstance : BaseCSAstItem
             default: throw new Exception("unsupported anonymous type");
         }
     }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append(Type?.FullName ?? "null");
+        foreach (var modifier in _modifier)
+        {
+            sb.Append(modifier.GetTypeString());
+        }
+
+        return sb.ToString();
+    } 
 }

@@ -1,20 +1,19 @@
 using CapiGenerator.Translator;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
 public class CSStaticClass : CSBaseType
 {
-
-
-    private readonly CSField[] _fields;
-    private readonly CSMethod[] _methods;
-    private string? _fullName;
+    private readonly HistoricList<CSField> _fields;
+    private readonly HistoricList<CSMethod> _methods;
+    private readonly ComputedValue<string> _fullName;
 
     public CSStaticClass(string name, ReadOnlySpan<CSField> fields, ReadOnlySpan<CSMethod> methods)
         : base(name)
     {
-        _fields = fields.ToArray();
-        _methods = methods.ToArray();
+        _fields = new(fields);
+        _methods = new(methods);
         foreach (var field in _fields)
         {
             field.SetParent(this);
@@ -23,13 +22,17 @@ public class CSStaticClass : CSBaseType
         {
             method.SetParent(this);
         }
+        _fullName = new ComputedValue<string>(
+            dependencies: [Namespace, Name],
+            compute: () => Namespace != null ? $"{Namespace.Value}.{Name.Value}" : Name.Value
+        );
     }
 
-    public ReadOnlySpan<CSField> Fields => _fields;
-    public ReadOnlySpan<CSMethod> Methods => _methods;
+    public HistoricList<CSField> Fields => _fields;
+    public HistoricList<CSMethod> Methods => _methods;
 
-    public string? Namespace { get; init; }
-    public override string FullName => _fullName ??= Namespace is null ? Name : $"{Namespace}.{Name}";
+    public HistoricValue<string?> Namespace { get; } = new(null);
+    public override ComputedValueOrValue<string> FullName => _fullName;
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

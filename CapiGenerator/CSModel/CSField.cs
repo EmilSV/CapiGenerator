@@ -15,7 +15,7 @@ public sealed class CSField : BaseCSAstItem, ICSField
         DefaultValue = new(defaultValue);
         FullName = new(
             dependencies: [Name],
-            compute: () => Parent is not null ? $"{Parent.FullName.Value}.{Name.Value}" : Name.Value
+            compute: () => Parent is not null ? $"{Parent.FullName.Value}.{Name.Value}" : Name.Value!
         );
     }
 
@@ -30,22 +30,24 @@ public sealed class CSField : BaseCSAstItem, ICSField
     public HistoricValue<bool> IsReadOnly { get; } = new(false);
     public HistoricValue<CSAccessModifier> AccessModifier { get; } = new(CSAccessModifier.Public);
 
-    string ICSField.Name => Name;
-
+    string ICSField.Name => Name!;
     string ICSField.FullName => FullName;
 
-    public void SetParent(CSBaseType parent)
+    internal void SetParent(CSBaseType parent)
     {
         if (_parent is not null)
         {
             throw new InvalidOperationException("Parent is already set");
         }
         _parent = parent;
-        FullName.AddDependency(Parent!.FullName);
+        if (parent.FullName.TryAsComputedValue(out var parentFullName))
+        {
+            FullName.AddDependency(parentFullName);
+        }
     }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        Type.Value.OnSecondPass(unit);
+        Type.Value?.OnSecondPass(unit);
     }
 }

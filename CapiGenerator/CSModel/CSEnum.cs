@@ -41,7 +41,7 @@ public class CSEnum : CSBaseType
     public HistoricList<CSEnumField> Values => _values;
 
     public HistoricValue<string?> Namespace { get; } = new(null);
-    public override string FullName => _fullName;
+    public override ComputedValueOrValue<string> FullName => _fullName;
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

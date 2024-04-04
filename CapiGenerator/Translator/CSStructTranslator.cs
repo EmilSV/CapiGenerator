@@ -17,6 +17,11 @@ public class CSStructTranslator : BaseTranslator
         {
             foreach (var structItem in compilationUnit.GetStructEnumerable())
             {
+                if (translationUnit.IsTypeTranslated(structItem))
+                {
+                    continue;
+                }
+
                 outputChannel.OnReceiveStruct(TranslateStruct(structItem));
             }
         }

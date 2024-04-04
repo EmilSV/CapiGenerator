@@ -65,6 +65,7 @@ public sealed class CSPrimitiveType : CSBaseType
     private CSPrimitiveType(Kind kind, string name) : base(name)
     {
         KindValue = kind;
+        Name = HistoricValue<string>.NewReadOnly(name);
     }
 
     public static CSPrimitiveType Get(Kind kind)

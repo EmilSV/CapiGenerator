@@ -34,6 +34,14 @@ public class CSStructWriter : BaseCSStructWriter
             await stream.FlushAsync();
         }
 
+        foreach (var structMethod in csStruct.Methods)
+        {
+            WriteToStream(stream, structMethod);
+            await stream.FlushAsync();
+        }
+
+        stream.WriteLine("}");
+
     }
     private static void WriteToStream(StreamWriter writer, CSMethod method)
     {
@@ -59,7 +67,7 @@ public class CSStructWriter : BaseCSStructWriter
         }
 
         writer.Write(" ");
-        writer.Write(method.ReturnType.Value.ToString());
+        writer.Write(method.ReturnType.Value!.ToString());
         writer.Write(" ");
         writer.Write(method.Name.Value);
         writer.Write("(");
@@ -67,9 +75,9 @@ public class CSStructWriter : BaseCSStructWriter
         for (var i = 0; i < method.Parameters.Count; i++)
         {
             var parameter = method.Parameters[i];
-            writer.Write(parameter.Type.Value.ToString());
+            writer.Write(parameter.Type.ToString());
             writer.Write(" ");
-            writer.Write(parameter.Name.Value);
+            writer.Write(parameter.Name);
             if (i < method.Parameters.Count - 1)
             {
                 writer.Write(", ");
@@ -77,14 +85,17 @@ public class CSStructWriter : BaseCSStructWriter
         }
 
         writer.Write(")");
-
+        writer.WriteLine();
         if (method.Body.Value is not null)
         {
-            writer.Write(" ");
+            writer.WriteLine("{");
             writer.Write(method.Body.Value);
+            writer.WriteLine("}");
         }
-
-        writer.Write(";");
+        else
+        {
+            writer.WriteLine(";");
+        }
         writer.WriteLine();
     }
 

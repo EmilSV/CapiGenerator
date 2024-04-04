@@ -19,6 +19,11 @@ public class CSEnumTranslator : BaseTranslator
         {
             foreach (var structItem in compilationUnit.GetEnumEnumerable())
             {
+                if(translationUnit.IsTypeTranslated(structItem))
+                {
+                    continue;
+                }
+
                 outputChannel.OnReceiveEnum(TranslateEnum(structItem));
             }
         }

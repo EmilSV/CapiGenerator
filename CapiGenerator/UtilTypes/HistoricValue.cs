@@ -5,7 +5,13 @@ namespace CapiGenerator.UtilTypes;
 public class HistoricValue<T> : IHistoricChangeNotify<T>
 {
     private readonly List<T> _values = [];
+    private readonly bool _isReadOnly;
     private event Action? TypelessOnChange;
+
+    private HistoricValue(bool isReadOnly)
+    {
+        _isReadOnly = isReadOnly;
+    }
 
     public HistoricValue()
     {
@@ -14,6 +20,13 @@ public class HistoricValue<T> : IHistoricChangeNotify<T>
     public HistoricValue(T value)
     {
         _values.Add(value);
+    }
+
+    public static HistoricValue<T> NewReadOnly(T value)
+    {
+        var historicValue = new HistoricValue<T>(isReadOnly: true);
+        historicValue._values.Add(value);
+        return historicValue;
     }
 
 
@@ -32,6 +45,8 @@ public class HistoricValue<T> : IHistoricChangeNotify<T>
 
     public event Action<T>? OnChange;
 
+    public bool IsReadOnly => _isReadOnly;
+
     [MaybeNull]
     public T Value
     {
@@ -48,6 +63,11 @@ public class HistoricValue<T> : IHistoricChangeNotify<T>
 
     public void SetValue(T value)
     {
+        if (_isReadOnly)
+        {
+            throw new InvalidOperationException("Cannot set value on readonly HistoricValue");
+        }
+
         _values.Add(value);
         OnChange?.Invoke(value);
         TypelessOnChange?.Invoke();

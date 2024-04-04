@@ -21,7 +21,7 @@ public class CSMethod : BaseCSAstItem
         _body = new(body);
         FullName = new ComputedValue<string>(
             dependencies: new[] { _name },
-            compute: () => _parent != null ? $"{_parent.FullName.Value}.{_name.Value}" : _name.Value
+            compute: () => _parent != null ? $"{_parent.FullName.Value}.{_name.Value}" : _name.Value!
         );
     }
 
@@ -53,7 +53,7 @@ public class CSMethod : BaseCSAstItem
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        _returnType.Value.OnSecondPass(unit);
+        _returnType.Value?.OnSecondPass(unit);
         foreach (var parameter in _parameters)
         {
             parameter.OnSecondPass(unit);

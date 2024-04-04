@@ -35,7 +35,7 @@ public readonly struct ComputedValueOrValue<T>
 
 
     public static implicit operator ComputedValueOrValue<T>(T value) => new(value);
-    public static implicit operator ComputedValueOrValue<T>(HistoricValue<T> value) => new(value);
+    public static implicit operator ComputedValueOrValue<T>(HistoricValue<T> value) => new(value!);
     public static implicit operator ComputedValueOrValue<T>(ComputedValue<T> computedValue) => new(computedValue);
     public static implicit operator T(ComputedValueOrValue<T> computedValueOrValue) => computedValueOrValue.Value;
 }

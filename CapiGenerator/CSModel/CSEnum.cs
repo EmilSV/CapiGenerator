@@ -8,7 +8,7 @@ public class CSEnum : CSBaseType
 {
     private readonly HistoricResoleRef<ICSType, ICType> _rRefType;
     private readonly HistoricList<CSEnumField> _values;
-    private ComputedValue<string> _fullName;
+    private readonly ComputedValue<string> _fullName;
 
     private CSEnum(string name, HistoricResoleRef<ICSType, ICType> refType, ReadOnlySpan<CSEnumField> values)
         : base(name)
@@ -22,7 +22,7 @@ public class CSEnum : CSBaseType
 
         _fullName = new ComputedValue<string>(
           dependencies: [Namespace, Name],
-          compute: () => Namespace != null ? $"{Namespace.Value}.{Name.Value}" : Name.Value
+          compute: () => Namespace != null ? $"{Namespace.Value!}.{Name.Value!}" : Name.Value!
         );
     }
 

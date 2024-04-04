@@ -139,6 +139,9 @@ public sealed class CSTranslationUnit :
     private readonly Dictionary<ICConstAssignable, ICSField> _felidByCConst = [];
     private readonly Dictionary<ICType, ICSType> _csTypeByCType = [];
 
+    private readonly Dictionary<string, ICSType> _csTypeByCTypeName = [];
+    private readonly HashSet<ICType> _bannedTypes = [];
+
     private readonly List<BaseTranslator> _translators = [];
 
 
@@ -161,6 +164,26 @@ public sealed class CSTranslationUnit :
         return null;
     }
 
+    public CSTranslationUnit AddPredefinedTranslation(ICType cType, ICSType csType)
+    {
+        _csTypeByCType.Add(cType, csType);
+        return this;
+    }
+
+    public CSTranslationUnit AddPredefinedTranslation(string cTypeName, ICSType csType)
+    {
+        _csTypeByCTypeName.Add(cTypeName, csType);
+        return this;
+    }
+
+    public CSTranslationUnit BanType(ICType cType)
+    {
+        _csTypeByCType.Add(cType, CSBannedType.Instance);
+        return this;
+    }
+
+    public bool IsTypeTranslated(ICType cType) =>
+        _csTypeByCType.ContainsKey(cType);
 
     public CSTranslationUnit AddTranslator(BaseTranslator translator)
     {
@@ -178,6 +201,29 @@ public sealed class CSTranslationUnit :
     public void Translate(ReadOnlySpan<CCompilationUnit> compilationUnits)
     {
         List<(TranslatorOutputChannel, BaseTranslator)> channels = [];
+
+        foreach (var compilationUnit in compilationUnits)
+        {
+            foreach (var structItem in compilationUnit.GetEnumEnumerable())
+            {
+                if (_csTypeByCTypeName.Remove(structItem.Name, out var csType))
+                {
+                    _csTypeByCType.Add(structItem, csType);
+                    continue;
+                }
+            }
+
+            foreach (var enumItem in compilationUnit.GetEnumEnumerable())
+            {
+                if (_csTypeByCTypeName.Remove(enumItem.Name, out var csType))
+                {
+                    _csTypeByCType.Add(enumItem, csType);
+                    continue;
+                }
+            }
+        }
+
+        _csTypeByCTypeName.Clear();
 
         foreach (var translator in _translators)
         {

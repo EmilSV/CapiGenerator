@@ -56,11 +56,10 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
             returnType: CSTypeInstance.CreateFromCTypeInstance(function.ReturnType),
             name: NameSelector(function),
             parameters: function.Parameters.ToArray().Select(CSParameter.FromCParameter).ToArray()
-        )
-        {
-            IsExtern = true,
-            IsStatic = true,
-        };
+        );
+
+        method.IsExtern.SetValue(true);
+        method.IsStatic.SetValue(true);
 
         method.EnrichingDataStore.Add(new CSTranslationFromCAstData(function));
         method.EnrichingDataStore.Add(new CSAttributesData([

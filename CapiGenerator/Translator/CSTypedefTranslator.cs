@@ -17,6 +17,11 @@ public class CSTypedefTranslator : BaseTranslator
         {
             foreach (var typedefItem in compilationUnit.GetTypedefEnumerable())
             {
+                if (translationUnit.IsTypeTranslated(typedefItem))
+                {
+                    continue;
+                }
+
                 if (IsDirectTypedef(typedefItem))
                 {
                     continue;

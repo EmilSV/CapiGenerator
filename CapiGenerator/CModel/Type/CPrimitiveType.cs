@@ -141,4 +141,39 @@ public sealed class CPrimitiveType : ICType
         CConstantType.Float => GetByKind(Kind.Double),
         _ => throw new ArgumentOutOfRangeException(nameof(constType))
     };
+
+    public static class Instances
+    {
+        public static readonly CPrimitiveType Int8_t = GetByKind(Kind.Int8_t);
+        public static readonly CPrimitiveType Int16_t = GetByKind(Kind.Int16_t);
+        public static readonly CPrimitiveType Int32_t = GetByKind(Kind.Int32_t);
+        public static readonly CPrimitiveType Int64_t = GetByKind(Kind.Int64_t);
+        public static readonly CPrimitiveType UInt8_t = GetByKind(Kind.UInt8_t);
+        public static readonly CPrimitiveType UInt16_t = GetByKind(Kind.UInt16_t);
+        public static readonly CPrimitiveType UInt32_t = GetByKind(Kind.UInt32_t);
+        public static readonly CPrimitiveType UInt64_t = GetByKind(Kind.UInt64_t);
+        public static readonly CPrimitiveType Intptr_t = GetByKind(Kind.Intptr_t);
+        public static readonly CPrimitiveType UIntptr_t = GetByKind(Kind.UIntptr_t);
+        public static readonly CPrimitiveType Size_t = GetByKind(Kind.Size_t);
+        public static readonly CPrimitiveType SSize_t = GetByKind(Kind.SSize_t);
+        public static readonly CPrimitiveType Ptrdiff_t = GetByKind(Kind.Ptrdiff_t);
+        public static readonly CPrimitiveType Char = GetByKind(Kind.Char);
+        public static readonly CPrimitiveType SignedChar = GetByKind(Kind.SignedChar);
+        public static readonly CPrimitiveType UnsignedChar = GetByKind(Kind.UnsignedChar);
+        public static readonly CPrimitiveType Short = GetByKind(Kind.Short);
+        public static readonly CPrimitiveType UnsignedShortInt = GetByKind(Kind.UnsignedShortInt);
+        public static readonly CPrimitiveType Int = GetByKind(Kind.Int);
+        public static readonly CPrimitiveType UnsignedInt = GetByKind(Kind.UnsignedInt);
+        public static readonly CPrimitiveType Long = GetByKind(Kind.Long);
+        public static readonly CPrimitiveType UnsignedLong = GetByKind(Kind.UnsignedLong);
+        public static readonly CPrimitiveType LongLong = GetByKind(Kind.LongLong);
+        public static readonly CPrimitiveType UnsignedLongLong = GetByKind(Kind.UnsignedLongLong);
+        public static readonly CPrimitiveType Float = GetByKind(Kind.Float);
+        public static readonly CPrimitiveType Double = GetByKind(Kind.Double);
+        public static readonly CPrimitiveType LongDouble = GetByKind(Kind.LongDouble);
+        public static readonly CPrimitiveType _Bool = GetByKind(Kind._Bool);
+        public static readonly CPrimitiveType Bool = GetByKind(Kind.Bool);
+        public static readonly CPrimitiveType CString = GetByKind(Kind.CString);
+    }
+
 }

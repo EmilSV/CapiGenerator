@@ -140,8 +140,6 @@ public sealed class CSTranslationUnit :
     private readonly Dictionary<ICType, ICSType> _csTypeByCType = [];
 
     private readonly Dictionary<string, ICSType> _csTypeByCTypeName = [];
-    private readonly HashSet<ICType> _bannedTypes = [];
-
     private readonly List<BaseTranslator> _translators = [];
 
 
@@ -182,8 +180,24 @@ public sealed class CSTranslationUnit :
         return this;
     }
 
+    public bool TryOverrideBannedType(ICType cType, ICSType csType)
+    {
+        if (_csTypeByCType.TryGetValue(cType, out var bannedType) && bannedType == CSBannedType.Instance)
+        {
+            _csTypeByCType[cType] = csType;
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool IsTypeBanned(ICType cType) =>
+        _csTypeByCType.TryGetValue(cType, out var csType) && csType == CSBannedType.Instance;
+
+
     public bool IsTypeTranslated(ICType cType) =>
         _csTypeByCType.ContainsKey(cType);
+
 
     public CSTranslationUnit AddTranslator(BaseTranslator translator)
     {

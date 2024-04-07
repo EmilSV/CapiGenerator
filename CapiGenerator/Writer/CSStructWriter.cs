@@ -80,7 +80,7 @@ public class CSStructWriter : BaseCSStructWriter
             writer.Write(parameter.Name);
             if (i < method.Parameters.Count - 1)
             {
-                writer.Write(", ");
+                writer.Write(",");
             }
         }
 
@@ -132,6 +132,9 @@ public class CSStructWriter : BaseCSStructWriter
 
         writer.Write(" ");
         writer.Write(field.Name.Value);
+
+        WriteToStreamGetterSetter(writer, field.GetterBody, field.SetterBody);
+
         if (field.DefaultValue.Value != CSDefaultValue.NullValue)
         {
             writer.Write(" = ");
@@ -170,9 +173,56 @@ public class CSStructWriter : BaseCSStructWriter
         {
             writer.Write($"\"{stringValue}\"");
         }
+        else if (defaultValue.TryGetCSConstantExpression(out var csConstantExpression))
+        {
+            writer.Write(csConstantExpression.ToString());
+        }
         else
         {
-            throw new ArgumentOutOfRangeException();
+            throw new NotImplementedException();
         }
+    }
+
+    private static void WriteToStreamGetterSetter(
+        StreamWriter writer, CSPropertyBody? getterBody, CSPropertyBody? setterBody)
+    {
+        if (getterBody is null && setterBody is null)
+        {
+            return;
+        }
+
+        writer.Write("{");
+        if (getterBody is not null)
+        {
+            var code = getterBody.Code;
+            if (code is null)
+            {
+                writer.Write("get;");
+            }
+            else
+            {
+                writer.WriteLine();
+                writer.Write("get");
+                writer.Write(code);
+                writer.WriteLine();
+            }
+        }
+
+        if (setterBody is not null)
+        {
+            var code = setterBody.Code;
+            if (code is null)
+            {
+                writer.Write("set;");
+            }
+            else
+            {
+                writer.WriteLine();
+                writer.Write("set");
+                writer.Write(code);
+                writer.WriteLine();
+            }
+        }
+        writer.Write("}");
     }
 }

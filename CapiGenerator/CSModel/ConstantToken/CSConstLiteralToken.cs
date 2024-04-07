@@ -9,6 +9,7 @@ public class CSConstLiteralToken(string value, CSConstantType type) : BaseCSCons
     public string Value = value;
     public CSConstantType Type => type;
     public bool CastFromChar { get; init; } = false;
+    public bool Utf8Literal { get; init; } = false;
 
     public bool TryParseValueAsFloat(out double value)
     {
@@ -26,14 +27,16 @@ public class CSConstLiteralToken(string value, CSConstantType type) : BaseCSCons
         {
             CConstantType.Int => new CSConstLiteralToken(token.Value, CSConstantType.Long),
             CConstantType.Float => new CSConstLiteralToken(token.Value, CSConstantType.Double),
-            CConstantType.String => new CSConstLiteralToken(token.Value, CSConstantType.String),
+            CConstantType.String => new CSConstLiteralToken(token.Value, CSConstantType.Byte) { Utf8Literal = true },
             CConstantType.Char => new CSConstLiteralToken(token.Value, CSConstantType.Byte) { CastFromChar = true },
             _ => throw new NotImplementedException()
         };
     }
 
-    public override string ToString()
+    public override string ToString() => type switch
     {
-        return Value;
-    }
+        CSConstantType.Byte when CastFromChar == true => $"(byte)'{Value}'",
+        CSConstantType.Byte when Utf8Literal == true => $"\"{Value}\"u8",
+        _ => Value
+    };
 }

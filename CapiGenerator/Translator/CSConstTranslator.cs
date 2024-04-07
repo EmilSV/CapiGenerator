@@ -14,6 +14,7 @@ public class CSConstTranslator(string className) : BaseTranslator
     protected virtual string NameSelector(CConstant value) => value.Name;
     protected virtual bool PredicateSelector(CConstant value) => true;
 
+    private string GetterBodyFormatStr = "{ return {0}; }";
 
     public override void FirstPass(
         CSTranslationUnit translationUnit,
@@ -21,7 +22,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         BaseTranslatorOutputChannel outputChannel)
     {
         List<CSField> constantFields = [];
-        
+
         foreach (var compilationUnit in compilationUnits)
         {
             foreach (var constant in compilationUnit.GetConstantEnumerable())
@@ -53,18 +54,43 @@ public class CSConstTranslator(string className) : BaseTranslator
     private CSField TranslateConstant(CConstant constant)
     {
         var cType = constant.Expression.GetTypeOfExpression();
-        CSPrimitiveType csType = cType switch
+        CSBaseType csType = cType switch
         {
             CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
             CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
             CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Float),
-            CConstantType.String => CSPrimitiveType.Get(CSPrimitiveType.Kind.String),
+            CConstantType.String => CSUft8LiteralType.Instance,
             _ => throw new Exception("Unknown constant type"),
         };
 
+        bool IsStaticGetter = csType == CSUft8LiteralType.Instance;
+        bool IsConstant = csType != CSUft8LiteralType.Instance;
+
         var typeInstance = new CSTypeInstance(csType);
         var csConstantExpression = CSConstantExpression.FromCConstantExpression(constant.Expression);
-        var newCSField = new CSField(NameSelector(constant), typeInstance, new(csConstantExpression));
+        var defaultValue = new CSDefaultValue(csConstantExpression);
+        CSField newCSField;
+
+        if (IsConstant)
+        {
+            newCSField = new CSField(NameSelector(constant), typeInstance, defaultValue)
+            {
+                IsConst = new(true)
+            };
+        }
+        else if (IsStaticGetter)
+        {
+            newCSField = new CSField(NameSelector(constant), typeInstance)
+            {
+                IsStatic = new(true),
+                GetterBody = new(new($" => \"{csConstantExpression}\";")),
+            };
+        }
+        else
+        {
+            throw new Exception("Unknown constant type");
+        }
+
         newCSField.EnrichingDataStore.Add(new CSTranslationFromCAstData(constant));
         return newCSField;
     }

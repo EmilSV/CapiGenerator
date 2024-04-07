@@ -7,7 +7,6 @@ namespace CapiGenerator.CSModel;
 public sealed class CSField : BaseCSAstItem, ICSField
 {
     private CSBaseType? _parent;
-
     public CSField(string name, CSTypeInstance type, CSDefaultValue defaultValue = default)
     {
         Name = new(name);
@@ -20,15 +19,18 @@ public sealed class CSField : BaseCSAstItem, ICSField
     }
 
     public CSBaseType? Parent => _parent;
-    public HistoricValue<string> Name { get; }
-    public ComputedValue<string> FullName { get; }
-    public HistoricValue<CSTypeInstance> Type { get; }
-    public HistoricValue<CSDefaultValue> DefaultValue { get; }
+    public HistoricValue<string> Name { get; init; }
+    public ComputedValue<string> FullName { get; init; }
+    public HistoricValue<CSTypeInstance> Type { get; init; }
+    public HistoricValue<CSDefaultValue> DefaultValue { get; init; }
 
-    public HistoricValue<bool> IsConst { get; } = new(false);
-    public HistoricValue<bool> IsStatic { get; } = new(false);
-    public HistoricValue<bool> IsReadOnly { get; } = new(false);
+    public HistoricValue<bool> IsConst { get; init; } = new(false);
+    public HistoricValue<bool> IsStatic { get; init; } = new(false);
+    public HistoricValue<bool> IsReadOnly { get; init; } = new(false);
     public HistoricValue<CSAccessModifier> AccessModifier { get; } = new(CSAccessModifier.Public);
+
+    public HistoricValue<CSPropertyBody?> GetterBody { get; init; } = new(null);
+    public HistoricValue<CSPropertyBody?> SetterBody { get; init; } = new(null);
 
     string ICSField.Name => Name!;
     string ICSField.FullName => FullName;

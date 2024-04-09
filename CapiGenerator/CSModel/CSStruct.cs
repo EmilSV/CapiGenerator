@@ -13,8 +13,14 @@ public class CSStruct : CSBaseType
     public CSStruct(string name, ReadOnlySpan<CSField> fields, ReadOnlySpan<CSMethod> methods)
         : base(name)
     {
+        _fullName = new ComputedValue<string>(
+            dependencies: [Namespace, Name],
+            compute: () => Namespace.Value != null ? $"{Namespace.Value}.{Name.Value}" : Name.Value!
+        );
+
         _fields = new(fields);
         _methods = new(methods);
+
         foreach (var field in _fields)
         {
             field.SetParent(this);
@@ -23,11 +29,6 @@ public class CSStruct : CSBaseType
         {
             method.SetParent(this);
         }
-
-        _fullName = new ComputedValue<string>(
-            dependencies: [Namespace, Name],
-            compute: () => Namespace != null ? $"{Namespace.Value}.{Name.Value}" : Name.Value!
-        );
     }
 
 

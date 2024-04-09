@@ -142,6 +142,11 @@ public sealed class CSTranslationUnit :
     private readonly Dictionary<string, ICSType> _csTypeByCTypeName = [];
     private readonly List<BaseTranslator> _translators = [];
 
+    public CSTranslationUnit()
+    {
+        BuildInTranslation.AddTranslation(this);
+    }
+
 
     ICSType? IResolver<ICSType, ICType>.Resolve(ICType key)
     {

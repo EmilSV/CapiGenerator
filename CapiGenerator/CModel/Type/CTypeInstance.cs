@@ -55,7 +55,15 @@ public class CTypeInstance : BaseCAstItem
         }
         else
         {
-            return new CTypeInstance(compilationUnitId, convertedType.FullName, modifiers);
+            string typeName = convertedType switch
+            {
+                CppTypedef typedef => typedef.Name,
+                CppPrimitiveType primitiveType => primitiveType.FullName,
+                CppEnum enumType => enumType.Name,
+                CppClass classType => classType.Name,
+                _ => throw new ArgumentException($"unsupported type {convertedType.GetType().Name}", nameof(convertedType))
+            };
+            return new CTypeInstance(compilationUnitId, typeName, modifiers);
         }
     }
 
@@ -67,12 +75,17 @@ public class CTypeInstance : BaseCAstItem
         static CppType HandlePointerType(CppPointerType type, List<CTypeModifier> outModifiers)
         {
             outModifiers.Add(PointerType.Instance);
-            return type;
+            return type.ElementType;
         }
 
         static CppType HandleArrayType(CppArrayType type, List<CTypeModifier> outModifiers)
         {
             outModifiers.Add(new ArrayType(type.Size));
+            return type.ElementType;
+        }
+
+        static CppType HandleQualifiedType(CppQualifiedType type, List<CTypeModifier> outModifiers)
+        {
             return type.ElementType;
         }
 
@@ -83,6 +96,7 @@ public class CTypeInstance : BaseCAstItem
             {
                 CppPointerType pointerType => HandlePointerType(pointerType, modifiers),
                 CppArrayType arrayType => HandleArrayType(arrayType, modifiers),
+                CppQualifiedType qualifiedType => HandleQualifiedType(qualifiedType, modifiers),
                 CppTypedef => null,
                 CppFunctionType => null,
                 CppPrimitiveType => null,

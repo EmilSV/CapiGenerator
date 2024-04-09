@@ -94,22 +94,22 @@ public sealed class CSPrimitiveType : CSBaseType
     public static class Instances
     {
         public static readonly CSPrimitiveType Byte = Get(Kind.Byte);
-        public static readonly CSPrimitiveType SByte = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Short = Get(Kind.Byte);
-        public static readonly CSPrimitiveType UShort = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Int = Get(Kind.Byte);
-        public static readonly CSPrimitiveType UInt = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Long = Get(Kind.Byte);
-        public static readonly CSPrimitiveType ULong = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Float = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Double = Get(Kind.Byte);
-        public static readonly CSPrimitiveType NInt = Get(Kind.Byte);
-        public static readonly CSPrimitiveType NUInt = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Decimal = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Bool = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Char = Get(Kind.Byte);
-        public static readonly CSPrimitiveType String = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Object = Get(Kind.Byte);
-        public static readonly CSPrimitiveType Void = Get(Kind.Byte);
+        public static readonly CSPrimitiveType SByte = Get(Kind.SByte);
+        public static readonly CSPrimitiveType Short = Get(Kind.Short);
+        public static readonly CSPrimitiveType UShort = Get(Kind.UShort);
+        public static readonly CSPrimitiveType Int = Get(Kind.Int);
+        public static readonly CSPrimitiveType UInt = Get(Kind.UInt);
+        public static readonly CSPrimitiveType Long = Get(Kind.Long);
+        public static readonly CSPrimitiveType ULong = Get(Kind.ULong);
+        public static readonly CSPrimitiveType Float = Get(Kind.Float);
+        public static readonly CSPrimitiveType Double = Get(Kind.Double);
+        public static readonly CSPrimitiveType NInt = Get(Kind.NInt);
+        public static readonly CSPrimitiveType NUInt = Get(Kind.NUInt);
+        public static readonly CSPrimitiveType Decimal = Get(Kind.Decimal);
+        public static readonly CSPrimitiveType Bool = Get(Kind.Bool);
+        public static readonly CSPrimitiveType Char = Get(Kind.Char);
+        public static readonly CSPrimitiveType String = Get(Kind.String);
+        public static readonly CSPrimitiveType Object = Get(Kind.Object);
+        public static readonly CSPrimitiveType Void = Get(Kind.Void);
     }
 }

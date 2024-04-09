@@ -47,6 +47,14 @@ public class StructParser : BaseParser
         return new CStruct(compilationUnitId, cppStruct.Name, fields!);
     }
 
+    public override void SecondPass(CCompilationUnit compilationUnit, BaseParserInputChannel inputChannel)
+    {
+        foreach (var cStruct in inputChannel.GetStructs())
+        {
+           cStruct.OnSecondPass(compilationUnit);
+        }
+    }
+
     protected virtual bool ShouldSkip(CppClass cppStruct) => false;
     protected virtual void OnError(CppClass cppStruct, string message)
     {

@@ -46,6 +46,14 @@ public class EnumParser : BaseParser
         return new CEnum(compilationUnitId, astEnum.Name, enumConstants!);
     }
 
+    public override void SecondPass(CCompilationUnit compilationUnit, BaseParserInputChannel inputChannel)
+    {
+        foreach (var cEnum in inputChannel.GetEnums())
+        {
+            cEnum.OnSecondPass(compilationUnit);
+        }
+    }
+
     protected virtual bool ShouldSkip(CppEnum value) => false;
     protected virtual void OnError(CppEnum value, string message)
     {

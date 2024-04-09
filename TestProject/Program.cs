@@ -60,26 +60,27 @@ translationUnit.AddTranslator([
 
 translationUnit.Translate([compilationUnit]);
 
-var writer = new CSEnumWriter();
+var structWriter = new CSStructWriter();
+var enumWriter = new CSEnumWriter();
+
+foreach (var csStruct in translationUnit.GetCSStructEnumerable())
+{
+    csStruct.Namespace.SetValue("TestProject");
+
+    await structWriter.Write(csStruct, new CSWriteConfig
+    {
+        OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output"),
+        Usings = [
+            "System"
+        ]
+    });
+}
 
 foreach (var csEnum in translationUnit.GetCSEnumEnumerable())
 {
+    csEnum.Namespace.SetValue("TestProject");
 
-    void updateNames()
-    {
-        foreach (var enumValue in csEnum.Values)
-        {
-            if (enumValue.Name.Value.StartsWith($"{csEnum.Name}_"))
-            {
-                enumValue.Name.SetValue(enumValue.Name.Value.Replace($"{csEnum.Name}_", ""));
-            }
-        }
-    }
-
-    updateNames();
-
-
-    await writer.Write(csEnum, new CSWriteConfig
+    await enumWriter.Write(csEnum, new CSWriteConfig
     {
         OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output"),
         Usings = [

@@ -22,7 +22,7 @@ public class CSEnum : CSBaseType
 
         _fullName = new ComputedValue<string>(
           dependencies: [Namespace, Name],
-          compute: () => Namespace != null ? $"{Namespace.Value!}.{Name.Value!}" : Name.Value!
+          compute: () => Namespace.Value != null ? $"{Namespace.Value!}.{Name.Value!}" : Name.Value!
         );
     }
 

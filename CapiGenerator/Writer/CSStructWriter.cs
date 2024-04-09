@@ -30,12 +30,14 @@ public class CSStructWriter : BaseCSStructWriter
 
         foreach (var structField in structFields)
         {
+            stream.Write('\t');
             WriteToStream(stream, structField);
             await stream.FlushAsync();
         }
 
         foreach (var structMethod in csStruct.Methods)
         {
+            stream.Write('\t');
             WriteToStream(stream, structMethod);
             await stream.FlushAsync();
         }

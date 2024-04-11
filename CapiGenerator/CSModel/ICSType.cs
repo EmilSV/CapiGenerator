@@ -1,6 +1,10 @@
+using CapiGenerator.UtilTypes;
+
 namespace CapiGenerator.CSModel;
 
 public interface ICSType
 {
-    public string? FullName { get; }
+    public InstanceId Id { get; }
+    public string? Namespace { get; }
+    public string Name { get; }
 }

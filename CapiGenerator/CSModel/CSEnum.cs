@@ -38,10 +38,8 @@ public class CSEnum : CSBaseType
 
     public HistoricResoleRef<ICSType, ICType> RRefType => _rRefType;
     public ICSType? Type => _rRefType.Output;
-    public HistoricList<CSEnumField> Values => _values;
 
-    public HistoricValue<string?> Namespace { get; } = new(null);
-    public override ComputedValueOrValue<string> FullName => _fullName;
+    public ChangeCountList<CSEnumField> Values { get; init; } = [];
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

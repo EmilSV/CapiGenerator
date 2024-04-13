@@ -9,17 +9,16 @@ namespace CapiGenerator.Translator;
 
 public class CSEnumTranslator : BaseTranslator
 {
-
     public override void FirstPass(
-        CSTranslationUnit translationUnit, 
-        ReadOnlySpan<CCompilationUnit> compilationUnits, 
+        CSTranslationUnit translationUnit,
+        ReadOnlySpan<CCompilationUnit> compilationUnits,
         BaseTranslatorOutputChannel outputChannel)
     {
         foreach (var compilationUnit in compilationUnits)
         {
             foreach (var structItem in compilationUnit.GetEnumEnumerable())
             {
-                if(translationUnit.IsTypeTranslated(structItem))
+                if (translationUnit.IsTypeTranslated(structItem))
                 {
                     continue;
                 }
@@ -30,7 +29,7 @@ public class CSEnumTranslator : BaseTranslator
     }
 
     public override void SecondPass(
-        CSTranslationUnit translationUnit, 
+        CSTranslationUnit translationUnit,
         BaseTranslatorInputChannel inputChannel)
     {
         foreach (var enumItem in inputChannel.GetEnums())
@@ -81,7 +80,12 @@ public class CSEnumTranslator : BaseTranslator
             _ => throw new InvalidOperationException("Enum field expression type is unknown")
         };
 
-        var newCSEnum = new CSEnum(enumItem.Name, csType, enumValue.ToArray());
+        var newCSEnum = new CSEnum()
+        {
+            Name = enumItem.Name,
+            RRefType = new(csType),
+            Values = [.. enumValue]
+        };
         newCSEnum.EnrichingDataStore.Add(new CSTranslationFromCAstData(enumItem));
         enumItem.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSEnum));
         return newCSEnum;

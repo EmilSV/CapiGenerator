@@ -3,7 +3,7 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSPrimitiveType : CSBaseType
+public sealed class CSPrimitiveType : ICSType
 {
     public enum Kind
     {
@@ -60,12 +60,16 @@ public sealed class CSPrimitiveType : CSBaseType
     private static Dictionary<Kind, CSPrimitiveType>? _allTypes;
 
     public readonly Kind KindValue;
-    public override ComputedValueOrValue<string> FullName => Name;
+    public InstanceId Id { get; } = new();
 
-    private CSPrimitiveType(Kind kind, string name) : base(name)
+    public string? Namespace => null;
+
+    public string Name { get; }
+
+    private CSPrimitiveType(Kind kind, string name)
     {
         KindValue = kind;
-        Name = HistoricValue<string>.NewReadOnly(name);
+        Name = name;
     }
 
     public static CSPrimitiveType Get(Kind kind)

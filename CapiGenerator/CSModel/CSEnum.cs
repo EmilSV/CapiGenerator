@@ -4,40 +4,27 @@ using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
 
-public class CSEnum : CSBaseType
+public sealed class CSEnum : CSBaseType
 {
-    private readonly HistoricResoleRef<ICSType, ICType> _rRefType;
-    private readonly HistoricList<CSEnumField> _values;
-    private readonly ComputedValue<string> _fullName;
+    private ResoleRef<ICSType, ICType> _rRefType;
 
-    private CSEnum(string name, HistoricResoleRef<ICSType, ICType> refType, ReadOnlySpan<CSEnumField> values)
-        : base(name)
+    public ResoleRef<ICSType, ICType> RRefType
     {
-        _values = new(values);
-        _rRefType = refType;
-        foreach (var value in _values)
+        get => _rRefType;
+        init => _rRefType = value;
+    }
+    public ICSType? Type
+    {
+        get => _rRefType.Output;
+        set
         {
-            value.SetParent(this);
+            if (_rRefType.Output != value)
+            {
+                _rRefType = new(value);
+                NotifyChange();
+            }
         }
-
-        _fullName = new ComputedValue<string>(
-          dependencies: [Namespace, Name],
-          compute: () => Namespace.Value != null ? $"{Namespace.Value!}.{Name.Value!}" : Name.Value!
-        );
     }
-
-    public CSEnum(string name, ICType type, ReadOnlySpan<CSEnumField> values)
-        : this(name, new HistoricResoleRef<ICSType, ICType>(type), values)
-    {
-    }
-
-    public CSEnum(string name, ICSType type, ReadOnlySpan<CSEnumField> values)
-        : this(name, new HistoricResoleRef<ICSType, ICType>(type), values)
-    {
-    }
-
-    public HistoricResoleRef<ICSType, ICType> RRefType => _rRefType;
-    public ICSType? Type => _rRefType.Output;
 
     public ChangeCountList<CSEnumField> Values { get; init; } = [];
 

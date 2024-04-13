@@ -2,14 +2,17 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSBannedType : CSBaseType
+public sealed class CSBannedType : ICSType
 {
-    private CSBannedType(string name) : base(name)
+    private CSBannedType()
     {
-        this.Name = HistoricValue<string>.NewReadOnly(name);
     }
 
-    public static CSBannedType Instance { get; } = new CSBannedType("__BanedType__");
+    public static CSBannedType Instance { get; } = new();
 
-    public override ComputedValueOrValue<string> FullName => Name;
+    public InstanceId Id { get; } = new();
+
+    public string? Namespace => null;
+
+    public string Name => "__BanedType__";
 }

@@ -2,15 +2,13 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSUft8LiteralType : CSBaseType
+public sealed class CSUft8LiteralType : ICSType
 {
-    private CSUft8LiteralType()
-        : base("ReadonlySpan<byte>")
-    {
-        this.Name = HistoricValue<string>.NewReadOnly("ReadonlySpan<byte>");
-    }
-
-    public override ComputedValueOrValue<string> FullName => "ReadonlySpan<byte>";
-
     public static CSUft8LiteralType Instance { get; } = new();
+
+    public InstanceId Id { get; } = new();
+
+    public string Namespace { get; } = "System";
+
+    public string Name { get; } = "ReadonlySpan<byte>";
 }

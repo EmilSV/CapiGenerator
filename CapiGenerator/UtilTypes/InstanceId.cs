@@ -1,6 +1,6 @@
 namespace CapiGenerator.UtilTypes;
 
-public record struct InstanceId
+public readonly record struct InstanceId
 {
     private static uint _nextId = 0;
     private static uint GetNextId()
@@ -14,7 +14,9 @@ public record struct InstanceId
         _id = GetNextId();
     }
 
-    public bool isValid => _id != 0;
+    public readonly bool IsValid => _id != 0;
 
     public static implicit operator uint(InstanceId id) => id._id;
+
+    public override string ToString() => _id.ToString();
 }

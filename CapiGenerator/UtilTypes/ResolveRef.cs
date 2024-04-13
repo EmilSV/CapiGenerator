@@ -2,34 +2,71 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CapiGenerator.UtilTypes;
 
-public class ResoleRef<TOutput, TKey> : BaseResolveRef<TOutput, TKey>
+public readonly record struct ResoleRef<TOutput, TKey>
     where TOutput : class
 {
-    private TOutput? _output = null;
-    private readonly TKey _key = default!;
-
-    public override TKey Key
+    private class ResoleRefClass : BaseResolveRef<TOutput, TKey>
     {
-        [return: MaybeNull]
-        get => _key;
+        private TOutput? _output = null;
+        private readonly TKey _key = default!;
+
+        public override TKey Key => throw new NotImplementedException();
+
+        public override TOutput? Output => _output;
+
+        public override bool IsOutputResolved() => _output != null;
+        public override bool TrySetOutputFromResolver(IResolver<TOutput, TKey> resolver)
+        {
+            _output ??= resolver.Resolve(_key!);
+            return _output != null;
+        }
+
+        public ResoleRefClass([DisallowNull] TKey key)
+        {
+            _key = key;
+        }
     }
-    public override TOutput? Output => _output;
 
-    public override bool IsOutputResolved() => _output != null;
+    private readonly object? _object;
 
-    public override bool TrySetOutputFromResolver(IResolver<TOutput, TKey> resolver)
+    public TOutput? Output
     {
-        _output ??= resolver.Resolve(_key!);
-        return _output != null;
+        get
+        {
+            if (_object is ResoleRefClass rRef)
+            {
+                return rRef.Output;
+            }
+
+            return _object as TOutput;
+        }
+    }
+
+    public readonly bool IsOutputResolved() =>
+        _object is ResoleRefClass rRef && rRef.IsOutputResolved();
+
+    public readonly bool TrySetOutputFromResolver(IResolver<TOutput, TKey> resolver)
+    {
+        if (_object is ResoleRefClass rRef)
+        {
+            return rRef.TrySetOutputFromResolver(resolver);
+        }
+
+        return false;
     }
 
     public ResoleRef([DisallowNull] TKey key)
     {
-        _key = key;
+        _object = new ResoleRefClass(
+            key
+        );
     }
 
-    public ResoleRef(TOutput output)
+    public ResoleRef(TOutput? output)
     {
-        _output = output;
+        _object = output;
     }
+
+    public static implicit operator ResoleRef<TOutput, TKey>(TOutput? output) =>
+        new(output);
 }

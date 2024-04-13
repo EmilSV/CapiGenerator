@@ -8,15 +8,16 @@ namespace CapiGenerator.CSModel.ConstantToken;
 public class CSConstIdentifierToken : BaseCSConstantToken
 {
     private readonly ResoleRef<ICSField, ICConstAssignable> _constantField;
+    private CSFullFieldPath? _fullFieldPath;
 
     public CSConstIdentifierToken(CConstant cConstIdentifier)
     {
         _constantField = new(cConstIdentifier);
     }
 
-    public CSConstIdentifierToken(CSField constantField)
+    public CSConstIdentifierToken(CSFullFieldPath fullFieldPath)
     {
-        _constantField = new(constantField);
+        _fullFieldPath = fullFieldPath;
     }
 
     public ICSField? GetField()
@@ -36,6 +37,6 @@ public class CSConstIdentifierToken : BaseCSConstantToken
 
     public override string? ToString()
     {
-        return _constantField?.Output?.FullName;
+        return _fullFieldPath?.GetFullName();
     }
 }

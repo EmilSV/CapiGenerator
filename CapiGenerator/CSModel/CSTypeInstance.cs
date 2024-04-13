@@ -81,12 +81,12 @@ public class CSTypeInstance : BaseCSAstItem
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.Append(Type?.FullName ?? "null");
+        sb.Append(Type?.GetFullName() ?? "null");
         foreach (var modifier in _modifier)
         {
             sb.Append(modifier.GetTypeString());
         }
 
         return sb.ToString();
-    } 
+    }
 }

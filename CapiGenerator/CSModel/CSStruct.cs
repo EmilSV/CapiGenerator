@@ -5,47 +5,16 @@ namespace CapiGenerator.CSModel;
 
 public class CSStruct : CSBaseType
 {
-    private readonly HistoricList<CSField> _fields;
-    private readonly HistoricList<CSMethod> _methods;
-    private readonly ComputedValue<string> _fullName;
-
-
-    public CSStruct(string name, ReadOnlySpan<CSField> fields, ReadOnlySpan<CSMethod> methods)
-        : base(name)
-    {
-        _fullName = new ComputedValue<string>(
-            dependencies: [Namespace, Name],
-            compute: () => Namespace.Value != null ? $"{Namespace.Value}.{Name.Value}" : Name.Value!
-        );
-
-        _fields = new(fields);
-        _methods = new(methods);
-
-        foreach (var field in _fields)
-        {
-            field.SetParent(this);
-        }
-        foreach (var method in _methods)
-        {
-            method.SetParent(this);
-        }
-    }
-
-
-    public HistoricList<CSField> Fields => _fields;
-    public HistoricList<CSMethod> Methods => _methods;
-
-    public HistoricValue<string?> Namespace { get; } = new();
-    public override ComputedValueOrValue<string> FullName => _fullName;
-
+    public ChangeCountList<CSField> Fields { get; init; } = [];
+    public ChangeCountList<CSMethod> Methods { get; init; } = [];
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        foreach (var field in _fields)
+        foreach (var field in Fields)
         {
             field.OnSecondPass(unit);
         }
-        foreach (var method in _methods)
+        foreach (var method in Methods)
         {
             method.OnSecondPass(unit);
         }

@@ -3,17 +3,11 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 
-public abstract class CSBaseType
+public abstract class CSBaseType 
     : BaseCSAstItem, ICSType
 {
-    private volatile uint _changeCounter = 0;
     private string? _namespace;
     private string? _name;
-
-    public readonly InstanceId Id = new();
-    InstanceId ICSType.Id => Id;
-    public uint ChangeCounter => _changeCounter;
-
     public string? Namespace
     {
         get => _namespace;
@@ -39,9 +33,5 @@ public abstract class CSBaseType
         }
     }
 
-
-    protected void NotifyChange()
-    {
-        _changeCounter++;
-    }
+    InstanceId ICSType.Id => Id;
 }

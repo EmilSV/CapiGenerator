@@ -22,6 +22,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         BaseTranslatorOutputChannel outputChannel)
     {
         List<CSField> constantFields = [];
+        List<CConstant> constantsTransLated = [];
 
         foreach (var compilationUnit in compilationUnits)
         {
@@ -33,10 +34,16 @@ public class CSConstTranslator(string className) : BaseTranslator
                 }
 
                 constantFields.Add(TranslateConstant(constant));
+                constantsTransLated.Add(constant);
             }
         }
 
         var csStaticClass = new CSStaticClass(className, CollectionsMarshal.AsSpan(constantFields), []);
+        foreach (var constant in constantsTransLated)
+        {
+            csStaticClass.EnrichingDataStore.Add(new CSTranslationParentClassData(csStaticClass));
+        }
+
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
     }

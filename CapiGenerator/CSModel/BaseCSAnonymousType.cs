@@ -1,7 +1,21 @@
+using CapiGenerator.Translator;
+using CapiGenerator.UtilTypes;
+
 namespace CapiGenerator.CSModel;
 
-public abstract class BaseCSAnonymousType()
-    : BaseCSAstItem(), ICSType
+public abstract class BaseCSAnonymousType : ICSType
 {
-    public virtual string? FullName => null;
+    public BaseCSAnonymousType()
+    {
+        Name = $"__AnonymousType{Id}__";
+    }
+
+    public InstanceId Id { get; } = new();
+
+    public string? Namespace => null;
+
+    public string Name { get; }
+
+    public virtual void OnSecondPass(CSTranslationUnit unit)
+    { }
 }

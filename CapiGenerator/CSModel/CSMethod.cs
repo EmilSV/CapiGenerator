@@ -5,56 +5,96 @@ namespace CapiGenerator.CSModel;
 
 public class CSMethod : BaseCSAstItem
 {
-    private readonly HistoricValue<CSTypeInstance> _returnType;
-    private readonly HistoricValue<string> _name;
-    private readonly HistoricList<CSParameter> _parameters;
-    private readonly HistoricValue<string?> _body;
-    private CSBaseType? _parent;
+    private readonly CSTypeInstance? _returnType;
+    private string? _name;
+    private string? _body;
+    private CSAccessModifier _accessModifier = CSAccessModifier.Public;
+    private bool _isStatic;
+    private bool _isExtern;
 
-    public CSMethod(
-        CSTypeInstance returnType, string name,
-        ReadOnlySpan<CSParameter> parameters, string? body = null)
+    public required string Name
     {
-        _returnType = new(returnType);
-        _name = new(name);
-        _parameters = new(parameters);
-        _body = new(body);
-        FullName = new ComputedValue<string>(
-            dependencies: new[] { _name },
-            compute: () => _parent != null ? $"{_parent.FullName.Value}.{_name.Value}" : _name.Value!
-        );
-    }
-
-    public HistoricValue<CSTypeInstance> ReturnType => _returnType;
-    public HistoricValue<string> Name => _name;
-    public HistoricList<CSParameter> Parameters => _parameters;
-    public HistoricValue<string?> Body => _body;
-
-    public HistoricValue<bool> IsStatic { get; } = new(false);
-    public HistoricValue<bool> IsExtern { get; } = new(false);
-
-    public HistoricValue<CSAccessModifier> AccessModifier { get; } = new(CSAccessModifier.Public);
-    public ComputedValue<string> FullName { get; }
-
-
-    internal void SetParent(CSBaseType parent)
-    {
-        if (_parent is not null)
+        get => _name!;
+        set
         {
-            throw new InvalidOperationException("Parent is already set");
-        }
-
-        _parent = parent;
-        if (parent.FullName.TryAsComputedValue(out var parentFullName))
-        {
-            FullName.AddDependency(parentFullName);
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Name cannot be null or empty");
+            }
+            if (_name != value)
+            {
+                _name = value;
+                NotifyChange();
+            }
         }
     }
+    public string? Body
+    {
+        get => _body;
+        set
+        {
+            if (_body != value)
+            {
+                _body = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    public required CSTypeInstance ReturnType
+    {
+        get => _returnType!;
+        init
+        {
+            if (_returnType != value)
+            {
+                _returnType = value;
+                NotifyChange();
+            }
+        }
+    }
+    public bool IsStatic
+    {
+        get => _isStatic;
+        set
+        {
+            if (_isStatic != value)
+            {
+                _isStatic = value;
+                NotifyChange();
+            }
+        }
+    }
+    public bool IsExtern
+    {
+        get => _isExtern;
+        set
+        {
+            if (_isExtern != value)
+            {
+                _isExtern = value;
+                NotifyChange();
+            }
+        }
+    }
+    public CSAccessModifier AccessModifier
+    {
+        get => _accessModifier;
+        set
+        {
+            if (_accessModifier != value)
+            {
+                _accessModifier = value;
+                NotifyChange();
+            }
+        }
+    }
+    public ChangeCountList<CSParameter> Parameters { get; init; } = [];
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        _returnType.Value?.OnSecondPass(unit);
-        foreach (var parameter in _parameters)
+        _returnType?.OnSecondPass(unit);
+        foreach (var parameter in Parameters)
         {
             parameter.OnSecondPass(unit);
         }

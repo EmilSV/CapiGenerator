@@ -1,55 +1,141 @@
-using CapiGenerator.CModel;
 using CapiGenerator.Translator;
-using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
 public sealed class CSField : BaseCSAstItem, ICSField
 {
-    private CSBaseType? _parent;
-    public CSField(string name, CSTypeInstance type, CSDefaultValue defaultValue = default)
+    private string? _name;
+    public required string Name
     {
-        Name = new(name);
-        Type = new(type);
-        DefaultValue = new(defaultValue);
-        FullName = new(
-            dependencies: [Name],
-            compute: () => Parent is not null ? $"{Parent.FullName.Value}.{Name.Value}" : Name.Value!
-        );
+        get => _name!;
+        set
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Name cannot be null or empty");
+            }
+            if (_name != value)
+            {
+                _name = value;
+                NotifyChange();
+            }
+        }
     }
 
-    public CSBaseType? Parent => _parent;
-    public HistoricValue<string> Name { get; init; }
-    public ComputedValue<string> FullName { get; init; }
-    public HistoricValue<CSTypeInstance> Type { get; init; }
-    public HistoricValue<CSDefaultValue> DefaultValue { get; init; }
-
-    public HistoricValue<bool> IsConst { get; init; } = new(false);
-    public HistoricValue<bool> IsStatic { get; init; } = new(false);
-    public HistoricValue<bool> IsReadOnly { get; init; } = new(false);
-    public HistoricValue<CSAccessModifier> AccessModifier { get; } = new(CSAccessModifier.Public);
-
-    public HistoricValue<CSPropertyBody?> GetterBody { get; init; } = new(null);
-    public HistoricValue<CSPropertyBody?> SetterBody { get; init; } = new(null);
-
-    string ICSField.Name => Name!;
-    string ICSField.FullName => FullName;
-
-    internal void SetParent(CSBaseType parent)
+    private CSTypeInstance? _type;
+    public required CSTypeInstance Type
     {
-        if (_parent is not null)
+        get => _type!;
+        init
         {
-            throw new InvalidOperationException("Parent is already set");
+            if (_type != value)
+            {
+                _type = value;
+                NotifyChange();
+            }
         }
-        _parent = parent;
-        if (parent.FullName.TryAsComputedValue(out var parentFullName))
+    }
+
+    private CSDefaultValue _defaultValue;
+    public CSDefaultValue DefaultValue
+    {
+        get => _defaultValue;
+        init
         {
-            FullName.AddDependency(parentFullName);
+            if (_defaultValue != value)
+            {
+                _defaultValue = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    private bool _isConst;
+    public bool IsConst
+    {
+        get => _isConst;
+        set
+        {
+            if (_isConst != value)
+            {
+                _isConst = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    private bool _isStatic;
+    public bool IsStatic
+    {
+        get => _isStatic;
+        set
+        {
+            if (_isStatic != value)
+            {
+                _isStatic = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    private bool _isReadOnly;
+    public bool IsReadOnly
+    {
+        get => _isReadOnly;
+        set
+        {
+            if (_isReadOnly != value)
+            {
+                _isReadOnly = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    private CSAccessModifier _accessModifier = CSAccessModifier.Public;
+    public CSAccessModifier AccessModifier
+    {
+        get => _accessModifier;
+        set
+        {
+            if (_accessModifier != value)
+            {
+                _accessModifier = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    private CSPropertyBody? _getterBody;
+    public CSPropertyBody? GetterBody
+    {
+        get => _getterBody;
+        set
+        {
+            if (_getterBody != value)
+            {
+                _getterBody = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    private CSPropertyBody? _setterBody;
+    public CSPropertyBody? SetterBody
+    {
+        get => _setterBody;
+        set
+        {
+            if (_setterBody != value)
+            {
+                _setterBody = value;
+                NotifyChange();
+            }
         }
     }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        Type.Value?.OnSecondPass(unit);
+        Type.OnSecondPass(unit);
     }
 }

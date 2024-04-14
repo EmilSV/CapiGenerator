@@ -15,8 +15,6 @@ public class CSConstTranslator(string className) : BaseTranslator
     protected virtual string NameSelector(CConstant value) => value.Name;
     protected virtual bool PredicateSelector(CConstant value) => true;
 
-    private const string GetterBodyFormatStr = "{ return {0}; }";
-
     public override void FirstPass(
         CSTranslationUnit translationUnit,
         ReadOnlySpan<CCompilationUnit> compilationUnits,

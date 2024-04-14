@@ -96,7 +96,11 @@ public class CSEnumTranslator : BaseTranslator
         var cExpression = enumField.Expression ?? throw new InvalidOperationException("Enum field expression is null");
         var csExpression = CSConstantExpression.FromCConstantExpression(cExpression);
 
-        CSEnumField newCSEnumValue = new(enumField.Name, csExpression);
+        CSEnumField newCSEnumValue = new()
+        {
+            Name = enumField.Name,
+            Expression = csExpression
+        };
         newCSEnumValue.EnrichingDataStore.Add(new CSTranslationFromCAstData(enumField));
         enumField.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSEnumValue));
         return newCSEnumValue;

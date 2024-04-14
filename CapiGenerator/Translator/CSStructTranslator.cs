@@ -46,7 +46,11 @@ public class CSStructTranslator : BaseTranslator
             fields.Add(TranslateField(field));
         }
 
-        var newCSStruct = new CSStruct(structItem.Name, fields.ToArray(), []);
+        var newCSStruct = new CSStruct
+        {
+            Name = structItem.Name,
+            Fields = [.. fields]
+        };
         newCSStruct.EnrichingDataStore.Add(new CSTranslationFromCAstData(structItem));
         structItem.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSStruct));
         return newCSStruct;
@@ -77,7 +81,11 @@ public class CSStructTranslator : BaseTranslator
         var cType = cTypeInstance.GetCType() ?? throw new Exception("cType is null");
 
         var csTypeInstance = new CSTypeInstance(cType, typeModifiers);
-        var newField = new CSField(field.Name, csTypeInstance);
+        var newField = new CSField
+        {
+            Name = field.Name,
+            Type = csTypeInstance,
+        };
 
         newField.EnrichingDataStore.Add(new CSTranslationFromCAstData(field));
         field.EnrichingDataStore.Add(new CTranslationToCSAstData(newField));

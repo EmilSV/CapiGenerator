@@ -23,7 +23,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
         {
             foreach (var function in compilationUnit.GetFunctionEnumerable())
             {
-                if (!PredicateSelector(function)) 
+                if (!PredicateSelector(function))
                 {
                     break;
                 }
@@ -32,7 +32,11 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
             }
         }
 
-        var csStaticClass = new CSStaticClass(className, [], CollectionsMarshal.AsSpan(methods));
+        var csStaticClass = new CSStaticClass
+        {
+            Name = className,
+            Methods = [.. methods]
+        };
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
     }
@@ -52,21 +56,21 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
     {
         CTypeInstance returnType = function.ReturnType;
 
-        CSMethod method = new(
-            returnType: CSTypeInstance.CreateFromCTypeInstance(function.ReturnType),
-            name: NameSelector(function),
-            parameters: function.Parameters.ToArray().Select(CSParameter.FromCParameter).ToArray()
-        );
-
-        method.IsExtern.SetValue(true);
-        method.IsStatic.SetValue(true);
+        CSMethod method = new()
+        {
+            ReturnType = CSTypeInstance.CreateFromCTypeInstance(function.ReturnType),
+            Name = NameSelector(function),
+            Parameters = [.. function.Parameters.ToArray().Select(CSParameter.FromCParameter)],
+            IsExtern = true,
+            IsStatic = true
+        };
 
         method.EnrichingDataStore.Add(new CSTranslationFromCAstData(function));
         method.EnrichingDataStore.Add(new CSAttributesData([
             new DllImportAttribute(dllName)
             {
                 CallingConvention = CallingConvention.Cdecl,
-                EntryPoint = function.Name,   
+                EntryPoint = function.Name,
             }
         ]));
         function.EnrichingDataStore.Add(new CTranslationToCSAstData(method));

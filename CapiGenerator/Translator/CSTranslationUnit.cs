@@ -73,7 +73,7 @@ public sealed class CSTranslationUnit :
             _structs.AddRange(structs);
             foreach (var item in structs)
             {
-                translationUnit._structByName.Add(item.FullName, item);
+                translationUnit._structByName.Add(item, item);
                 var cAstType = item.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
                 if (cAstType is ICType cType)
                 {

@@ -3,7 +3,7 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 
-public abstract class CSBaseType 
+public abstract class CSBaseType
     : BaseCSAstItem, ICSType
 {
     private string? _namespace;
@@ -33,5 +33,15 @@ public abstract class CSBaseType
         }
     }
 
+    public string GetFullName()
+    {
+        if (Namespace is not null)
+        {
+            return $"{Namespace}.{Name}";
+        }
+
+        return Name;
+    }
+
     InstanceId ICSType.Id => Id;
-}
+} 

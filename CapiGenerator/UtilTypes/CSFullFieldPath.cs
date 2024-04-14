@@ -2,13 +2,13 @@ using CapiGenerator.CSModel;
 
 namespace CapiGenerator.UtilTypes;
 
-public class CSFullFieldPath
+public class CSFullFieldPath(CSBaseType type, ICSFieldLike field)
 {
-    private readonly CSBaseType _type;
-    private readonly CSField _field;
+    private readonly CSBaseType _type = type;
+    private readonly ICSFieldLike _field = field;
 
-    private uint _typeChangeCount;
-    private uint _fieldChangeCount;
+    private uint _typeChangeCount = type.ChangeCount;
+    private uint _fieldChangeCount = field.ChangeCount;
 
     private string? _fullName;
 
@@ -30,14 +30,5 @@ public class CSFullFieldPath
             }
         }
         return _fullName;
-    }
-
-
-    public CSFullFieldPath(CSStaticClass type, CSField field)
-    {
-        _type = type;
-        _field = field;
-        _typeChangeCount = type.ChangeCount;
-        _fieldChangeCount = field.ChangeCount;
     }
 }

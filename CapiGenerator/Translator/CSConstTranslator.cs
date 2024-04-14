@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.ConstantToken;
@@ -14,7 +15,7 @@ public class CSConstTranslator(string className) : BaseTranslator
     protected virtual string NameSelector(CConstant value) => value.Name;
     protected virtual bool PredicateSelector(CConstant value) => true;
 
-    private string GetterBodyFormatStr = "{ return {0}; }";
+    private const string GetterBodyFormatStr = "{ return {0}; }";
 
     public override void FirstPass(
         CSTranslationUnit translationUnit,
@@ -38,12 +39,15 @@ public class CSConstTranslator(string className) : BaseTranslator
             }
         }
 
-        var csStaticClass = new CSStaticClass(className, CollectionsMarshal.AsSpan(constantFields), []);
+        var csStaticClass = new CSStaticClass
+        {
+            Name = className,
+            Fields = [.. constantFields]
+        };
         foreach (var constant in constantsTransLated)
         {
-            csStaticClass.EnrichingDataStore.Add(new CSTranslationParentClassData(csStaticClass));
+            constant.EnrichingDataStore.Add(new CSTranslationParentClassData(csStaticClass));
         }
-
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
     }
@@ -61,7 +65,7 @@ public class CSConstTranslator(string className) : BaseTranslator
     private CSField TranslateConstant(CConstant constant)
     {
         var cType = constant.Expression.GetTypeOfExpression();
-        CSBaseType csType = cType switch
+        ICSType csType = cType switch
         {
             CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
             CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
@@ -80,17 +84,22 @@ public class CSConstTranslator(string className) : BaseTranslator
 
         if (IsConstant)
         {
-            newCSField = new CSField(NameSelector(constant), typeInstance, defaultValue)
+            newCSField = new CSField
             {
-                IsConst = new(true)
+                Name = NameSelector(constant),
+                Type = typeInstance,
+                DefaultValue = defaultValue,
+                IsConst = true
             };
         }
         else if (IsStaticGetter)
         {
-            newCSField = new CSField(NameSelector(constant), typeInstance)
+            newCSField = new CSField
             {
-                IsStatic = new(true),
-                GetterBody = new(new($" => \"{csConstantExpression}\";")),
+                Name = NameSelector(constant),
+                Type = typeInstance,
+                IsStatic = true,
+                GetterBody = new($" => \"{csConstantExpression}\";"),
             };
         }
         else

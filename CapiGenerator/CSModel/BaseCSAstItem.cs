@@ -7,13 +7,13 @@ public abstract class BaseCSAstItem()
 {
     public EnrichingDataStore EnrichingDataStore { get; } = new();
 
-    private volatile uint _changeCounter = 0;
-    public readonly InstanceId Id = new();
-    public uint ChangeCount => _changeCounter;
-    
+    private volatile uint _changeCount = 0;
+    public InstanceId Id { get; } = new();
+    public uint ChangeCount => _changeCount;
+
     protected void NotifyChange()
     {
-        _changeCounter++;
+        _changeCount++;
     }
 
 

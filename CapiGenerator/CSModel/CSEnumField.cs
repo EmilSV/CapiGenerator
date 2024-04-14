@@ -3,31 +3,43 @@ using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
 
-public class CSEnumField(string name, CSConstantExpression expression) : BaseCSAstItem
+public class CSEnumField : BaseCSAstItem, ICSFieldLike
 {
-    private CSBaseType? _parent;
-
-    public CSBaseType? Parent => _parent;
-
-    private readonly HistoricValue<string> _name = new(name);
-    public HistoricValue<string> Name => _name;
-
-    private readonly HistoricValue<CSConstantExpression> _expression = new(expression);
-    public HistoricValue<CSConstantExpression> Expression => _expression;
-
-    public void SetParent(CSBaseType parent)
+    private string? _name;
+    public required string Name
     {
-        if (_parent is not null)
+        get => _name!;
+        set
         {
-            throw new InvalidOperationException("Parent is already set");
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new ArgumentException("Name cannot be null or empty");
+            }
+            if (_name != value)
+            {
+                _name = value;
+                NotifyChange();
+            }
         }
-
-        _parent = parent;
     }
+
+    private CSConstantExpression _expression = [];
+    public CSConstantExpression Expression
+    {
+        get => _expression;
+        set
+        {
+            if (_expression != value)
+            {
+                _expression = value;
+                NotifyChange();
+            }
+        }
+    };
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        foreach (var expression in _expression.GetHistoricValues())
+        foreach (var expression in _expression)
         {
             expression.OnSecondPass(unit);
         }

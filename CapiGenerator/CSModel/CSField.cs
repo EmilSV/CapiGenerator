@@ -2,7 +2,7 @@ using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSField : BaseCSAstItem, ICSField
+public sealed class CSField : BaseCSAstItem, ICSFieldLike
 {
     private string? _name;
     public required string Name

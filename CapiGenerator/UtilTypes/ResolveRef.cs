@@ -5,10 +5,10 @@ namespace CapiGenerator.UtilTypes;
 public readonly record struct ResoleRef<TOutput, TKey>
     where TOutput : class
 {
-    private class ResoleRefClass : BaseResolveRef<TOutput, TKey>
+    private class ResoleRefClass([DisallowNull] TKey key) : BaseResolveRef<TOutput, TKey>
     {
         private TOutput? _output = null;
-        private readonly TKey _key = default!;
+        private readonly TKey _key = key;
 
         public override TKey Key => throw new NotImplementedException();
 
@@ -19,11 +19,6 @@ public readonly record struct ResoleRef<TOutput, TKey>
         {
             _output ??= resolver.Resolve(_key!);
             return _output != null;
-        }
-
-        public ResoleRefClass([DisallowNull] TKey key)
-        {
-            _key = key;
         }
     }
 
@@ -42,10 +37,11 @@ public readonly record struct ResoleRef<TOutput, TKey>
         }
     }
 
-    public readonly bool IsOutputResolved() =>
+    public bool IsOutputResolved() =>
+        _object is TOutput ||
         _object is ResoleRefClass rRef && rRef.IsOutputResolved();
 
-    public readonly bool TrySetOutputFromResolver(IResolver<TOutput, TKey> resolver)
+    public bool TrySetOutputFromResolver(IResolver<TOutput, TKey> resolver)
     {
         if (_object is ResoleRefClass rRef)
         {
@@ -54,6 +50,14 @@ public readonly record struct ResoleRef<TOutput, TKey>
 
         return false;
     }
+
+    public bool TryAsBaseResolveRef([MaybeNullWhen(false)] out BaseResolveRef<TOutput, TKey> resolveRef)
+    {
+        resolveRef = _object as BaseResolveRef<TOutput, TKey>;
+        return resolveRef is not null;
+    }
+
+    public bool IsNull => _object is null;
 
     public ResoleRef([DisallowNull] TKey key)
     {

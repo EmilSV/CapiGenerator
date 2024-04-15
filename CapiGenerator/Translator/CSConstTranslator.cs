@@ -37,6 +37,11 @@ public class CSConstTranslator(string className) : BaseTranslator
             }
         }
 
+        if(constantFields.Count == 0)
+        {
+            return;
+        }
+
         var csStaticClass = new CSStaticClass
         {
             Name = className,
@@ -97,7 +102,7 @@ public class CSConstTranslator(string className) : BaseTranslator
                 Name = NameSelector(constant),
                 Type = typeInstance,
                 IsStatic = true,
-                GetterBody = new($" => \"{csConstantExpression}\";"),
+                GetterBody = new($" => {csConstantExpression}u8;"),
             };
         }
         else

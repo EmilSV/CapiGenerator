@@ -36,7 +36,7 @@ public class CSConstLiteralToken(string value, CSConstantType type) : BaseCSCons
     public override string ToString() => type switch
     {
         CSConstantType.Byte when CastFromChar == true => $"(byte)'{Value}'",
-        CSConstantType.Byte when Utf8Literal == true => $"\"{Value}\"u8",
+        CSConstantType.Byte when Utf8Literal == true => Value,
         _ => Value
     };
 }

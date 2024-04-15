@@ -31,6 +31,10 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
                 methods.Add(TranslateFunction(function));
             }
         }
+        if(methods.Count == 0)
+        {
+            return;
+        }
 
         var csStaticClass = new CSStaticClass
         {

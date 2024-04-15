@@ -61,9 +61,18 @@ public class CSTypedefTranslator : BaseTranslator
 
     protected static CSStruct TranslateTypedef(CTypedef typedefItem)
     {
-        var newCSStruct = new CSStruct(typedefItem.Name, [
-            new CSField("Value", CSTypeInstance.CreateFromCTypeInstance(typedefItem.InnerType))
-        ], []);
+        var newCSStruct = new CSStruct
+        {
+            Name = typedefItem.Name,
+            Fields = [
+                new()
+                {
+                    Name = "Value",
+                    Type = CSTypeInstance.CreateFromCTypeInstance(typedefItem.InnerType)
+                }
+            ],
+        };
+
         newCSStruct.EnrichingDataStore.Add(new CSTranslationFromCAstData(typedefItem));
         typedefItem.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSStruct));
         return newCSStruct;

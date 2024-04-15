@@ -135,7 +135,7 @@ public sealed class ChangeCountList<T> :
     object? IList.this[int index]
     {
         get => _list[index];
-        set => _list[index] = (T)value;
+        set => _list[index] = (T)value!;
     }
 
     void ICollection.CopyTo(Array array, int index)

@@ -30,7 +30,7 @@ public sealed class CSTranslationUnit :
             _enums.AddRange(enums);
             foreach (var item in enums)
             {
-                translationUnit._enumByName.Add(item.FullName, item);
+                translationUnit._enumByName.Add(item.GetFullName(), item);
                 var cAstType = item.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
                 if (cAstType is ICType cType)
                 {
@@ -46,10 +46,10 @@ public sealed class CSTranslationUnit :
                 throw new InvalidOperationException("Channel is closed");
             }
 
-            _staticClasses.AddRange(_staticClasses);
-            foreach (var staticClass in _staticClasses)
+            _staticClasses.AddRange(staticClasses);
+            foreach (var staticClass in staticClasses)
             {
-                translationUnit._staticClassesByName.Add(staticClass.FullName, staticClass);
+                translationUnit._staticClassesByName.Add(staticClass.GetFullName(), staticClass);
                 foreach (var field in staticClass.Fields)
                 {
                     var cAst = field.EnrichingDataStore.Get<CSTranslationFromCAstData>();
@@ -73,7 +73,7 @@ public sealed class CSTranslationUnit :
             _structs.AddRange(structs);
             foreach (var item in structs)
             {
-                translationUnit._structByName.Add(item, item);
+                translationUnit._structByName.Add(item.GetFullName(), item);
                 var cAstType = item.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
                 if (cAstType is ICType cType)
                 {

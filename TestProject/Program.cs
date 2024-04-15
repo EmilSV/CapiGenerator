@@ -51,9 +51,9 @@ foreach (var constant in compilationUnit.GetEnumEnumerable())
 var translationUnit = new CSTranslationUnit();
 
 translationUnit.AddTranslator([
-    new CSConstTranslator("TestProject"),
+    new CSConstTranslator("TestProjectConstants"),
     new CSEnumTranslator(),
-    new CSFunctionTranslator("TestProject", "TestProject.Interop"),
+    new CSFunctionTranslator("TestProjectFunction", "TestProject.Interop"),
     new CSStructTranslator(),
     new CSTypedefTranslator()
 ]);
@@ -65,7 +65,7 @@ var enumWriter = new CSEnumWriter();
 
 foreach (var csStruct in translationUnit.GetCSStructEnumerable())
 {
-    csStruct.Namespace.SetValue("TestProject");
+    csStruct.Namespace = "TestProject";
 
     await structWriter.Write(csStruct, new CSWriteConfig
     {
@@ -78,9 +78,24 @@ foreach (var csStruct in translationUnit.GetCSStructEnumerable())
 
 foreach (var csEnum in translationUnit.GetCSEnumEnumerable())
 {
-    csEnum.Namespace.SetValue("TestProject");
+    csEnum.Namespace = "TestProject";
 
     await enumWriter.Write(csEnum, new CSWriteConfig
+    {
+        OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output"),
+        Usings = [
+            "System"
+        ]
+    });
+}
+
+foreach (var csStaticClass in translationUnit.GetCSStaticClassesEnumerable())
+{
+    csStaticClass.Namespace = "TestProject";
+
+    var staticClassWriter = new CSStaticClassWriter();
+
+    await staticClassWriter.Write(csStaticClass, new CSWriteConfig
     {
         OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output"),
         Usings = [

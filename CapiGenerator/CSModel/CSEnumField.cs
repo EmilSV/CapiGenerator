@@ -35,7 +35,7 @@ public class CSEnumField : BaseCSAstItem, ICSFieldLike
                 NotifyChange();
             }
         }
-    };
+    }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

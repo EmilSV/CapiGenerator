@@ -3,15 +3,13 @@ using static CapiGenerator.Writer.StreamWriterUtils;
 
 namespace CapiGenerator.Writer;
 
-
-public class CSStructWriter : BaseCSStructWriter
+public class CSStaticClassWriter : BaseCSStaticClassWriter
 {
-    public override async Task Write(CSStruct csStruct, CSWriteConfig writeConfig)
+    public override async Task Write(CSStaticClass csStaticClass, CSWriteConfig writeConfig)
     {
-        var structName = csStruct.Name;
-        var structFields = csStruct.Fields;
+        var staticClassName = csStaticClass.Name;
 
-        using var stream = new StreamWriter(Path.Combine(writeConfig.OutputDirectory, $"{structName}.cs"));
+        using var stream = new StreamWriter(Path.Combine(writeConfig.OutputDirectory, $"{staticClassName}.cs"));
 
         foreach (var usingNamespace in writeConfig.Usings)
         {
@@ -20,24 +18,24 @@ public class CSStructWriter : BaseCSStructWriter
 
         await stream.FlushAsync();
 
-        if (csStruct.Namespace is not null)
+        if (csStaticClass.Namespace is not null)
         {
-            stream.WriteLine($"namespace {csStruct.Namespace};");
+            stream.WriteLine($"namespace {csStaticClass.Namespace};");
         }
 
-        stream.WriteLine($"public struct {structName}");
+        stream.WriteLine($"public static class {staticClassName}");
         stream.WriteLine("{");
 
         await stream.FlushAsync();
 
-        foreach (var structField in structFields)
+        foreach (var structField in csStaticClass.Fields)
         {
             stream.Write('\t');
             WriteToStream(stream, structField);
             await stream.FlushAsync();
         }
 
-        foreach (var structMethod in csStruct.Methods)
+        foreach (var structMethod in csStaticClass.Methods)
         {
             stream.Write('\t');
             WriteToStream(stream, structMethod);
@@ -45,6 +43,5 @@ public class CSStructWriter : BaseCSStructWriter
         }
 
         stream.WriteLine("}");
-
     }
 }

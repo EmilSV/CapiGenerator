@@ -5,6 +5,8 @@ namespace CapiGenerator.CSModel;
 
 public class CSEnumField : BaseCSAstItem, ICSFieldLike
 {
+    public CSEnum? ParentEnum { get; private set; }
+
     private string? _name;
     public required string Name
     {
@@ -43,5 +45,15 @@ public class CSEnumField : BaseCSAstItem, ICSFieldLike
         {
             expression.OnSecondPass(unit);
         }
+    }
+
+    internal void SetParent(CSEnum? parent)
+    {
+        if (ParentEnum != null && parent != null)
+        {
+            throw new InvalidOperationException("Parent method is already set");
+        }
+        ParentEnum = parent;
+        NotifyChange();
     }
 }

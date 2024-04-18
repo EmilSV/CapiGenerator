@@ -134,8 +134,21 @@ public sealed class CSField : BaseCSAstItem, ICSFieldLike
         }
     }
 
+    public CSBaseType? ParentType { get; private set; }
+
     public override void OnSecondPass(CSTranslationUnit unit)
     {
         Type.OnSecondPass(unit);
+    }
+
+    internal void SetParent(CSBaseType? parent)
+    {
+        if(ParentType != null && parent != null)
+        {
+            throw new InvalidOperationException("Parent method is already set");
+        }
+
+        ParentType = parent;
+        NotifyChange();
     }
 }

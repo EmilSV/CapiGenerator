@@ -3,7 +3,7 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSMethod : BaseCSAstItem
+public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
 {
     private readonly CSTypeInstance? _returnType;
     private string? _name;
@@ -11,6 +11,12 @@ public class CSMethod : BaseCSAstItem
     private CSAccessModifier _accessModifier = CSAccessModifier.Public;
     private bool _isStatic;
     private bool _isExtern;
+    public CSBaseType? ParentType { get; private set; }
+
+    public CSMethod()
+    {
+        Parameters = new(this);
+    }
 
     public required string Name
     {
@@ -89,7 +95,7 @@ public class CSMethod : BaseCSAstItem
             }
         }
     }
-    public ChangeCountList<CSParameter> Parameters { get; init; } = [];
+    public NotifyUniqueList<CSParameter> Parameters { get; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
@@ -97,6 +103,32 @@ public class CSMethod : BaseCSAstItem
         foreach (var parameter in Parameters)
         {
             parameter.OnSecondPass(unit);
+        }
+    }
+
+    internal void SetParent(CSBaseType? parent)
+    {
+        if (ParentType != null && parent != null)
+        {
+            throw new InvalidOperationException("Parent method is already set");
+        }
+        ParentType = parent;
+        NotifyChange();
+    }
+
+    void INotifyReviver<CSParameter>.OnAddRange(ReadOnlySpan<CSParameter> items)
+    {
+        foreach (var item in items)
+        {
+            item.SetParentMethod(this);
+        }
+    }
+
+    void INotifyReviver<CSParameter>.OnRemoveRange(ReadOnlySpan<CSParameter> items)
+    {
+        foreach (var item in items)
+        {
+            item.SetParentMethod(null);
         }
     }
 }

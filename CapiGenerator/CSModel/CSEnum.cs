@@ -4,9 +4,14 @@ using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSEnum : CSBaseType
+public sealed class CSEnum : CSBaseType, INotifyReviver<CSEnumField>
 {
     private ResoleRef<ICSType, ICType> _rRefType;
+
+    public CSEnum()
+    {
+        Values = new(this);
+    }
 
     public ResoleRef<ICSType, ICType> RRefType
     {
@@ -26,10 +31,26 @@ public sealed class CSEnum : CSBaseType
         }
     }
 
-    public ChangeCountList<CSEnumField> Values { get; init; } = [];
+    public NotifyUniqueList<CSEnumField> Values { get; private set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
         _rRefType.TrySetOutputFromResolver(unit);
+    }
+
+    void INotifyReviver<CSEnumField>.OnAddRange(ReadOnlySpan<CSEnumField> items)
+    {
+        foreach (var item in items)
+        {
+            item.SetParent(this);
+        }
+    }
+
+    void INotifyReviver<CSEnumField>.OnRemoveRange(ReadOnlySpan<CSEnumField> items)
+    {
+        foreach (var item in items)
+        {
+            item.SetParent(null);
+        }
     }
 }

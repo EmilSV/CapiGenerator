@@ -39,8 +39,8 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
         var csStaticClass = new CSStaticClass
         {
             Name = className,
-            Methods = [.. methods]
         };
+        csStaticClass.Methods.AddRange(methods);
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
     }
@@ -64,10 +64,10 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
         {
             ReturnType = CSTypeInstance.CreateFromCTypeInstance(function.ReturnType),
             Name = NameSelector(function),
-            Parameters = [.. function.Parameters.ToArray().Select(CSParameter.FromCParameter)],
             IsExtern = true,
             IsStatic = true
         };
+        method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 
         method.EnrichingDataStore.Add(new CSTranslationFromCAstData(function));
         method.EnrichingDataStore.Add(new CSAttributesData([

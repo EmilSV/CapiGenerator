@@ -44,9 +44,10 @@ public class CSConstTranslator(string className) : BaseTranslator
 
         var csStaticClass = new CSStaticClass
         {
-            Name = className,
-            Fields = [.. constantFields]
+            Name = className
         };
+        csStaticClass.Fields.AddRange(constantFields);
+
         foreach (var constant in constantsTransLated)
         {
             constant.EnrichingDataStore.Add(new CSTranslationParentClassData(csStaticClass));

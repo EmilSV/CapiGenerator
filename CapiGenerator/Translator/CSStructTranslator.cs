@@ -49,8 +49,9 @@ public class CSStructTranslator : BaseTranslator
         var newCSStruct = new CSStruct
         {
             Name = structItem.Name,
-            Fields = [.. fields]
         };
+        newCSStruct.Fields.AddRange(fields);
+
         newCSStruct.EnrichingDataStore.Add(new CSTranslationFromCAstData(structItem));
         structItem.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSStruct));
         return newCSStruct;

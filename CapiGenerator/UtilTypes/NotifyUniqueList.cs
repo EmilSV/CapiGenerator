@@ -1,33 +1,17 @@
 using System.Collections;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace CapiGenerator.UtilTypes;
 
-file static class ChangeCountListBuilder
+public sealed class NotifyUniqueList<T>(INotifyReviver<T> notifyReceiver) :
+    ICollection<T>, IEnumerable<T>, IEnumerable, IReadOnlyCollection<T>, IReadOnlyList<T>, ICollection, IList
 {
-    public static ChangeCountList<T> Create<T>(ReadOnlySpan<T> value)
-    {
-        return new ChangeCountList<T>(value);
-    }
-}
+    [ThreadStatic] private static List<T>? _tempList;
 
-[CollectionBuilder(typeof(ChangeCountListBuilder), "Create")]
-public sealed class ChangeCountList<T> :
-    ICollection<T>, IEnumerable<T>, IEnumerable, IList<T>, IReadOnlyCollection<T>, IReadOnlyList<T>, ICollection, IList
-{
-    private readonly List<T> _list = new();
+    private readonly List<T> _list = [];
+    private readonly INotifyReviver<T> _notifyReceiver = notifyReceiver;
     private volatile uint _changeCounter = 0;
-
-    public ChangeCountList(ReadOnlySpan<T> value)
-    {
-        _list.AddRange(value);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void NotifyChange()
-    {
-        _changeCounter++;
-    }
 
     public InstanceId Id { get; } = new();
     public uint ChangeCounter => _changeCounter;
@@ -37,29 +21,93 @@ public sealed class ChangeCountList<T> :
     public T this[int index]
     {
         get => _list[index];
-        set
+    }
+
+    public bool Add(T item)
+    {
+        if (_list.Contains(item))
         {
-            _list[index] = value;
-            NotifyChange();
+            return false;
         }
-    }
 
-    public void Add(T item)
-    {
         _list.Add(item);
-        NotifyChange();
+        _changeCounter++;
+        _notifyReceiver.OnAdd(item);
+        return true;
     }
 
-    public void AddRange(ReadOnlySpan<T> items)
+    public int AddRange(ReadOnlySpan<T> items)
     {
-        _list.AddRange(items);
-        NotifyChange();
+        List<T>? addedItems = _tempList;
+        if (addedItems == null)
+        {
+            addedItems = [];
+        }
+        else
+        {
+            addedItems.Clear();
+            _tempList = null;
+        }
+
+        foreach (var item in items)
+        {
+            if (_list.Contains(item))
+            {
+                continue;
+            }
+
+            _list.Add(item);
+            addedItems.Add(item);
+        }
+
+        int addedCount = addedItems.Count;
+
+        if (addedCount > 0)
+        {
+            _changeCounter++;
+            _notifyReceiver.OnAddRange(CollectionsMarshal.AsSpan(addedItems));
+        }
+
+        _tempList ??= addedItems;
+
+        return addedCount;
     }
 
-    public void AddRange(IEnumerable<T> items)
+    public int AddRange(IEnumerable<T> items)
     {
-        _list.AddRange(items);
-        NotifyChange();
+        List<T>? addedItems = _tempList;
+        if (addedItems == null)
+        {
+            addedItems = [];
+        }
+        else
+        {
+            addedItems.Clear();
+            _tempList = null;
+        }
+
+        foreach (var item in items)
+        {
+            if (_list.Contains(item))
+            {
+                continue;
+            }
+
+            _list.Add(item);
+            addedItems.Add(item);
+        }
+
+        int addedCount = addedItems.Count;
+
+        if (addedItems.Count > 0)
+        {
+            _changeCounter++;
+            _notifyReceiver.OnAddRange(CollectionsMarshal.AsSpan(addedItems));
+        }
+
+        _tempList ??= addedItems;
+
+        return addedCount;
     }
 
     public void Clear()
@@ -67,9 +115,10 @@ public sealed class ChangeCountList<T> :
         var previousCount = _list.Count;
         if (previousCount > 0)
         {
-            NotifyChange();
+            var previousItems = _list.ToArray();
+            _changeCounter++;
+            _notifyReceiver.OnRemoveRange(previousItems);
         }
-        NotifyChange();
     }
 
     public bool Contains(T item)
@@ -80,7 +129,6 @@ public sealed class ChangeCountList<T> :
     public void CopyTo(T[] array, int arrayIndex)
     {
         _list.CopyTo(array, arrayIndex);
-        NotifyChange();
     }
 
     public bool Remove(T item)
@@ -88,7 +136,8 @@ public sealed class ChangeCountList<T> :
         var result = _list.Remove(item);
         if (result)
         {
-            NotifyChange();
+            _changeCounter++;
+            _notifyReceiver.OnRemove(item);
         }
         return result;
     }
@@ -100,14 +149,36 @@ public sealed class ChangeCountList<T> :
 
     public void Insert(int index, T item)
     {
+        if (_list.Contains(item))
+        {
+            return;
+        }
+
         _list.Insert(index, item);
-        NotifyChange();
+        _changeCounter++;
+        _notifyReceiver.OnAdd(item);
+    }
+
+    public bool TryReplaceAt(int index, T item)
+    {
+        if (index < 0 || index >= _list.Count)
+        {
+            return false;
+        }
+        var previousItem = _list[index];
+        _list[index] = item;
+        _changeCounter++;
+        _notifyReceiver.OnRemove(previousItem);
+        _notifyReceiver.OnAdd(item);
+        return true;
     }
 
     public void RemoveAt(int index)
     {
+        var item = _list[index];
         _list.RemoveAt(index);
-        NotifyChange();
+        _changeCounter++;
+        _notifyReceiver.OnRemove(item);
     }
 
     public Enumerator GetEnumerator()
@@ -188,6 +259,11 @@ public sealed class ChangeCountList<T> :
             return Count - 1;
         }
         return -1;
+    }
+
+    void ICollection<T>.Add(T item)
+    {
+        Add(item);
     }
 
     public struct Enumerator : IEnumerator<T>, IEnumerator

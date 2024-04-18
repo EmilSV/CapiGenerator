@@ -64,14 +64,11 @@ public class CSTypedefTranslator : BaseTranslator
         var newCSStruct = new CSStruct
         {
             Name = typedefItem.Name,
-            Fields = [
-                new()
-                {
-                    Name = "Value",
-                    Type = CSTypeInstance.CreateFromCTypeInstance(typedefItem.InnerType)
-                }
-            ],
         };
+        newCSStruct.Fields.Add(new(){
+            Name = "Value",
+            Type = CSTypeInstance.CreateFromCTypeInstance(typedefItem.InnerType)
+        });
 
         newCSStruct.EnrichingDataStore.Add(new CSTranslationFromCAstData(typedefItem));
         typedefItem.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSStruct));

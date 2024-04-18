@@ -10,10 +10,21 @@ public sealed class CSParameter(
     public string Name => name;
     public CSTypeInstance Type => type;
     public CSDefaultValue? DefaultValue => defaultValue;
+    public CSMethod? ParentMethod { get; private set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
         type.OnSecondPass(unit);
+    }
+
+    internal void SetParentMethod(CSMethod? parent)
+    {
+        if (ParentMethod != null && parent != null)
+        {
+            throw new InvalidOperationException("Parent method is already set");
+        }
+
+        ParentMethod = parent;
     }
 
     public static CSParameter FromCParameter(CParameter parameter) => new(

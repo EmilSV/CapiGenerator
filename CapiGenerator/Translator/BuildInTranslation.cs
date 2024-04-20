@@ -36,7 +36,8 @@ public static class BuildInTranslation
         .AddPredefinedTranslation(CPrimitiveType.Instances.Double, CSPrimitiveType.Instances.Double)
         .AddPredefinedTranslation(CPrimitiveType.Instances._Bool, CSPrimitiveType.Instances.Bool)
         .AddPredefinedTranslation(CPrimitiveType.Instances.Bool, CSPrimitiveType.Instances.Bool)
-        .AddPredefinedTranslation(CPrimitiveType.Instances.CString, CSUft8LiteralType.Instance);
+        .AddPredefinedTranslation(CPrimitiveType.Instances.CString, CSUft8LiteralType.Instance)
+        .AddPredefinedTranslation(CPrimitiveType.Instances.Void, CSPrimitiveType.Instances.Void);
 
 
         translationUnit

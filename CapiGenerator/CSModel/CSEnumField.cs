@@ -56,4 +56,14 @@ public class CSEnumField : BaseCSAstItem, ICSFieldLike
         ParentEnum = parent;
         NotifyChange();
     }
+
+    public string GetFullName()
+    {
+        if (ParentEnum == null)
+        {
+            throw new InvalidOperationException("Parent enum is not set");
+        }
+
+        return $"{ParentEnum.GetFullName()}.{Name}";
+    }
 }

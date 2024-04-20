@@ -68,6 +68,7 @@ public sealed class CPrimitiveType : ICType
         [Name("_Bool")] _Bool,
         [Name("bool")] Bool,
         [Name("CString")] CString,
+        [Name("void")] Void,
 
         Other
     }
@@ -117,7 +118,7 @@ public sealed class CPrimitiveType : ICType
 
     public static CPrimitiveType FromCppPrimitiveType(CppPrimitiveType cppType) => cppType.Kind switch
     {
-        CppPrimitiveKind.Void => GetByKind(Kind.Other),
+        CppPrimitiveKind.Void => GetByKind(Kind.Void),
         CppPrimitiveKind.Bool => GetByKind(Kind.Bool),
         CppPrimitiveKind.Char => GetByKind(Kind.Char),
         CppPrimitiveKind.Short => GetByKind(Kind.Short),
@@ -174,6 +175,7 @@ public sealed class CPrimitiveType : ICType
         public static readonly CPrimitiveType _Bool = GetByKind(Kind._Bool);
         public static readonly CPrimitiveType Bool = GetByKind(Kind.Bool);
         public static readonly CPrimitiveType CString = GetByKind(Kind.CString);
+        public static readonly CPrimitiveType Void = GetByKind(Kind.Void);
     }
 
 }

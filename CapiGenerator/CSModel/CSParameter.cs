@@ -9,12 +9,13 @@ public sealed class CSParameter(
 {
     public string Name => name;
     public CSTypeInstance Type => type;
-    public CSDefaultValue? DefaultValue => defaultValue;
+    public CSDefaultValue DefaultValue => defaultValue;
     public CSMethod? ParentMethod { get; private set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
         type.OnSecondPass(unit);
+        defaultValue.OnSecondPass(unit);
     }
 
     internal void SetParentMethod(CSMethod? parent)

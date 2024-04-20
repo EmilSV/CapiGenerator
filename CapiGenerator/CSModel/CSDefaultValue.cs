@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel;
+using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
 
@@ -109,6 +110,14 @@ public readonly record struct CSDefaultValue
 
         value = default;
         return false;
+    }
+
+    public void OnSecondPass(CSTranslationUnit unit)
+    {
+        if (Value is CSConstantExpression c)
+        {
+            c.OnSecondPass(unit);
+        }
     }
 
     public static readonly CSDefaultValue NullValue = default;

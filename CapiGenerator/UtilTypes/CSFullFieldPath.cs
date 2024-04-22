@@ -2,9 +2,9 @@ using CapiGenerator.CSModel;
 
 namespace CapiGenerator.UtilTypes;
 
-public class CSFullFieldPath(CSBaseType type, ICSFieldLike field)
+public class CSFullFieldPath(BaseCSType type, ICSFieldLike field)
 {
-    private readonly CSBaseType _type = type;
+    private readonly BaseCSType _type = type;
     private readonly ICSFieldLike _field = field;
 
     private uint _typeChangeCount = type.ChangeCount;

@@ -49,7 +49,7 @@ public class CTypeInstance : BaseCAstItem
     public static CTypeInstance FromCppType(CppType type, Guid compilationUnitId)
     {
         var (convertedType, modifiers) = UnpackModifiers(type);
-        if (TryConvertToCType(convertedType, out var cType))
+        if (TryConvertToCType(compilationUnitId, convertedType, out var cType))
         {
             return new CTypeInstance(compilationUnitId, cType, modifiers);
         }
@@ -109,12 +109,12 @@ public class CTypeInstance : BaseCAstItem
         return (type, modifiers.ToArray());
     }
 
-    private static bool TryConvertToCType(CppType type, [NotNullWhen(true)] out ICType? cType)
+    private static bool TryConvertToCType(Guid compilationUnitId, CppType type, [NotNullWhen(true)] out ICType? cType)
     {
         cType = type switch
         {
             CppPrimitiveType cppPrimitiveType => CPrimitiveType.FromCppPrimitiveType(cppPrimitiveType),
-            CppFunctionType cppFunctionType => AnonymousFunctionType.FromCFunctionType(Guid.Empty, cppFunctionType),
+            CppFunctionType cppFunctionType => AnonymousFunctionType.FromCFunctionType(compilationUnitId, cppFunctionType),
             _ => null,
         };
 

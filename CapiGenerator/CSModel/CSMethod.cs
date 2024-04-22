@@ -11,7 +11,7 @@ public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
     private CSAccessModifier _accessModifier = CSAccessModifier.Public;
     private bool _isStatic;
     private bool _isExtern;
-    public CSBaseType? ParentType { get; private set; }
+    public BaseCSType? ParentType { get; private set; }
 
     public CSMethod()
     {
@@ -106,7 +106,7 @@ public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
         }
     }
 
-    internal void SetParent(CSBaseType? parent)
+    internal void SetParent(BaseCSType? parent)
     {
         if (ParentType != null && parent != null)
         {

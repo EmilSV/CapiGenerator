@@ -4,7 +4,7 @@ using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSEnum : CSBaseType, INotifyReviver<CSEnumField>
+public sealed class CSEnum : BaseCSType, INotifyReviver<CSEnumField>
 {
     private ResoleRef<ICSType, ICType> _rRefType;
 

@@ -25,7 +25,7 @@ public class CSStructWriter : BaseCSStructWriter
             stream.WriteLine($"namespace {csStruct.Namespace};");
         }
 
-        stream.WriteLine($"public struct {structName}");
+        stream.WriteLine($"public unsafe struct {structName}");
         stream.WriteLine("{");
 
         await stream.FlushAsync();

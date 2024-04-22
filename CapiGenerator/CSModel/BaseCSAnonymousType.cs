@@ -18,4 +18,6 @@ public abstract class BaseCSAnonymousType : ICSType
 
     public virtual void OnSecondPass(CSTranslationUnit unit)
     { }
+
+    public abstract string GetFullTypeDefString();
 }

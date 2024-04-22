@@ -3,7 +3,7 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSStruct : CSBaseType, INotifyReviver<CSField>, INotifyReviver<CSMethod>
+public class CSStruct : BaseCSType, INotifyReviver<CSField>, INotifyReviver<CSMethod>
 {
     public CSStruct()
     {

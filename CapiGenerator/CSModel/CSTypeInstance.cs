@@ -29,6 +29,11 @@ public class CSTypeInstance : BaseCSAstItem
     public override void OnSecondPass(CSTranslationUnit compilationUnit)
     {
         _rRefType.TrySetOutputFromResolver(compilationUnit);
+        if (Type is not BaseCSAnonymousType anonymousType)
+        {
+            return;
+        }
+        anonymousType.OnSecondPass(compilationUnit);
     }
 
     protected static BaseCSTypeModifier[] TranslateModifiers(ReadOnlySpan<CTypeModifier> cModifiers)
@@ -73,6 +78,10 @@ public class CSTypeInstance : BaseCSAstItem
                     i => CreateFromCTypeInstance(i.GetParameterType())
                 ).ToArray();
                 var csFunctionType = new CSUnmanagedFunctionType(returnType, parameters);
+                if (modifiers is [CsPointerType, ..])
+                {
+                    return new CSTypeInstance(csFunctionType, modifiers[1..]);
+                }
                 return new CSTypeInstance(csFunctionType, modifiers);
             default: throw new Exception("unsupported anonymous type");
         }
@@ -81,7 +90,13 @@ public class CSTypeInstance : BaseCSAstItem
     public override string ToString()
     {
         var sb = new StringBuilder();
-        sb.Append(Type?.GetFullName() ?? "null");
+        sb.Append(Type switch
+        {
+            BaseCSType namedType => namedType.GetFullName(),
+            BaseCSAnonymousType anonymousType => anonymousType.GetFullTypeDefString(),
+            CSPrimitiveType primitiveType => primitiveType.Name,
+            _ => throw new Exception("unsupported type")
+        });
         foreach (var modifier in _modifier)
         {
             sb.Append(modifier.GetTypeString());

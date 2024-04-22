@@ -12,11 +12,13 @@ public class CTypedef(Guid compilationUnitId, string name, CTypeInstance innerTy
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        if (_innerType.GetIsCompletedType())
+        _innerType.OnSecondPass(compilationUnit);
+        var type = _innerType.GetCType();
+        if (type is not BaseCAnonymousType anonymousType)
         {
             return;
         }
 
-        _innerType.OnSecondPass(compilationUnit);
+        anonymousType.OnSecondPass(compilationUnit);
     }
 }

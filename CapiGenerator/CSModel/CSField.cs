@@ -134,7 +134,7 @@ public sealed class CSField : BaseCSAstItem, ICSFieldLike
         }
     }
 
-    public CSBaseType? ParentType { get; private set; }
+    public BaseCSType? ParentType { get; private set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
@@ -142,7 +142,7 @@ public sealed class CSField : BaseCSAstItem, ICSFieldLike
         DefaultValue.OnSecondPass(unit);
     }
 
-    internal void SetParent(CSBaseType? parent)
+    internal void SetParent(BaseCSType? parent)
     {
         if (ParentType != null && parent != null)
         {

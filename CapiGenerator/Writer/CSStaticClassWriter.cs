@@ -23,7 +23,7 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
             stream.WriteLine($"namespace {csStaticClass.Namespace};");
         }
 
-        stream.WriteLine($"public static class {staticClassName}");
+        stream.WriteLine($"public unsafe static class {staticClassName}");
         stream.WriteLine("{");
 
         await stream.FlushAsync();

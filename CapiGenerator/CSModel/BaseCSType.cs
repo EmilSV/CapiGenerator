@@ -3,7 +3,7 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 
-public abstract class CSBaseType
+public abstract class BaseCSType
     : BaseCSAstItem, ICSType
 {
     private string? _namespace;

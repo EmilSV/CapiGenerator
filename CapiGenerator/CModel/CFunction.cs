@@ -4,9 +4,8 @@ using CapiGenerator.CModel.Type;
 namespace CapiGenerator.CModel;
 
 
-public class CFunction(
-    Guid compilationUnitId, CTypeInstance returnType, string name, ReadOnlySpan<CParameter> parameters)
-    : BaseCAstItem(compilationUnitId)
+public class CFunction(CTypeInstance returnType, string name, ReadOnlySpan<CParameter> parameters)
+    : BaseCAstItem
 {
     private readonly CParameter[] _parameters = parameters.ToArray();
     private CTypeInstance _returnType = returnType;

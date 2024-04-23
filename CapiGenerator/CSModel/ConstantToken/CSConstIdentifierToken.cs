@@ -10,9 +10,9 @@ public class CSConstIdentifierToken : BaseCSConstantToken
 {
     private readonly ResoleRef<ICSFieldLike, ICConstAssignable> _constantField;
 
-    public CSConstIdentifierToken(CConstant cConstIdentifier)
+    public CSConstIdentifierToken(ICConstAssignable constAssignable)
     {
-        _constantField = new(cConstIdentifier);
+        _constantField = new(constAssignable);
     }
 
     public CSConstIdentifierToken(ICSFieldLike field)

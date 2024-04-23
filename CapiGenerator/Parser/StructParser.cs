@@ -8,7 +8,6 @@ namespace CapiGenerator.Parser;
 public class StructParser : BaseParser
 {
     public override void FirstPass(
-        Guid compilationUnitId,
         ReadOnlySpan<CppCompilation> compilations,
         BaseParserOutputChannel outputChannel)
     {
@@ -26,7 +25,7 @@ public class StructParser : BaseParser
                     continue;
                 }
 
-                var newStruct = FirstPass(compilationUnitId, cppStruct);
+                var newStruct = FirstPass(cppStruct);
                 if (newStruct is not null)
                 {
                     outputChannel.OnReceiveStruct(newStruct);
@@ -35,23 +34,23 @@ public class StructParser : BaseParser
         }
     }
 
-    protected virtual CStruct? FirstPass(Guid compilationUnitId, CppClass cppStruct)
+    protected virtual CStruct? FirstPass(CppClass cppStruct)
     {
-        var fields = cppStruct.Fields.Select(i => CppFieldToCField(compilationUnitId, i)).ToArray();
+        var fields = cppStruct.Fields.Select(i => CppFieldToCField(i)).ToArray();
         if (fields == null || fields.Any(field => field is null))
         {
             OnError(cppStruct, "Failed to parse fields");
             return null;
         }
 
-        return new CStruct(compilationUnitId, cppStruct.Name, fields!);
+        return new CStruct(cppStruct.Name, fields!);
     }
 
     public override void SecondPass(CCompilationUnit compilationUnit, BaseParserInputChannel inputChannel)
     {
         foreach (var cStruct in inputChannel.GetStructs())
         {
-           cStruct.OnSecondPass(compilationUnit);
+            cStruct.OnSecondPass(compilationUnit);
         }
     }
 
@@ -61,9 +60,9 @@ public class StructParser : BaseParser
         Console.Error.WriteLine($"Error parsing struct {cppStruct.Name}: {message}");
     }
 
-    private static CField? CppFieldToCField(Guid compilationUnitId, CppField field)
+    private static CField? CppFieldToCField(CppField field)
     {
-        var fieldType = CTypeInstance.FromCppType(field.Type, compilationUnitId);
-        return new CField(compilationUnitId, field.Name, fieldType);
+        var fieldType = CTypeInstance.FromCppType(field.Type);
+        return new CField(field.Name, fieldType);
     }
 }

@@ -29,11 +29,10 @@ public class CSTypeInstance : BaseCSAstItem
     public override void OnSecondPass(CSTranslationUnit compilationUnit)
     {
         _rRefType.TrySetOutputFromResolver(compilationUnit);
-        if (Type is not BaseCSAnonymousType anonymousType)
+        if (_rRefType.Output is { IsAnonymous: true } and ICSSecondPassable anonymousType)
         {
-            return;
+            anonymousType.OnSecondPass(compilationUnit);
         }
-        anonymousType.OnSecondPass(compilationUnit);
     }
 
     protected static BaseCSTypeModifier[] TranslateModifiers(ReadOnlySpan<CTypeModifier> cModifiers)

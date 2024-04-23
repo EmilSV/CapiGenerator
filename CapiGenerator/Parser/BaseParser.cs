@@ -5,7 +5,6 @@ namespace CapiGenerator.Parser;
 public abstract class BaseParser
 {
     public abstract void FirstPass(
-        Guid CompilationUnitId,
         ReadOnlySpan<CppCompilation> compilations,
         BaseParserOutputChannel outputChannel);
 

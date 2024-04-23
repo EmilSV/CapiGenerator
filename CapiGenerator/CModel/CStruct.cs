@@ -2,8 +2,8 @@ using CapiGenerator.Parser;
 
 namespace CapiGenerator.CModel;
 
-public class CStruct(Guid compilationUnitId, string name, ReadOnlySpan<CField> fields) :
-    BaseCAstItem(compilationUnitId), ICType
+public class CStruct(string name, ReadOnlySpan<CField> fields) :
+    BaseCAstItem, ICType
 {
     private readonly CField[] _fields = fields.ToArray();
     public string Name => name;

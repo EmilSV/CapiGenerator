@@ -3,7 +3,7 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public abstract class BaseCSAnonymousType : ICSType
+public abstract class BaseCSAnonymousType : ICSType, ICSSecondPassable
 {
     public BaseCSAnonymousType()
     {
@@ -15,6 +15,8 @@ public abstract class BaseCSAnonymousType : ICSType
     public string? Namespace => null;
 
     public string Name { get; }
+
+    public bool IsAnonymous => true;
 
     public virtual void OnSecondPass(CSTranslationUnit unit)
     { }

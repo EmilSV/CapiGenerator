@@ -7,7 +7,6 @@ namespace CapiGenerator.Parser;
 public class EnumParser : BaseParser
 {
     public override void FirstPass(
-        Guid compilationUnitId,
         ReadOnlySpan<CppCompilation> compilations,
         BaseParserOutputChannel outputChannel)
     {
@@ -25,7 +24,7 @@ public class EnumParser : BaseParser
                     continue;
                 }
 
-                var newConst = FirstPass(compilationUnitId, enumValue);
+                var newConst = FirstPass(enumValue);
                 if (newConst is not null)
                 {
                     outputChannel.OnReceiveEnum(newConst);
@@ -34,16 +33,16 @@ public class EnumParser : BaseParser
         }
     }
 
-    protected virtual CEnum? FirstPass(Guid compilationUnitId, CppEnum astEnum)
+    protected virtual CEnum? FirstPass(CppEnum astEnum)
     {
-        var enumConstants = astEnum.Items.Select(i => CppEnumItemToEnumFelid(compilationUnitId, i)).ToArray();
+        var enumConstants = astEnum.Items.Select(CppEnumItemToEnumFelid).ToArray();
         if (enumConstants == null || enumConstants.Any(token => token is null))
         {
             OnError(astEnum, "Failed to parse tokens");
             return null;
         }
 
-        return new CEnum(compilationUnitId, astEnum.Name, enumConstants!);
+        return new CEnum(astEnum.Name, enumConstants!);
     }
 
     public override void SecondPass(CCompilationUnit compilationUnit, BaseParserInputChannel inputChannel)
@@ -60,8 +59,6 @@ public class EnumParser : BaseParser
         Console.Error.WriteLine($"Error parsing enum {value.Name}: {message}");
     }
 
-    private static CEnumField? CppEnumItemToEnumFelid(Guid compilationUnitId, CppEnumItem item) =>
-        new(compilationUnitId, item.Name, [
-            new CConstLiteralToken(item.Value.ToString())
-        ]);
+    private static CEnumField? CppEnumItemToEnumFelid(CppEnumItem item) =>
+        new(item.Name, [new CConstLiteralToken(item.Value.ToString())]);
 }

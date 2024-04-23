@@ -5,19 +5,19 @@ namespace CapiGenerator.CModel.ConstantToken;
 
 public class CConstIdentifierToken : BaseCConstantToken
 {
-    private readonly ResoleRef<CConstant, string> _constantRef;
+    private readonly ResoleRef<ICConstAssignable, string> _constantRef;
 
     public CConstIdentifierToken(string constIdentifierName)
     {
         _constantRef = new(constIdentifierName);
     }
 
-    public CConstIdentifierToken(CConstant constantIdentifier)
+    public CConstIdentifierToken(ICConstAssignable constantIdentifier)
     {
         _constantRef = new(constantIdentifier);
     }
 
-    public CConstant? GetConstantModel()
+    public ICConstAssignable? GetConstantModel()
     {
         return _constantRef.IsOutputResolved() ? _constantRef.Output : null;
     }

@@ -4,9 +4,8 @@ using CppAst;
 
 namespace CapiGenerator.CModel;
 
-public sealed class CParameter(
-    Guid compilationUnitId, string name, CTypeInstance type)
-    : BaseCAstItem(compilationUnitId)
+public sealed class CParameter(string name, CTypeInstance type)
+    : BaseCAstItem
 {
     public readonly string Name = name;
     private CTypeInstance _type = type;
@@ -24,9 +23,9 @@ public sealed class CParameter(
         _type.OnSecondPass(compilationUnit);
     }
 
-    public static CParameter FromCPPParameter(Guid compilationUnitId, CppParameter parameter)
+    public static CParameter FromCPPParameter(CppParameter parameter)
     {
-        var type = CTypeInstance.FromCppType(parameter.Type, compilationUnitId);
-        return new CParameter(compilationUnitId, parameter.Name, type);
+        var type = CTypeInstance.FromCppType(parameter.Type);
+        return new CParameter(parameter.Name, type);
     }
 }

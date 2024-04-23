@@ -6,9 +6,10 @@ using CppAst;
 
 namespace CapiGenerator.Parser;
 
-public sealed class CCompilationUnit:
+public sealed class CCompilationUnit :
     IResolver<ICType, string>,
-    IResolver<CConstant, string>
+    IResolver<CConstant, string>,
+    IResolver<ICConstAssignable, string>
 {
     private class ParserOutputChannel(CCompilationUnit compilationUnit) : BaseParserOutputChannel
     {
@@ -46,6 +47,10 @@ public sealed class CCompilationUnit:
 
                 compilationUnit._types.Add(@enum.Name, @enum);
                 compilationUnit._enums.Add(@enum.Name, @enum);
+                foreach (var field in @enum.Fields)
+                {
+                    compilationUnit._enumFields.Add(field.Name, field);
+                }
                 _receiveEnums.Add(@enum);
             }
 
@@ -167,6 +172,7 @@ public sealed class CCompilationUnit:
 
     private readonly Dictionary<string, CConstant> _constants = [];
     private readonly Dictionary<string, CEnum> _enums = [];
+    private readonly Dictionary<string, CEnumField> _enumFields = [];
     private readonly Dictionary<string, CStruct> _structs = [];
     private readonly Dictionary<string, CFunction> _functions = [];
     private readonly Dictionary<string, CTypedef> _typedefs = [];
@@ -181,6 +187,9 @@ public sealed class CCompilationUnit:
 
     public CEnum? GetEnumByName(string name) =>
         _enums.TryGetValue(name, out var @enum) ? @enum : null;
+
+    public CEnumField? GetEnumFieldByName(string name) =>
+        _enumFields.TryGetValue(name, out var field) ? field : null;
 
     public CStruct? GetStructByName(string name) =>
         _structs.TryGetValue(name, out var @struct) ? @struct : null;
@@ -214,7 +223,7 @@ public sealed class CCompilationUnit:
         foreach (var parser in _parsers)
         {
             ParserOutputChannel outputChannel = new(this);
-            parser.FirstPass(CompilationUnitId, compilations, outputChannel);
+            parser.FirstPass(compilations, outputChannel);
 
             ParserInputChannel inputChannel = new(
                 constants: outputChannel.ReceiveConstantsToArray(),
@@ -248,5 +257,10 @@ public sealed class CCompilationUnit:
     CConstant? IResolver<CConstant, string>.Resolve(string key)
     {
         return GetConstantByName(key);
+    }
+
+    public ICConstAssignable? Resolve([DisallowNull] string key)
+    {
+        return GetConstantByName(key) ?? (ICConstAssignable?)GetEnumFieldByName(key);
     }
 }

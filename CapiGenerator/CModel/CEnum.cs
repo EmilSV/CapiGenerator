@@ -3,8 +3,8 @@ using CapiGenerator.Parser;
 namespace CapiGenerator.CModel;
 
 
-public sealed class CEnum(Guid compilationUnitId, string name, ReadOnlySpan<CEnumField> fields) :
-    BaseCAstItem(compilationUnitId), ICType
+public sealed class CEnum(string name, ReadOnlySpan<CEnumField> fields) :
+    BaseCAstItem, ICType
 {
     public string Name => name;
     private readonly CEnumField[] _fields = fields.ToArray();

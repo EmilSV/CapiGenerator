@@ -7,7 +7,6 @@ namespace CapiGenerator.Parser;
 public class TypedefParser : BaseParser
 {
     public override void FirstPass(
-        Guid compilationUnitId,
         ReadOnlySpan<CppCompilation> compilations,
         BaseParserOutputChannel outputChannel)
     {
@@ -17,9 +16,9 @@ public class TypedefParser : BaseParser
             {
                 FindTypeDefs(cppTypedef, typedef =>
                 {
-                    var type = CTypeInstance.FromCppType(typedef.ElementType, compilationUnitId);
+                    var type = CTypeInstance.FromCppType(typedef.ElementType);
                     var typedefName = typedef.Name;
-                    outputChannel.OnReceiveTypedef(new CTypedef(compilationUnitId, typedefName, type));
+                    outputChannel.OnReceiveTypedef(new CTypedef(typedefName, type));
                 });
             }
         }

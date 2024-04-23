@@ -44,4 +44,6 @@ public abstract class BaseCSType
     }
 
     InstanceId ICSType.Id => Id;
-} 
+
+    public bool IsAnonymous => false;
+}

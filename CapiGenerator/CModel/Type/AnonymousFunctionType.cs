@@ -4,9 +4,8 @@ using CppAst;
 namespace CapiGenerator.CModel.Type;
 
 
-public class AnonymousFunctionType(
-    Guid compilationUnitId, CTypeInstance returnType, ReadOnlySpan<CParameter> parameters)
-    : BaseCAnonymousType(compilationUnitId)
+public class AnonymousFunctionType(CTypeInstance returnType, ReadOnlySpan<CParameter> parameters)
+    : BaseCAnonymousType
 {
     private readonly CParameter[] _parameters = parameters.ToArray();
     public CTypeInstance ReturnType => returnType;
@@ -39,15 +38,10 @@ public class AnonymousFunctionType(
         returnType.OnSecondPass(compilationUnit);
     }
 
-    public static AnonymousFunctionType FromCFunctionType(Guid compilationUnitId, CppFunctionType function)
+    public static AnonymousFunctionType FromCFunctionType(CppFunctionType function)
     {
-        var returnType = CTypeInstance.FromCppType(function.ReturnType, compilationUnitId);
-        var parameters = function.Parameters.Select(i => CParameter.FromCPPParameter(compilationUnitId, i)).ToArray();
-
-        return new AnonymousFunctionType(
-            compilationUnitId: compilationUnitId,
-            returnType: returnType,
-            parameters: parameters
-        );
+        var returnType = CTypeInstance.FromCppType(function.ReturnType);
+        var parameters = function.Parameters.Select(CParameter.FromCPPParameter).ToArray();
+        return new AnonymousFunctionType(returnType, parameters);
     }
 }

@@ -66,6 +66,8 @@ public sealed class CSPrimitiveType : ICSType
 
     public string Name { get; }
 
+    public bool IsAnonymous => false;
+
     private CSPrimitiveType(Kind kind, string name)
     {
         KindValue = kind;

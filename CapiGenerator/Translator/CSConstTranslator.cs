@@ -72,8 +72,8 @@ public class CSConstTranslator(string className) : BaseTranslator
         ICSType csType = cType switch
         {
             CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
-            CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
-            CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Float),
+            CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
+            CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Double),
             CConstantType.String => CSUft8LiteralType.Instance,
             _ => throw new Exception("Unknown constant type"),
         };

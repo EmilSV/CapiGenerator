@@ -8,7 +8,6 @@ namespace CapiGenerator.Parser;
 public class ConstantParser : BaseParser
 {
     public override void FirstPass(
-        Guid compilationUnitId,
         ReadOnlySpan<CppCompilation> compilations,
         BaseParserOutputChannel outputChannel)
     {
@@ -21,12 +20,17 @@ public class ConstantParser : BaseParser
                     continue;
                 }
 
+                if (macro.Tokens.Count == 0)
+                {
+                    continue;
+                }
+
                 if (ShouldSkip(macro))
                 {
                     continue;
                 }
 
-                var newConst = FirstPass(compilationUnitId, macro);
+                var newConst = FirstPass(macro);
                 if (newConst is not null)
                 {
                     outputChannel.OnReceiveConstant(newConst);
@@ -48,7 +52,7 @@ public class ConstantParser : BaseParser
         value.OnSecondPass(compilationUnit);
     }
 
-    protected virtual CConstant? FirstPass(Guid compilationUnitId, CppMacro macro)
+    protected virtual CConstant? FirstPass(CppMacro macro)
     {
         var constantTokens = macro.Tokens.Select(CppTokenToConstantToken).ToArray();
         if (constantTokens == null || constantTokens.Any(token => token is null))
@@ -57,7 +61,7 @@ public class ConstantParser : BaseParser
             return null;
         }
 
-        return new(compilationUnitId, macro.Name, new(constantTokens!));
+        return new(macro.Name, new(constantTokens!));
     }
 
     protected virtual bool ShouldSkip(CppMacro constant) => false;

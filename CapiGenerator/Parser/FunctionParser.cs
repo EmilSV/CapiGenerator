@@ -6,9 +6,7 @@ namespace CapiGenerator.Parser;
 
 public class FunctionParser : BaseParser
 {
-    public override void FirstPass(
-        Guid CompilationUnitId,
-        ReadOnlySpan<CppCompilation> compilations, BaseParserOutputChannel outputChannel)
+    public override void FirstPass(ReadOnlySpan<CppCompilation> compilations, BaseParserOutputChannel outputChannel)
     {
 
         foreach (var compilation in compilations)
@@ -25,7 +23,7 @@ public class FunctionParser : BaseParser
                     continue;
                 }
 
-                var newFunction = FirstPass(CompilationUnitId, cppFunction);
+                var newFunction = FirstPass(cppFunction);
                 if (newFunction is not null)
                 {
                     outputChannel.OnReceiveFunction(newFunction);
@@ -44,18 +42,18 @@ public class FunctionParser : BaseParser
         }
     }
 
-    protected virtual CFunction? FirstPass(Guid compilationUnitId, CppFunction function)
+    protected virtual CFunction? FirstPass(CppFunction function)
     {
-        var parameters = function.Parameters.Select(i => CppParameterToCParameter(compilationUnitId, i)).ToArray();
+        var parameters = function.Parameters.Select(CppParameterToCParameter).ToArray();
         if (parameters == null || parameters.Any(parameter => parameter is null))
         {
             OnError(function, "Failed to parse parameters");
             return null;
         }
 
-        var returnType = CTypeInstance.FromCppType(function.ReturnType, compilationUnitId);
+        var returnType = CTypeInstance.FromCppType(function.ReturnType);
 
-        return new CFunction(compilationUnitId, returnType, function.Name, parameters!);
+        return new CFunction(returnType, function.Name, parameters!);
 
     }
 
@@ -65,9 +63,9 @@ public class FunctionParser : BaseParser
         Console.Error.WriteLine($"Error parsing function {constant.Name}: {message}");
     }
 
-    private static CParameter CppParameterToCParameter(Guid compilationUnitId, CppParameter parameter)
+    private static CParameter CppParameterToCParameter(CppParameter parameter)
     {
-        var parameterType = CTypeInstance.FromCppType(parameter.Type, compilationUnitId);
-        return new CParameter(compilationUnitId, parameter.Name, parameterType);
+        var parameterType = CTypeInstance.FromCppType(parameter.Type);
+        return new CParameter(parameter.Name, parameterType);
     }
 }

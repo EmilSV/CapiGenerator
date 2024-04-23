@@ -2,8 +2,8 @@ using CapiGenerator.CModel;
 
 namespace CapiGenerator.CModel.Type;
 
-public abstract class BaseCAnonymousType(Guid compilationUnitId)
-    : BaseCAstItem(compilationUnitId), ICType
+public abstract class BaseCAnonymousType
+    : BaseCAstItem, ICType
 {
     public string? Name => null;
 

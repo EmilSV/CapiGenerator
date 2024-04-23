@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Security.Cryptography;
 using CppAst;
 
 namespace CapiGenerator.CModel.Type;

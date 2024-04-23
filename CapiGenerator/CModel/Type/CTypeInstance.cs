@@ -12,15 +12,13 @@ public class CTypeInstance : BaseCAstItem
     public ReadOnlySpan<CTypeModifier> Modifiers =>
         _modifiers ?? ReadOnlySpan<CTypeModifier>.Empty;
 
-    public CTypeInstance(Guid compilationUnitId, ICType cType, ReadOnlySpan<CTypeModifier> modifiers)
-        : base(compilationUnitId)
+    public CTypeInstance(ICType cType, ReadOnlySpan<CTypeModifier> modifiers)
     {
         CTypeRef = new(cType);
         _modifiers = modifiers.ToArray();
     }
 
-    public CTypeInstance(Guid compilationUnitId, string typeName, ReadOnlySpan<CTypeModifier> modifiers)
-        : base(compilationUnitId)
+    public CTypeInstance(string typeName, ReadOnlySpan<CTypeModifier> modifiers)
     {
         CTypeRef = new(typeName);
         _modifiers = modifiers.ToArray();
@@ -38,20 +36,20 @@ public class CTypeInstance : BaseCAstItem
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        if (compilationUnit.CompilationUnitId != CompilationUnitId)
-        {
-            throw new InvalidOperationException("Compilation unit id mismatch");
-        }
-
         CTypeRef.TrySetOutputFromResolver(compilationUnit);
+
+        if (CTypeRef.Output is { IsAnonymous: true } and ICSecondPassable secondPassable)
+        {
+            secondPassable.OnSecondPass(compilationUnit);
+        }
     }
 
-    public static CTypeInstance FromCppType(CppType type, Guid compilationUnitId)
+    public static CTypeInstance FromCppType(CppType type)
     {
         var (convertedType, modifiers) = UnpackModifiers(type);
-        if (TryConvertToCType(compilationUnitId, convertedType, out var cType))
+        if (TryConvertToCType(convertedType, out var cType))
         {
-            return new CTypeInstance(compilationUnitId, cType, modifiers);
+            return new CTypeInstance(cType, modifiers);
         }
         else
         {
@@ -61,9 +59,9 @@ public class CTypeInstance : BaseCAstItem
                 CppPrimitiveType primitiveType => primitiveType.FullName,
                 CppEnum enumType => enumType.Name,
                 CppClass classType => classType.Name,
-                _ => throw new ArgumentException($"unsupported type {convertedType.GetType().Name}", nameof(convertedType))
+                _ => throw new ArgumentException($"unsupported type {convertedType.GetType().Name}", nameof(type))
             };
-            return new CTypeInstance(compilationUnitId, typeName, modifiers);
+            return new CTypeInstance(typeName, modifiers);
         }
     }
 
@@ -84,7 +82,7 @@ public class CTypeInstance : BaseCAstItem
             return type.ElementType;
         }
 
-        static CppType HandleQualifiedType(CppQualifiedType type, List<CTypeModifier> outModifiers)
+        static CppType HandleQualifiedType(CppQualifiedType type, List<CTypeModifier> _)
         {
             return type.ElementType;
         }
@@ -97,11 +95,8 @@ public class CTypeInstance : BaseCAstItem
                 CppPointerType pointerType => HandlePointerType(pointerType, modifiers),
                 CppArrayType arrayType => HandleArrayType(arrayType, modifiers),
                 CppQualifiedType qualifiedType => HandleQualifiedType(qualifiedType, modifiers),
-                CppTypedef => null,
-                CppFunctionType => null,
-                CppPrimitiveType => null,
-                CppEnum => null,
-                CppClass => null,
+                CppTypedef or CppFunctionType or CppFunctionType => null,
+                CppPrimitiveType or CppEnum or CppClass => null,
                 _ => throw new ArgumentException($"unsupported type {type.GetType().Name}", nameof(type))
             };
         } while (nextType != null);
@@ -109,12 +104,12 @@ public class CTypeInstance : BaseCAstItem
         return (type, modifiers.ToArray());
     }
 
-    private static bool TryConvertToCType(Guid compilationUnitId, CppType type, [NotNullWhen(true)] out ICType? cType)
+    private static bool TryConvertToCType(CppType type, [NotNullWhen(true)] out ICType? cType)
     {
         cType = type switch
         {
             CppPrimitiveType cppPrimitiveType => CPrimitiveType.FromCppPrimitiveType(cppPrimitiveType),
-            CppFunctionType cppFunctionType => AnonymousFunctionType.FromCFunctionType(compilationUnitId, cppFunctionType),
+            CppFunctionType cppFunctionType => AnonymousFunctionType.FromCFunctionType(cppFunctionType),
             _ => null,
         };
 

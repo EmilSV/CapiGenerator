@@ -15,4 +15,6 @@ public sealed class CSBannedType : ICSType
     public string? Namespace => null;
 
     public string Name => "__BanedType__";
+
+    public bool IsAnonymous => false;
 }

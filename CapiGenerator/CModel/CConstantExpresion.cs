@@ -28,32 +28,40 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
             return _constantType;
         }
 
+        static CConstantType GetConstantType(CConstantType currentConstantType, CConstantType tokenType) =>
+            tokenType switch
+            {
+                CConstantType.Int
+                    when currentConstantType is CConstantType.NONE or CConstantType.Int =>
+                        CConstantType.Int,
+
+                CConstantType.Float or CConstantType.Int
+                    when currentConstantType is CConstantType.NONE or CConstantType.Float or CConstantType.Int =>
+                        CConstantType.Float,
+
+                CConstantType.Char
+                    when currentConstantType is CConstantType.NONE or CConstantType.Char =>
+                    CConstantType.Char,
+
+                CConstantType.String or CConstantType.Char
+                    when currentConstantType is CConstantType.NONE or CConstantType.String or CConstantType.Char =>
+                        CConstantType.String,
+
+                _ => CConstantType.Unknown
+            };
+
         CConstantType constantType = CConstantType.NONE;
         foreach (var token in _tokens)
         {
             if (token is CConstLiteralToken literalToken)
             {
-                constantType = literalToken.Type switch
-                {
-                    CConstantType.Int
-                        when _constantType is CConstantType.NONE or CConstantType.Int =>
-                            CConstantType.Int,
-
-                    CConstantType.Float or CConstantType.Int
-                        when _constantType is CConstantType.NONE or CConstantType.Float or CConstantType.Int =>
-                            CConstantType.Float,
-
-                    CConstantType.Char
-                        when _constantType is CConstantType.NONE or CConstantType.Char =>
-                        CConstantType.Char,
-
-                    CConstantType.String or CConstantType.Char
-                        when _constantType is CConstantType.NONE or CConstantType.String or CConstantType.Char =>
-                            CConstantType.String,
-
-                    _ => CConstantType.Unknown
-                };
-
+                constantType = GetConstantType(constantType, literalToken.Type);
+            }
+            else if (token is CConstIdentifierToken identifierToken)
+            {
+                var identifierTokenConstant = identifierToken.GetConstantModel() ??
+                    throw new InvalidOperationException($"Constant {identifierToken} not resolve");
+                constantType = GetConstantType(constantType, identifierTokenConstant.Expression.GetTypeOfExpression());
             }
 
             if (constantType is CConstantType.Unknown)

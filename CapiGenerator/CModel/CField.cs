@@ -3,9 +3,8 @@ using CapiGenerator.CModel.Type;
 
 namespace CapiGenerator.CModel;
 
-public class CField(
-    Guid compilationUnitId, string name, CTypeInstance type)
-    : BaseCAstItem(compilationUnitId)
+public class CField(string name, CTypeInstance type)
+    : BaseCAstItem
 {
     public readonly string Name = name;
     private CTypeInstance _type = type;

@@ -36,6 +36,18 @@ public sealed class CSTranslationUnit :
                 {
                     translationUnit._csTypeByCType.Add(cType, item);
                 }
+
+                foreach (var field in item.Values)
+                {
+                    var cAst = field.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
+                    if (cAst is not CEnumField cEnumField)
+                    {
+                        continue;
+                    }
+
+                    translationUnit._felidLikeByCConst.Add(cEnumField, field);
+                }
+
             }
         }
 
@@ -58,7 +70,7 @@ public sealed class CSTranslationUnit :
                         continue;
                     }
 
-                    translationUnit._felidByCConst.Add(cConstant, field);
+                    translationUnit._felidLikeByCConst.Add(cConstant, field);
                 }
             }
         }
@@ -88,7 +100,7 @@ public sealed class CSTranslationUnit :
                         continue;
                     }
 
-                    translationUnit._felidByCConst.Add(cConstant, field);
+                    translationUnit._felidLikeByCConst.Add(cConstant, field);
                 }
             }
         }
@@ -136,7 +148,7 @@ public sealed class CSTranslationUnit :
     private readonly Dictionary<string, CSStruct> _structByName = [];
     private readonly Dictionary<string, CSEnum> _enumByName = [];
 
-    private readonly Dictionary<ICConstAssignable, ICSFieldLike> _felidByCConst = [];
+    private readonly Dictionary<ICConstAssignable, ICSFieldLike> _felidLikeByCConst = [];
     private readonly Dictionary<ICType, ICSType> _csTypeByCType = [];
 
     private readonly Dictionary<string, ICSType> _csTypeByCTypeName = [];
@@ -159,7 +171,7 @@ public sealed class CSTranslationUnit :
     }
     ICSFieldLike? IResolver<ICSFieldLike, ICConstAssignable>.Resolve(ICConstAssignable key)
     {
-        if (_felidByCConst.TryGetValue(key, out var val))
+        if (_felidLikeByCConst.TryGetValue(key, out var val))
         {
             return val;
         }

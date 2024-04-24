@@ -83,7 +83,7 @@ public class CSEnumTranslator : BaseTranslator
         var newCSEnum = new CSEnum()
         {
             Name = enumItem.Name,
-            RRefType = new(csType),
+            Type = csType
         };
         newCSEnum.Values.AddRange(enumValue);
         newCSEnum.EnrichingDataStore.Add(new CSTranslationFromCAstData(enumItem));

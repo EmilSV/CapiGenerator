@@ -6,26 +6,21 @@ namespace CapiGenerator.CSModel;
 
 public sealed class CSEnum : BaseCSType, INotifyReviver<CSEnumField>
 {
-    private ResoleRef<ICSType, ICType> _rRefType;
+    private CSPrimitiveType? _type;
 
     public CSEnum()
     {
         Values = new(this);
     }
 
-    public ResoleRef<ICSType, ICType> RRefType
+    public CSPrimitiveType? Type
     {
-        get => _rRefType;
-        init => _rRefType = value;
-    }
-    public ICSType? Type
-    {
-        get => _rRefType.Output;
+        get => _type;
         set
         {
-            if (_rRefType.Output != value)
+            if (_type != value)
             {
-                _rRefType = new(value);
+                _type = value;
                 NotifyChange();
             }
         }
@@ -35,7 +30,10 @@ public sealed class CSEnum : BaseCSType, INotifyReviver<CSEnumField>
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        _rRefType.TrySetOutputFromResolver(unit);
+        foreach (var value in Values)
+        {
+            value.OnSecondPass(unit);
+        }
     }
 
     void INotifyReviver<CSEnumField>.OnAddRange(ReadOnlySpan<CSEnumField> items)

@@ -78,10 +78,7 @@ public class CSStructTranslator : BaseTranslator
     protected static CSField TranslateField(CField field)
     {
         var cTypeInstance = field.GetFieldType();
-        var typeModifiers = TranslateModifiers(cTypeInstance.Modifiers);
-        var cType = cTypeInstance.GetCType() ?? throw new Exception("cType is null");
-
-        var csTypeInstance = new CSTypeInstance(cType, typeModifiers);
+        var csTypeInstance = CSTypeInstance.CreateFromCTypeInstance(cTypeInstance);
         var newField = new CSField
         {
             Name = field.Name,

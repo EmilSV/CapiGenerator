@@ -13,6 +13,7 @@ public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
     private bool _isExtern;
     public BaseCSType? ParentType { get; private set; }
 
+
     public CSMethod()
     {
         Parameters = new(this);
@@ -95,7 +96,10 @@ public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
             }
         }
     }
+    
     public NotifyUniqueList<CSParameter> Parameters { get; }
+
+    public NotifyList<Attribute> Attributes { get; } = new(null);
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

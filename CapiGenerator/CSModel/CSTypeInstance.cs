@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
@@ -88,13 +90,20 @@ public class CSTypeInstance : BaseCSAstItem
 
     public override string ToString()
     {
+        [DoesNotReturn]
+        static T Failed<T>()
+        {
+            Debugger.Break();
+            throw new Exception("unsupported type");
+        }
+
         var sb = new StringBuilder();
         sb.Append(Type switch
         {
             BaseCSType namedType => namedType.GetFullName(),
             BaseCSAnonymousType anonymousType => anonymousType.GetFullTypeDefString(),
             CSPrimitiveType primitiveType => primitiveType.Name,
-            _ => throw new Exception("unsupported type")
+            _ => Failed<string>()
         });
         foreach (var modifier in _modifier)
         {

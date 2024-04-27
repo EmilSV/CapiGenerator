@@ -4,8 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace CapiGenerator.UtilTypes;
 
-public sealed class NotifyUniqueList<T>(INotifyReviver<T>? notifyReceiver) :
-    ICollection<T>, IEnumerable<T>, IEnumerable, IReadOnlyCollection<T>, IReadOnlyList<T>, ICollection
+public sealed class NotifyList<T>(INotifyReviver<T>? notifyReceiver) :
+    ICollection<T>, IEnumerable<T>, IEnumerable, IReadOnlyCollection<T>, IReadOnlyList<T>, ICollection, IList, IList<T>
 {
     [ThreadStatic] private static List<T>? _tempList;
 
@@ -21,22 +21,28 @@ public sealed class NotifyUniqueList<T>(INotifyReviver<T>? notifyReceiver) :
     public T this[int index]
     {
         get => _list[index];
+        set
+        {
+            if (index < 0 || index >= _list.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index));
+            }
+            var previousItem = _list[index];
+            _list[index] = value;
+            _changeCounter++;
+            _notifyReceiver?.OnRemove(previousItem);
+            _notifyReceiver?.OnAdd(value);
+        }
     }
 
-    public bool Add(T item)
+    public void Add(T item)
     {
-        if (_list.Contains(item))
-        {
-            return false;
-        }
-
         _list.Add(item);
         _changeCounter++;
         _notifyReceiver?.OnAdd(item);
-        return true;
     }
 
-    public int AddRange(ReadOnlySpan<T> items)
+    public void AddRange(ReadOnlySpan<T> items)
     {
         List<T>? addedItems = _tempList;
         if (addedItems == null)
@@ -59,45 +65,6 @@ public sealed class NotifyUniqueList<T>(INotifyReviver<T>? notifyReceiver) :
             _list.Add(item);
             addedItems.Add(item);
         }
-
-        int addedCount = addedItems.Count;
-
-        if (addedCount > 0)
-        {
-            _changeCounter++;
-            _notifyReceiver?.OnAddRange(CollectionsMarshal.AsSpan(addedItems));
-        }
-
-        _tempList ??= addedItems;
-
-        return addedCount;
-    }
-
-    public int AddRange(IEnumerable<T> items)
-    {
-        List<T>? addedItems = _tempList;
-        if (addedItems == null)
-        {
-            addedItems = [];
-        }
-        else
-        {
-            addedItems.Clear();
-            _tempList = null;
-        }
-
-        foreach (var item in items)
-        {
-            if (_list.Contains(item))
-            {
-                continue;
-            }
-
-            _list.Add(item);
-            addedItems.Add(item);
-        }
-
-        int addedCount = addedItems.Count;
 
         if (addedItems.Count > 0)
         {
@@ -106,8 +73,39 @@ public sealed class NotifyUniqueList<T>(INotifyReviver<T>? notifyReceiver) :
         }
 
         _tempList ??= addedItems;
+    }
 
-        return addedCount;
+    public void AddRange(IEnumerable<T> items)
+    {
+        List<T>? addedItems = _tempList;
+        if (addedItems == null)
+        {
+            addedItems = [];
+        }
+        else
+        {
+            addedItems.Clear();
+            _tempList = null;
+        }
+
+        foreach (var item in items)
+        {
+            if (_list.Contains(item))
+            {
+                continue;
+            }
+
+            _list.Add(item);
+            addedItems.Add(item);
+        }
+
+        if (addedItems.Count > 0)
+        {
+            _changeCounter++;
+            _notifyReceiver?.OnAddRange(CollectionsMarshal.AsSpan(addedItems));
+        }
+
+        _tempList ??= addedItems;
     }
 
     public void Clear()
@@ -197,8 +195,13 @@ public sealed class NotifyUniqueList<T>(INotifyReviver<T>? notifyReceiver) :
     }
 
     bool ICollection.IsSynchronized => false;
+    bool IList.IsFixedSize => false;
+
     object ICollection.SyncRoot => _list;
     bool ICollection<T>.IsReadOnly => false;
+    bool IList.IsReadOnly => false;
+
+    object? IList.this[int index] { get => this[index]; set => this[index] = (T)value!; }
 
     void ICollection.CopyTo(Array array, int index)
     {
@@ -206,6 +209,50 @@ public sealed class NotifyUniqueList<T>(INotifyReviver<T>? notifyReceiver) :
         {
             CopyTo(typedArray, index);
         }
+    }
+
+    bool IList.Contains(object? value)
+    {
+        if (value is T item)
+        {
+            return Contains(item);
+        }
+        return false;
+    }
+
+    int IList.IndexOf(object? value)
+    {
+        if (value is T item)
+        {
+            return IndexOf(item);
+        }
+        return -1;
+    }
+
+    void IList.Insert(int index, object? value)
+    {
+        if (value is T item)
+        {
+            Insert(index, item);
+        }
+    }
+
+    void IList.Remove(object? value)
+    {
+        if (value is T item)
+        {
+            Remove(item);
+        }
+    }
+
+    int IList.Add(object? value)
+    {
+        if (value is T item)
+        {
+            Add(item);
+            return Count - 1;
+        }
+        return -1;
     }
 
     void ICollection<T>.Add(T item)

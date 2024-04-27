@@ -3,6 +3,7 @@ using CapiGenerator.CSModel;
 namespace CapiGenerator.Writer;
 
 
+
 public class CSWriter(
     BaseCSStructWriter csStructWriter,
     BaseCSEnumWriter csEnumWriter,

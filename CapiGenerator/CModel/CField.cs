@@ -16,11 +16,6 @@ public class CField(string name, CTypeInstance type)
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
-        if (_type.GetIsCompletedType())
-        {
-            return;
-        }
-
         _type.OnSecondPass(compilationUnit);
     }
 }

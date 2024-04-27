@@ -46,16 +46,16 @@ public static class StreamWriterUtils
         }
 
         writer.Write(")");
-        writer.WriteLine();
         if (method.Body is not null)
         {
+            writer.WriteLine();
             writer.WriteLine("{");
             writer.Write(method.Body);
             writer.WriteLine("}");
         }
         else
         {
-            writer.WriteLine(";");
+            writer.Write(";");
         }
         writer.WriteLine();
     }

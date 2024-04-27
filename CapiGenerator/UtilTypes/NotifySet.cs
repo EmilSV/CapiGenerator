@@ -3,13 +3,13 @@ using System.Runtime.InteropServices;
 
 namespace CapiGenerator.UtilTypes;
 
-public sealed class NotifySet<T>(INotifyReviver<T> notifyReceiver) :
+public sealed class NotifySet<T>(INotifyReviver<T>? notifyReceiver) :
     ICollection<T>, IEnumerable<T>, IEnumerable, IReadOnlyCollection<T>, ICollection
 {
     [ThreadStatic] private static List<T>? _tempList;
 
     private readonly HashSet<T> _set = [];
-    private readonly INotifyReviver<T> _notifyReceiver = notifyReceiver;
+    private readonly INotifyReviver<T>? _notifyReceiver = notifyReceiver;
     private volatile uint _changeCounter = 0;
 
     public InstanceId Id { get; } = new();
@@ -24,7 +24,7 @@ public sealed class NotifySet<T>(INotifyReviver<T> notifyReceiver) :
             return false;
         }
         _changeCounter++;
-        _notifyReceiver.OnAdd(item);
+        _notifyReceiver?.OnAdd(item);
         return true;
     }
 
@@ -53,7 +53,7 @@ public sealed class NotifySet<T>(INotifyReviver<T> notifyReceiver) :
         if (addedCount > 0)
         {
             _changeCounter++;
-            _notifyReceiver.OnAddRange(CollectionsMarshal.AsSpan(addedItems));
+            _notifyReceiver?.OnAddRange(CollectionsMarshal.AsSpan(addedItems));
         }
 
         _tempList ??= addedItems;
@@ -86,7 +86,7 @@ public sealed class NotifySet<T>(INotifyReviver<T> notifyReceiver) :
         if (addedCount > 0)
         {
             _changeCounter++;
-            _notifyReceiver.OnAddRange(CollectionsMarshal.AsSpan(addedItems));
+            _notifyReceiver?.OnAddRange(CollectionsMarshal.AsSpan(addedItems));
         }
 
         _tempList ??= addedItems;
@@ -104,7 +104,7 @@ public sealed class NotifySet<T>(INotifyReviver<T> notifyReceiver) :
         var previousList = _set.ToArray();
         _set.Clear();
         _changeCounter++;
-        _notifyReceiver.OnRemoveRange(previousList.AsSpan());
+        _notifyReceiver?.OnRemoveRange(previousList.AsSpan());
     }
 
     public bool Contains(T item)
@@ -137,7 +137,7 @@ public sealed class NotifySet<T>(INotifyReviver<T> notifyReceiver) :
         if (result)
         {
             _changeCounter++;
-            _notifyReceiver.OnRemove(item);
+            _notifyReceiver?.OnRemove(item);
         }
         return result;
     }
@@ -166,7 +166,7 @@ public sealed class NotifySet<T>(INotifyReviver<T> notifyReceiver) :
             return false;
         });
         _changeCounter++;
-        _notifyReceiver.OnRemoveRange(CollectionsMarshal.AsSpan(elementsRemoved));
+        _notifyReceiver?.OnRemoveRange(CollectionsMarshal.AsSpan(elementsRemoved));
         list.AddRange(elementsRemoved);
 
         _tempList ??= elementsRemoved;
@@ -196,7 +196,7 @@ public sealed class NotifySet<T>(INotifyReviver<T> notifyReceiver) :
             return false;
         });
         _changeCounter++;
-        _notifyReceiver.OnRemoveRange(CollectionsMarshal.AsSpan(elementsRemoved));
+        _notifyReceiver?.OnRemoveRange(CollectionsMarshal.AsSpan(elementsRemoved));
         otherSet.AddRange(CollectionsMarshal.AsSpan(elementsRemoved));
 
         _tempList ??= elementsRemoved;

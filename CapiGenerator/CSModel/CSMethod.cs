@@ -99,7 +99,7 @@ public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
     
     public NotifyUniqueList<CSParameter> Parameters { get; }
 
-    public NotifyList<Attribute> Attributes { get; } = new(null);
+    public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

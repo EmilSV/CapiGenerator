@@ -6,6 +6,14 @@ public static class StreamWriterUtils
 {
     public static void WriteToStream(StreamWriter writer, CSMethod method)
     {
+        
+        foreach (var attribute in method.Attributes)
+        {
+            WriteToStream(writer, attribute);
+            writer.WriteLine();
+            writer.Write("\t");
+        }
+
         writer.Write(method.AccessModifier switch
         {
             CSAccessModifier.Public => "public",
@@ -192,6 +200,42 @@ public static class StreamWriterUtils
             }
         }
         writer.Write("}");
+    }
+
+    public static void WriteToStream(StreamWriter writer, BaseCSAttribute attribute)
+    {
+        writer.Write("[");
+        writer.Write(attribute.GetFullAttributeName());
+
+        writer.Write("(");
+
+        for (int i = 0; i < attribute.CtorArgs.Length; i++)
+        {
+            var argument = attribute.CtorArgs[i];
+            writer.Write(argument);
+            if (i < attribute.CtorArgs.Length - 1 || attribute.Parameters.Count > 0)
+            {
+                writer.Write(", ");
+            }
+        }
+        
+        using (var iter = attribute.Parameters.GetEnumerator())
+        {
+            if (iter.MoveNext())
+            {
+                var current = iter.Current;
+                while (iter.MoveNext())
+                {
+                    writer.Write($"{current.Key} = {current.Value}");
+                    writer.Write(", ");
+                    current = iter.Current;
+                }
+                writer.Write($"{current.Key} = {current.Value}");
+            }
+        }
+        writer.Write(")");
+
+        writer.Write("]");
     }
 
     public static bool HasGetterOrSetter(CSField field)

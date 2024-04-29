@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Runtime.InteropServices;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
@@ -31,7 +32,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
                 methods.Add(TranslateFunction(function));
             }
         }
-        if(methods.Count == 0)
+        if (methods.Count == 0)
         {
             return;
         }
@@ -70,13 +71,17 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
         method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 
         method.EnrichingDataStore.Add(new CSTranslationFromCAstData(function));
-        method.EnrichingDataStore.Add(new CSAttributesData([
-            new DllImportAttribute(dllName)
-            {
-                CallingConvention = CallingConvention.Cdecl,
-                EntryPoint = function.Name,
-            }
-        ]));
+        if (dllName is not null)
+        {
+            method.Attributes.Add(CSAttribute<DllImportAttribute>.Create(
+
+                [$"\"{dllName}\""],
+                [
+                    new("CallingConvention", "System.Runtime.InteropServices.CallingConvention.Cdecl"),
+                    new("EntryPoint", $"\"{function.Name}\"")
+                ]
+            ));
+        }
         function.EnrichingDataStore.Add(new CTranslationToCSAstData(method));
 
         return method;

@@ -27,6 +27,7 @@ public class CSConstLiteralToken(string value, CSConstantType type) : BaseCSCons
         {
             CConstantType.Int => new CSConstLiteralToken(token.Value, CSConstantType.Long),
             CConstantType.Float => new CSConstLiteralToken(token.Value, CSConstantType.Double),
+            CConstantType.UnsignedInt => new CSConstLiteralToken(token.Value, CSConstantType.Ulong),
             CConstantType.String => new CSConstLiteralToken(token.Value, CSConstantType.Byte) { Utf8Literal = true },
             CConstantType.Char => new CSConstLiteralToken(token.Value, CSConstantType.Byte) { CastFromChar = true },
             _ => throw new NotImplementedException()

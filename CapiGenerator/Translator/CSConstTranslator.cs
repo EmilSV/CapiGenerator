@@ -73,6 +73,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         {
             CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
             CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
+            CConstantType.UnsignedInt => CSPrimitiveType.Get(CSPrimitiveType.Kind.ULong),
             CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Double),
             CConstantType.String => CSUft8LiteralType.Instance,
             _ => throw new Exception("Unknown constant type"),

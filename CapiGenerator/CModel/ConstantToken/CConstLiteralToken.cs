@@ -1,12 +1,13 @@
 using System.Globalization;
+using System.Reflection.Metadata;
 namespace CapiGenerator.CModel.ConstantToken;
 
 public class CConstLiteralToken : BaseCConstantToken
 {
-    private readonly CConstantType _type;
+    private readonly (CConstantType Type, bool Is64bit) _type;
 
     public string Value { get; }
-    public CConstantType Type => _type;
+    public (CConstantType Type, bool Is64bit) Type => _type;
 
     // public override string GetOutValue()
     // {
@@ -60,35 +61,101 @@ public class CConstLiteralToken : BaseCConstantToken
         bool isFloat = value.Contains('.') || value.Contains('e') || value.Contains('E');
         bool isOctal = value.StartsWith("0", StringComparison.OrdinalIgnoreCase) && !isHex;
 
+        bool isUnsigned = false;
+        bool isLong = false;
+        bool isLongLong = false;
+        bool isFloatSuffix = false;
+        bool isParsed = false;
+
+
+        int suffixStart = value.Length - 1;
+        for (; suffixStart >= 0; suffixStart--)
+        {
+            if (value[suffixStart] == 'u' || value[suffixStart] == 'U')
+            {
+                isUnsigned = true;
+            }
+            else if (value[suffixStart] == 'l' || value[suffixStart] == 'L')
+            {
+                isLong = true;
+            }
+            else if (value[suffixStart] == 'l' || value[suffixStart] == 'L' && isLong)
+            {
+                isLong = false;
+                isLongLong = true;
+            }
+            else if (value[suffixStart] == 'f' || value[suffixStart] == 'F')
+            {
+                isFloatSuffix = true;
+            }
+            else
+            {
+                break;
+            }
+        }
+        value = value[..(suffixStart + 1)].ToString();
+        newValue = value;
+
+
+
         if (isHex && long.TryParse(value[2..], NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _))
         {
-            return CConstantType.Int;
+            isParsed = true;
         }
-
-        if (isFloat && double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+        else if (isFloat && double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
         {
-            return CConstantType.Float;
+            isParsed = true;
         }
-
-        if (isOctal)
+        else if (isOctal)
         {
             try
             {
                 long octalAsLong = Convert.ToInt64(value[1..], 8);
                 newValue = octalAsLong.ToString(CultureInfo.InvariantCulture);
-                return CConstantType.Int;
+                isParsed = true;
             }
             catch (Exception)
             {
                 // ignored
             }
         }
-
-        if (long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
+        else if (long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _))
         {
-            return CConstantType.Int;
+            isParsed = true;
         }
 
-        return CConstantType.Unknown;
+        if (!isParsed)
+        {
+            return CConstantType.Unknown;
+        }
+
+        if (isFloat)
+        {
+            if (isFloatSuffix)
+            {
+                return CConstantType.Float;
+            }
+            else
+            {
+                return CConstantType.Double;
+            }
+        }
+
+        if (isUnsigned)
+        {
+            if (isLongLong)
+            {
+                return CConstantType.UnsignedLongLong;
+            }
+            return CConstantType.UnsignedInt;
+        }
+        else
+        {
+            if (isLongLong)
+            {
+                return CConstantType.LongLong;
+            }
+            return CConstantType.Int;
+        }
     }
 }

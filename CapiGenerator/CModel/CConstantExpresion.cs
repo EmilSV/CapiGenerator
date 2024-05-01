@@ -31,14 +31,15 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
         static CConstantType GetConstantType(CConstantType currentConstantType, CConstantType tokenType) =>
             tokenType switch
             {
+                CConstantType.UnsignedInt
+                    when currentConstantType is CConstantType.NONE or CConstantType.UnsignedInt =>
+                        CConstantType.UnsignedInt,
                 CConstantType.Int
-                    when currentConstantType is CConstantType.NONE or CConstantType.Int =>
+                    when currentConstantType is CConstantType.NONE or CConstantType.Int or CConstantType.UnsignedInt =>
                         CConstantType.Int,
-
                 CConstantType.Float or CConstantType.Int
                     when currentConstantType is CConstantType.NONE or CConstantType.Float or CConstantType.Int =>
                         CConstantType.Float,
-
                 CConstantType.Char
                     when currentConstantType is CConstantType.NONE or CConstantType.Char =>
                     CConstantType.Char,

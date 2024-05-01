@@ -4,8 +4,12 @@ public enum CConstantType
 {
     Unknown = -1,
     NONE = 0,
-    Int,
-    Float,
-    String,
     Char,
+    Int,
+    UnsignedInt,
+    LongLong,
+    UnsignedLongLong,
+    Float,
+    Double,
+    String,
 }

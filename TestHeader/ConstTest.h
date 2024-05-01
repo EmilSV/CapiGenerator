@@ -11,11 +11,4 @@
 // #define COMPLEX_EXPRESSION_REF (1 + 2) * SIMPLE_EXPRESSION
 
 // #define EMPTY_DEFINE
-enum SimpleEnum
-{
-    SimpleEnum_EnumValue1,
-    SimpleEnum_EnumValue2,
-    SimpleEnum_EnumValue3
-};
-
-#define SIMPLE_EXPRESSION SimpleEnum_EnumValue1 + 1
+#define WGPU_ARRAY_LAYER_COUNT_UNDEFINED (0xffffffffUL)

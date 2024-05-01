@@ -4,10 +4,10 @@ namespace CapiGenerator.CModel.ConstantToken;
 
 public class CConstLiteralToken : BaseCConstantToken
 {
-    private readonly (CConstantType Type, bool Is64bit) _type;
+    private readonly CConstantType _type;
 
     public string Value { get; }
-    public (CConstantType Type, bool Is64bit) Type => _type;
+    public CConstantType Type => _type;
 
     // public override string GetOutValue()
     // {

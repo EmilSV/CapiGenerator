@@ -135,9 +135,13 @@ public sealed class CPrimitiveType : ICType
     public static CPrimitiveType FromCConstType(CConstantType constType) => constType switch
     {
         CConstantType.Int => GetByKind(Kind.LongLong),
-        CConstantType.String => GetByKind(Kind.CString),
-        CConstantType.Char => GetByKind(Kind.Char),
+        CConstantType.UnsignedInt => GetByKind(Kind.UnsignedLongLong),
+        CConstantType.LongLong => GetByKind(Kind.LongLong),
+        CConstantType.UnsignedLongLong => GetByKind(Kind.UnsignedLongLong),
         CConstantType.Float => GetByKind(Kind.Double),
+        CConstantType.Double => GetByKind(Kind.Double),
+        CConstantType.Char => GetByKind(Kind.Char),
+        CConstantType.String => GetByKind(Kind.CString),
         _ => throw new ArgumentOutOfRangeException(nameof(constType))
     };
 

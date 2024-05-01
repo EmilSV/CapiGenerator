@@ -90,10 +90,14 @@ public sealed class CSPrimitiveType : ICSType
 
     public static CSPrimitiveType FromCConstType(CConstantType constType) => constType switch
     {
-        CConstantType.Int => Get(Kind.Long),
+        CConstantType.Int => Get(Kind.Int),
+        CConstantType.UnsignedInt => Get(Kind.UInt),
+        CConstantType.LongLong => Get(Kind.Long),
+        CConstantType.UnsignedLongLong => Get(Kind.ULong),
         CConstantType.String => Get(Kind.String),
         CConstantType.Char => Get(Kind.Byte),
-        CConstantType.Float => Get(Kind.Double),
+        CConstantType.Float => Get(Kind.Float),
+        CConstantType.Double => Get(Kind.Double),
         _ => throw new ArgumentOutOfRangeException(nameof(constType))
     };
 

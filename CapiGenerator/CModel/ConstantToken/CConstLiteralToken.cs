@@ -58,7 +58,7 @@ public class CConstLiteralToken : BaseCConstantToken
         }
 
         bool isHex = value.StartsWith("0x", StringComparison.OrdinalIgnoreCase);
-        bool isFloat = value.Contains('.') || value.Contains('e') || value.Contains('E');
+        bool isFloat = (value.Contains('.') || value.Contains('e') || value.Contains('E')) && !isHex;
         bool isOctal = value.StartsWith("0", StringComparison.OrdinalIgnoreCase) && !isHex;
 
         bool isUnsigned = false;
@@ -84,7 +84,7 @@ public class CConstLiteralToken : BaseCConstantToken
                 isLong = false;
                 isLongLong = true;
             }
-            else if (value[suffixStart] == 'f' || value[suffixStart] == 'F')
+            else if ((value[suffixStart] == 'f' || value[suffixStart] == 'F') && !isHex)
             {
                 isFloatSuffix = true;
             }

@@ -28,28 +28,15 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
             return _constantType;
         }
 
-        static CConstantType GetConstantType(CConstantType currentConstantType, CConstantType tokenType) =>
-            tokenType switch
+        static CConstantType GetConstantType(CConstantType currentConstantType, CConstantType tokenType)
+        {
+            if ((int)tokenType < 0)
             {
-                CConstantType.UnsignedInt
-                    when currentConstantType is CConstantType.NONE or CConstantType.UnsignedInt =>
-                        CConstantType.UnsignedInt,
-                CConstantType.Int
-                    when currentConstantType is CConstantType.NONE or CConstantType.Int or CConstantType.UnsignedInt =>
-                        CConstantType.Int,
-                CConstantType.Float or CConstantType.Int
-                    when currentConstantType is CConstantType.NONE or CConstantType.Float or CConstantType.Int =>
-                        CConstantType.Float,
-                CConstantType.Char
-                    when currentConstantType is CConstantType.NONE or CConstantType.Char =>
-                    CConstantType.Char,
+                return tokenType;
+            }
 
-                CConstantType.String or CConstantType.Char
-                    when currentConstantType is CConstantType.NONE or CConstantType.String or CConstantType.Char =>
-                        CConstantType.String,
-
-                _ => CConstantType.Unknown
-            };
+            return (CConstantType)Math.Max((int)currentConstantType, (int)tokenType);
+        }
 
         CConstantType constantType = CConstantType.NONE;
         foreach (var token in _tokens)

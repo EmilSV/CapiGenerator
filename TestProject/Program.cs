@@ -14,7 +14,17 @@ if (!File.Exists(headerFile))
 var options = new CppParserOptions
 {
     ParseMacros = true,
+    PreHeaderText=
+    """
+       # undef __STDC_HOSTED__
+       # undef __cplusplus
+    """
 };
+
+options.AdditionalArguments.Clear();
+options.IncludeFolders.AddRange([
+    @"C:\Program Files\LLVM\lib\clang\18\include"
+]);
 
 var cppCompilation = CppParser.ParseFile(headerFile, options);
 

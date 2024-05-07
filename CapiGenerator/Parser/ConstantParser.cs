@@ -20,7 +20,7 @@ public class ConstantParser : BaseParser
                     continue;
                 }
 
-                if (macro.Tokens.Count == 0)
+                if (macro.Tokens.Count == 0) 
                 {
                     continue;
                 }

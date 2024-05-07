@@ -11,7 +11,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/TestProject/bin/Debug/net8.0/win-x64/TestProject.dll",
-            "args": ["TestHeader\\ConstTest.h", "Output"],
+            "args": ["TestHeader\\IncludeTest.h", "Output"],
             "cwd": "${workspaceFolder}/",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
             "console": "internalConsole",

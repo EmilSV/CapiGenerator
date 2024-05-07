@@ -47,43 +47,10 @@ public class CSEnumTranslator : BaseTranslator
             enumValue.Add(TranslateEnumField(value));
         }
 
-        CConstantType constantType = CConstantType.NONE;
-        foreach (var value in enumItem.Fields)
-        {
-            var cExpression = value.Expression ?? throw new InvalidOperationException("Enum field expression is null");
-            var expressionType = cExpression.GetTypeOfExpression();
-            constantType = expressionType switch
-            {
-                CConstantType.Int
-                    when constantType is CConstantType.NONE or CConstantType.Int => CConstantType.Int,
-                CConstantType.Float or CConstantType.Int
-                    when constantType is CConstantType.NONE or CConstantType.Float or CConstantType.Int => CConstantType.Float,
-                CConstantType.Char
-                    when constantType is CConstantType.NONE or CConstantType.Char => CConstantType.Char,
-                CConstantType.String or CConstantType.Char
-                    when constantType is CConstantType.NONE or CConstantType.String or CConstantType.Char => CConstantType.String,
-                _ => CConstantType.Unknown
-            };
-        }
-
-        if (constantType is CConstantType.Unknown or CConstantType.NONE)
-        {
-            throw new InvalidOperationException("Enum field expression type is unknown");
-        }
-
-        CSPrimitiveType csType = constantType switch
-        {
-            CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
-            CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Float),
-            CConstantType.String => CSPrimitiveType.Get(CSPrimitiveType.Kind.String),
-            CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
-            _ => throw new InvalidOperationException("Enum field expression type is unknown")
-        };
-
         var newCSEnum = new CSEnum()
         {
             Name = enumItem.Name,
-            Type = csType
+            Type = CSPrimitiveType.Instances.Int
         };
         newCSEnum.Values.AddRange(enumValue);
         newCSEnum.EnrichingDataStore.Add(new CSTranslationFromCAstData(enumItem));
@@ -101,6 +68,7 @@ public class CSEnumTranslator : BaseTranslator
             Name = enumField.Name,
             Expression = csExpression
         };
+        
         newCSEnumValue.EnrichingDataStore.Add(new CSTranslationFromCAstData(enumField));
         enumField.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSEnumValue));
         return newCSEnumValue;

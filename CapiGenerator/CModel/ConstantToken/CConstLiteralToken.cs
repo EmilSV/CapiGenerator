@@ -9,16 +9,6 @@ public class CConstLiteralToken : BaseCConstantToken
     public string Value { get; }
     public CConstantType Type => _type;
 
-    // public override string GetOutValue()
-    // {
-    //     return Type switch
-    //     {
-    //         ConstantType.String => $"\"{Value[1..^1]}\"u8",
-    //         ConstantType.Char => $"(byte){Value}",
-    //         _ => Value,
-    //     };
-    // }
-
     public CConstLiteralToken(string value)
     {
         Value = value;

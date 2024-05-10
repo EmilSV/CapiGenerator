@@ -6,10 +6,10 @@ public class ArrayType(ArrayType.Size size) : CTypeModifier
 {
     public readonly record struct Size
     {
-        private readonly CConstant? constant;
+        private readonly BaseCConstant? constant;
         private readonly uint? value;
 
-        public Size(CConstant constant)
+        public Size(BaseCConstant constant)
         {
             this.constant = constant;
             value = null;
@@ -24,7 +24,7 @@ public class ArrayType(ArrayType.Size size) : CTypeModifier
         public bool IsConstant => constant != null;
         public bool IsValue => value != null;
 
-        public bool TryAsConstant([MaybeNullWhen(false)] out CConstant constant)
+        public bool TryAsConstant([MaybeNullWhen(false)] out BaseCConstant constant)
         {
             if (IsConstant)
             {
@@ -58,7 +58,7 @@ public class ArrayType(ArrayType.Size size) : CTypeModifier
             return value?.ToString() ?? "null";
         }
 
-        public static implicit operator Size(CConstant constant) => new(constant);
+        public static implicit operator Size(BaseCConstant constant) => new(constant);
         public static implicit operator Size(uint value) => new(value);
         public static implicit operator Size(int value) => new((uint)value);
     }

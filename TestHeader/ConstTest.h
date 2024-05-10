@@ -12,3 +12,4 @@
 
 // #define EMPTY_DEFINE
 #define WGPU_ARRAY_LAYER_COUNT_UNDEFINED (0xffffffffUL)
+#define SIZE_MAX __$SIZE_MAX$__

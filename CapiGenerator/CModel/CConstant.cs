@@ -3,12 +3,13 @@ using CapiGenerator.Parser;
 namespace CapiGenerator.CModel;
 
 public class CConstant(string name, CConstantExpression expression)
-    : BaseCAstItem, ICConstAssignable
+    : BaseCConstant
 {
-    public string Name => name;
+    public override string Name => name;
+
     public CConstantExpression Expression => expression;
 
-    public CConstantType GetCConstantType()
+    public override CConstantType GetCConstantType()
     {
         return expression.GetTypeOfExpression();
     }

@@ -47,7 +47,7 @@ public class ConstantParser : BaseParser
         }
     }
 
-    protected virtual void SecondPass(CConstant value, CCompilationUnit compilationUnit)
+    protected virtual void SecondPass(BaseCConstant value, CCompilationUnit compilationUnit)
     {
         value.OnSecondPass(compilationUnit);
     }

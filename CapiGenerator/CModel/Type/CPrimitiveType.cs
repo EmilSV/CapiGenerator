@@ -142,6 +142,7 @@ public sealed class CPrimitiveType : ICType
         CConstantType.Double => GetByKind(Kind.Double),
         CConstantType.Char => GetByKind(Kind.Char),
         CConstantType.String => GetByKind(Kind.CString),
+        CConstantType.Size_t => GetByKind(Kind.Size_t),
         _ => throw new ArgumentOutOfRangeException(nameof(constType))
     };
 

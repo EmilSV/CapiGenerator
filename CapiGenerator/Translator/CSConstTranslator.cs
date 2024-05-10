@@ -12,8 +12,8 @@ namespace CapiGenerator.Translator;
 
 public class CSConstTranslator(string className) : BaseTranslator
 {
-    protected virtual string NameSelector(CConstant value) => value.Name;
-    protected virtual bool PredicateSelector(CConstant value) => true;
+    protected virtual string NameSelector(BaseCConstant value) => value.Name;
+    protected virtual bool PredicateSelector(BaseCConstant value) => true;
 
     public override void FirstPass(
         CSTranslationUnit translationUnit,
@@ -21,7 +21,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         BaseTranslatorOutputChannel outputChannel)
     {
         List<CSField> constantFields = [];
-        List<CConstant> constantsTransLated = [];
+        List<BaseCConstant> constantsTransLated = [];
 
         foreach (var compilationUnit in compilationUnits)
         {
@@ -66,9 +66,9 @@ public class CSConstTranslator(string className) : BaseTranslator
         }
     }
 
-    private CSField TranslateConstant(CConstant constant)
+    private CSField TranslateConstant(BaseCConstant constant)
     {
-        var cType = constant.Expression.GetTypeOfExpression();
+        var cType = constant.GetCConstantType();
         ICSType csType = cType switch
         {
             CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),

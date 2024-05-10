@@ -49,7 +49,7 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
             {
                 var identifierTokenConstant = identifierToken.GetConstantModel() ??
                     throw new InvalidOperationException($"Constant {identifierToken} not resolve");
-                constantType = GetConstantType(constantType, identifierTokenConstant.Expression.GetTypeOfExpression());
+                constantType = GetConstantType(constantType, identifierTokenConstant.GetCConstantType());
             }
 
             if (constantType is CConstantType.Unknown)

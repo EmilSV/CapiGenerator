@@ -8,19 +8,19 @@ namespace CapiGenerator.Parser;
 
 public sealed class CCompilationUnit :
     IResolver<ICType, string>,
-    IResolver<CConstant, string>,
+    IResolver<BaseCConstant, string>,
     IResolver<ICConstAssignable, string>
 {
     private class ParserOutputChannel(CCompilationUnit compilationUnit) : BaseParserOutputChannel
     {
-        private readonly List<CConstant> _receiveConstants = [];
+        private readonly List<BaseCConstant> _receiveConstants = [];
         private readonly List<CEnum> _receiveEnums = [];
         private readonly List<CStruct> _receiveStructs = [];
         private readonly List<CFunction> _receiveFunctions = [];
         private readonly List<CTypedef> _receiveTypedefs = [];
 
 
-        public override void OnReceiveConstant(ReadOnlySpan<CConstant> constants)
+        public override void OnReceiveConstant(ReadOnlySpan<BaseCConstant> constants)
         {
             foreach (var constant in constants)
             {
@@ -107,7 +107,7 @@ public sealed class CCompilationUnit :
             }
         }
 
-        public CConstant[] ReceiveConstantsToArray()
+        public BaseCConstant[] ReceiveConstantsToArray()
         {
             return [.. _receiveConstants];
         }
@@ -144,15 +144,15 @@ public sealed class CCompilationUnit :
     }
 
     private sealed class ParserInputChannel(
-        CConstant[]? constants,
+        BaseCConstant[]? constants,
         CEnum[]? enums,
         CStruct[]? structs,
         CFunction[]? functions,
         CTypedef[]? typedefs
     ) : BaseParserInputChannel
     {
-        public override ReadOnlySpan<CConstant> GetConstants() =>
-            constants is null ? ReadOnlySpan<CConstant>.Empty : constants;
+        public override ReadOnlySpan<BaseCConstant> GetConstants() =>
+            constants is null ? ReadOnlySpan<BaseCConstant>.Empty : constants;
 
         public override ReadOnlySpan<CEnum> GetEnums() =>
             enums is null ? ReadOnlySpan<CEnum>.Empty : enums;
@@ -170,7 +170,7 @@ public sealed class CCompilationUnit :
     public readonly Guid CompilationUnitId = Guid.NewGuid();
     private readonly Dictionary<string, ICType> _types = [];
 
-    private readonly Dictionary<string, CConstant> _constants = [];
+    private readonly Dictionary<string, BaseCConstant> _constants = [];
     private readonly Dictionary<string, CEnum> _enums = [];
     private readonly Dictionary<string, CEnumField> _enumFields = [];
     private readonly Dictionary<string, CStruct> _structs = [];
@@ -182,7 +182,7 @@ public sealed class CCompilationUnit :
     public ICType? GetTypeByName(string name) =>
         _types.TryGetValue(name, out var type) ? type : null;
 
-    public CConstant? GetConstantByName(string name) =>
+    public BaseCConstant? GetConstantByName(string name) =>
         _constants.TryGetValue(name, out var constant) ? constant : null;
 
     public CEnum? GetEnumByName(string name) =>
@@ -243,7 +243,7 @@ public sealed class CCompilationUnit :
 
 
     public IEnumerable<ICType> GetTypeEnumerable() => _types.Values;
-    public IEnumerable<CConstant> GetConstantEnumerable() => _constants.Values;
+    public IEnumerable<BaseCConstant> GetConstantEnumerable() => _constants.Values;
     public IEnumerable<CEnum> GetEnumEnumerable() => _enums.Values;
     public IEnumerable<CStruct> GetStructEnumerable() => _structs.Values;
     public IEnumerable<CFunction> GetFunctionEnumerable() => _functions.Values;
@@ -254,7 +254,7 @@ public sealed class CCompilationUnit :
         return GetTypeByName(key);
     }
 
-    CConstant? IResolver<CConstant, string>.Resolve(string key)
+    BaseCConstant? IResolver<BaseCConstant, string>.Resolve(string key)
     {
         return GetConstantByName(key);
     }

@@ -4,8 +4,8 @@ namespace CapiGenerator.Parser;
 
 public abstract class BaseParserOutputChannel
 {
-    public abstract void OnReceiveConstant(ReadOnlySpan<CConstant> constants);
-    public virtual void OnReceiveConstant(CConstant constant)
+    public abstract void OnReceiveConstant(ReadOnlySpan<BaseCConstant> constants);
+    public virtual void OnReceiveConstant(BaseCConstant constant)
     {
         OnReceiveConstant([constant]);
     }

@@ -11,5 +11,6 @@ public enum CConstantType
     UnsignedLongLong,
     Float,
     Double,
+    Size_t,
     String,
 }

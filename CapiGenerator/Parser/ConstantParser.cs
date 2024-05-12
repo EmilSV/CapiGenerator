@@ -1,4 +1,5 @@
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinConstants;
 using CapiGenerator.CModel.ConstantToken;
 using CppAst;
 
@@ -20,13 +21,20 @@ public class ConstantParser : BaseParser
                     continue;
                 }
 
-                if (macro.Tokens.Count == 0) 
+                if (macro.Tokens.Count == 0)
                 {
                     continue;
                 }
 
                 if (ShouldSkip(macro))
                 {
+                    continue;
+                }
+
+                var builtinConstant = AllBuiltinCConstants.AllCConstantTypes.FirstOrDefault(bc => bc.MacroIsBuiltin(macro));
+                if (builtinConstant is not null)
+                {
+                    outputChannel.OnReceiveConstant(builtinConstant);
                     continue;
                 }
 

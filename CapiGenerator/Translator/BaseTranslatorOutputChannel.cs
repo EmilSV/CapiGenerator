@@ -1,3 +1,4 @@
+using CapiGenerator.CModel;
 using CapiGenerator.CSModel;
 
 namespace CapiGenerator.Translator;
@@ -21,5 +22,12 @@ public abstract class BaseTranslatorOutputChannel
     public virtual void OnReceiveStaticClass(CSStaticClass staticClass)
     {
         OnReceiveStaticClass([staticClass]);
+    }
+
+
+    public abstract void OnReceiveBuiltInConstant(ReadOnlySpan<(BaseBuiltInCConstant fromConstant, BaseBuiltInCsConstant constant)> constants);
+    public virtual void OnReceiveBuiltInConstant(BaseBuiltInCConstant fromConstant, BaseBuiltInCsConstant constant)
+    {
+        OnReceiveBuiltInConstant([(fromConstant, constant)]);
     }
 }

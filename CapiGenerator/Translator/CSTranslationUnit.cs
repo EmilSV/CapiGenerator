@@ -119,6 +119,19 @@ public sealed class CSTranslationUnit :
 
             return new TranslatorInputChannel(_enums, _staticClasses, _structs);
         }
+
+        public override void OnReceiveBuiltInConstant(ReadOnlySpan<(BaseBuiltInCConstant fromConstant, BaseBuiltInCsConstant constant)> constants)
+        {
+            if (_isClosed)
+            {
+                throw new InvalidOperationException("Channel is closed");
+            }
+
+            foreach (var (fromConstant, constant) in constants)
+            {
+                translationUnit._felidLikeByCConst.Add(fromConstant, constant);
+            }
+        }
     }
 
     private class TranslatorInputChannel(

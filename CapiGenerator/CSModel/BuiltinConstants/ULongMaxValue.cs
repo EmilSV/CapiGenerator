@@ -4,22 +4,22 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel.BuiltinConstants
 {
-    public class NuintMaxValue : BaseBuiltInCsConstant
+    public class ULongMaxValue : BaseBuiltInCsConstant
     {
         private static readonly InstanceId _id = new();
 
-        private NuintMaxValue()
+        private ULongMaxValue()
         {
         }
 
-        public static NuintMaxValue Instance { get; } = new();
+        public static ULongMaxValue Instance { get; } = new();
 
         public override string Name => "MaxValue";
         public override InstanceId Id => _id;
-        public override string GetFullName() => "nuint.MaxValue";
+        public override string GetFullName() => "ulong.MaxValue";
         public override bool CConstantTranslateToBuiltin(BaseBuiltInCConstant builtinType) =>
-            builtinType is SizeMaxBuiltinConstant or UIntPtrMaxBuiltinConstant;
+            builtinType is UInt64MaxBuiltinConstant;
 
-        public override bool HasConstantValue() => false;
+        public override bool HasConstantValue() => true;
     }
 }

@@ -1,7 +1,10 @@
-﻿using CapiGenerator.Parser;
+﻿using System.Reflection;
+using CapiGenerator;
+using CapiGenerator.Parser;
 using CapiGenerator.Translator;
 using CapiGenerator.Writer;
 using CppAst;
+
 
 string headerFile = Path.Combine(Directory.GetCurrentDirectory(), args[0]);
 
@@ -11,20 +14,14 @@ if (!File.Exists(headerFile))
     return 1;
 }
 
+string headerPath = FakeCStdHeader.CreateFakeStdHeaderFolder();
+
 var options = new CppParserOptions
 {
     ParseMacros = true,
-    PreHeaderText=
-    """
-       # undef __STDC_HOSTED__
-       # undef __cplusplus
-    """
 };
 
-options.AdditionalArguments.Clear();
-options.IncludeFolders.AddRange([
-    @"C:\Program Files\LLVM\lib\clang\18\include"
-]);
+options.IncludeFolders.Add(headerPath);
 
 var cppCompilation = CppParser.ParseFile(headerFile, options);
 

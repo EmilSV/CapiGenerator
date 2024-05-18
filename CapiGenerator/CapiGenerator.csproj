@@ -12,5 +12,6 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="CppAst" Version="0.13.0" />
+        <EmbeddedResource Include="FakeCStdHeaders\**\*.*" />
     </ItemGroup>
 </Project>

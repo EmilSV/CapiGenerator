@@ -1,4 +1,1 @@
-#include <stdint.h>
-
-#define WGPU_WHOLE_MAP_SIZE SIZE_MAX
-#define WGPU_WHOLE_BUFFER_SIZE WGPU_WHOLE_MAP_SIZE - 1
+#define ZERO 0

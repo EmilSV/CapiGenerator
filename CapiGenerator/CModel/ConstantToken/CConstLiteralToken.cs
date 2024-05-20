@@ -49,7 +49,7 @@ public class CConstLiteralToken : BaseCConstantToken
 
         bool isHex = value.StartsWith("0x", StringComparison.OrdinalIgnoreCase);
         bool isFloat = (value.Contains('.') || value.Contains('e') || value.Contains('E')) && !isHex;
-        bool isOctal = value.StartsWith("0", StringComparison.OrdinalIgnoreCase) && !isHex;
+        bool isOctal = value.StartsWith("0", StringComparison.OrdinalIgnoreCase) && !isHex && value.Length > 1;
 
         bool isUnsigned = false;
         bool isLong = false;

@@ -67,12 +67,15 @@ public class CConstLiteralToken : BaseCConstantToken
             }
             else if (value[suffixStart] == 'l' || value[suffixStart] == 'L')
             {
-                isLong = true;
-            }
-            else if (value[suffixStart] == 'l' || value[suffixStart] == 'L' && isLong)
-            {
-                isLong = false;
-                isLongLong = true;
+                if (!isLong && !isLongLong)
+                {
+                    isLong = true;
+                }
+                else if (!isLongLong)
+                {
+                    isLong = false;
+                    isLongLong = true;
+                }
             }
             else if ((value[suffixStart] == 'f' || value[suffixStart] == 'F') && !isHex)
             {

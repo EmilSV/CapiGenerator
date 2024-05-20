@@ -1,1 +1,1 @@
-#define ZERO 0
+#define WGPU_WHOLE_SIZE (0xffffffffffffffffULL)

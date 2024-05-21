@@ -1,4 +1,5 @@
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinTypedefs;
 
 namespace CapiGenerator.Parser;
 
@@ -32,5 +33,11 @@ public abstract class BaseParserOutputChannel
     public virtual void OnReceiveTypedef(CTypedef type)
     {
         OnReceiveTypedef([type]);
+    }
+
+    public abstract void OnReceiveBuiltinTypedef(ReadOnlySpan<BaseBuiltinTypedef> types);
+    public virtual void OnReceiveBuiltinTypedef(BaseBuiltinTypedef type)
+    {
+        OnReceiveBuiltinTypedef([type]);
     }
 }

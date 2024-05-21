@@ -1,6 +1,7 @@
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinConstants;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;

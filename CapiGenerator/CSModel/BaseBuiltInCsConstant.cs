@@ -1,4 +1,4 @@
-using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinConstants;
 using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;

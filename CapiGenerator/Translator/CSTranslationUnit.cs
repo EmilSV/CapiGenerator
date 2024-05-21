@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinConstants;
 using CapiGenerator.CSModel;
 using CapiGenerator.CSModel.EnrichData;
 using CapiGenerator.Parser;

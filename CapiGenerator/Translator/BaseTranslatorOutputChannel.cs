@@ -1,4 +1,5 @@
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinConstants;
 using CapiGenerator.CSModel;
 
 namespace CapiGenerator.Translator;

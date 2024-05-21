@@ -1,6 +1,6 @@
 using CppAst;
 
-namespace CapiGenerator.CModel;
+namespace CapiGenerator.CModel.BuiltinConstants;
 
 public abstract class BaseBuiltInCConstant :
     BaseCConstant

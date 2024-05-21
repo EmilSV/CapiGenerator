@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinTypedefs;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.UtilTypes;
 using CppAst;
@@ -107,6 +108,17 @@ public sealed class CCompilationUnit :
             }
         }
 
+        public override void OnReceiveBuiltinTypedef(ReadOnlySpan<BaseBuiltinTypedef> types)
+        {
+            foreach (var type in types)
+            {
+                if(compilationUnit._builtinTypedefs.TryAdd(type.Name, type))
+                {
+                    compilationUnit._types.Add(type.Name, type);
+                }
+            }
+        }
+
         public BaseCConstant[] ReceiveConstantsToArray()
         {
             return [.. _receiveConstants];
@@ -131,8 +143,6 @@ public sealed class CCompilationUnit :
         {
             return [.. _receiveTypedefs];
         }
-
-
     }
 
     public CCompilationUnit()
@@ -176,6 +186,7 @@ public sealed class CCompilationUnit :
     private readonly Dictionary<string, CStruct> _structs = [];
     private readonly Dictionary<string, CFunction> _functions = [];
     private readonly Dictionary<string, CTypedef> _typedefs = [];
+    private readonly Dictionary<string, BaseBuiltinTypedef> _builtinTypedefs = [];
 
     private readonly List<BaseParser> _parsers = [];
 

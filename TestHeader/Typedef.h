@@ -1,4 +1,2 @@
-/**
- * TurboJPEG instance handle
- */
-typedef void *tjhandle;
+
+#include <stdint.h>

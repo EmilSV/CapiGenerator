@@ -2,17 +2,17 @@ using CppAst;
 
 namespace CapiGenerator.CModel.BuiltinTypedefs;
 
-public class UInt32tBuiltinTypedef : BaseBuiltinTypedef
+public class UIntLeast32tBuiltinTypedef : BaseBuiltinTypedef
 {
-    public static UInt32tBuiltinTypedef Instance { get; } = new UInt32tBuiltinTypedef();
+    public static UIntLeast32tBuiltinTypedef Instance { get; } = new UIntLeast32tBuiltinTypedef();
 
-    public override string Name => "uint32_t";
+    public override string Name => "uint_least32_t";
 
-    private UInt32tBuiltinTypedef()
+    private UIntLeast32tBuiltinTypedef()
     {
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)
     {
-        return typedef.Name == "uint32_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.UnsignedInt };
+        return typedef.Name == "uint_least32_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.UnsignedInt };
     }
 }

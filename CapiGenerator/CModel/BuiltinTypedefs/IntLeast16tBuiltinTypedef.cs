@@ -4,7 +4,7 @@ namespace CapiGenerator.CModel.BuiltinTypedefs;
 
 public class IntLeast16tBuiltinTypedef : BaseBuiltinTypedef
 {
-    public static Int16tBuiltinTypedef Instance { get; } = new IntLeast16tBuiltinTypedef();
+    public static IntLeast16tBuiltinTypedef Instance { get; } = new IntLeast16tBuiltinTypedef();
 
     public override string Name => "int_least16_t";
 

@@ -2,17 +2,17 @@ using CppAst;
 
 namespace CapiGenerator.CModel.BuiltinTypedefs;
 
-public class Int64tBuiltinTypedef : BaseBuiltinTypedef
+public class IntLeast64tBuiltinTypedef : BaseBuiltinTypedef
 {
-    public static Int64tBuiltinTypedef Instance { get; } = new Int64tBuiltinTypedef();
+    public static IntLeast64tBuiltinTypedef Instance { get; } = new IntLeast64tBuiltinTypedef();
 
-    public override string Name => "int64_t";
+    public override string Name => "int_least64_t";
 
-    private Int64tBuiltinTypedef()
+    private IntLeast64tBuiltinTypedef()
     {
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)
     {
-        return typedef.Name == "int64_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.LongLong };
+        return typedef.Name == "int_least64_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.LongLong };
     }
 }

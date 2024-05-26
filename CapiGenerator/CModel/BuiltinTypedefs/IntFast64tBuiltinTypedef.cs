@@ -2,13 +2,13 @@ using CppAst;
 
 namespace CapiGenerator.CModel.BuiltinTypedefs;
 
-public class IntFast64tBuiltinTypedef : BaseBuiltinTypedef
+public class IntFast64TBuiltinTypedef : BaseBuiltinTypedef
 {
-    public static IntFast64tBuiltinTypedef Instance { get; } = new IntFast64tBuiltinTypedef();
+    public static IntFast64TBuiltinTypedef Instance { get; } = new IntFast64TBuiltinTypedef();
 
     public override string Name => "int_fast64_t";
 
-    private IntFast64tBuiltinTypedef()
+    private IntFast64TBuiltinTypedef()
     {
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)

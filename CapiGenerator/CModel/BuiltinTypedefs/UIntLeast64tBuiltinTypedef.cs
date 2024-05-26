@@ -2,13 +2,13 @@ using CppAst;
 
 namespace CapiGenerator.CModel.BuiltinTypedefs;
 
-public class UIntLeast64tBuiltinTypedef : BaseBuiltinTypedef
+public class UIntLeast64TBuiltinTypedef : BaseBuiltinTypedef
 {
-    public static UIntLeast64tBuiltinTypedef Instance { get; } = new UIntLeast64tBuiltinTypedef();
+    public static UIntLeast64TBuiltinTypedef Instance { get; } = new UIntLeast64TBuiltinTypedef();
 
     public override string Name => "uint_least64_t";
 
-    private UIntLeast64tBuiltinTypedef()
+    private UIntLeast64TBuiltinTypedef()
     {
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)

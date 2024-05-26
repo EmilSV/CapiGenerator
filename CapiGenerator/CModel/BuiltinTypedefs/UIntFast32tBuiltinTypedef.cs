@@ -2,13 +2,13 @@ using CppAst;
 
 namespace CapiGenerator.CModel.BuiltinTypedefs;
 
-public class UIntFast32tBuiltinTypedef : BaseBuiltinTypedef
+public class UIntFast32TBuiltinTypedef : BaseBuiltinTypedef
 {
-    public static UIntFast32tBuiltinTypedef Instance { get; } = new UIntFast32tBuiltinTypedef();
+    public static UIntFast32TBuiltinTypedef Instance { get; } = new UIntFast32TBuiltinTypedef();
 
     public override string Name => "uint_fast32_t";
 
-    private UIntFast32tBuiltinTypedef()
+    private UIntFast32TBuiltinTypedef()
     {
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)

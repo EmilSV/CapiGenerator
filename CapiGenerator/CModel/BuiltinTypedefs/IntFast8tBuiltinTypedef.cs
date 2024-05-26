@@ -2,13 +2,13 @@ using CppAst;
 
 namespace CapiGenerator.CModel.BuiltinTypedefs;
 
-public class IntFast8tBuiltinTypedef : BaseBuiltinTypedef
+public class IntFast8TBuiltinTypedef : BaseBuiltinTypedef
 {
-    public static IntFast8tBuiltinTypedef Instance { get; } = new IntFast8tBuiltinTypedef();
+    public static IntFast8TBuiltinTypedef Instance { get; } = new IntFast8TBuiltinTypedef();
 
     public override string Name => "int_fast8_t";
 
-    private IntFast8tBuiltinTypedef()
+    private IntFast8TBuiltinTypedef()
     {
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)

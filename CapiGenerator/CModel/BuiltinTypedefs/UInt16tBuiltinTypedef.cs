@@ -2,13 +2,13 @@ using CppAst;
 
 namespace CapiGenerator.CModel.BuiltinTypedefs;
 
-public class UInt16tBuiltinTypedef : BaseBuiltinTypedef
+public class UInt16TBuiltinTypedef : BaseBuiltinTypedef
 {
-    public static UInt16tBuiltinTypedef Instance { get; } = new UInt16tBuiltinTypedef();
+    public static UInt16TBuiltinTypedef Instance { get; } = new UInt16TBuiltinTypedef();
 
     public override string Name => "uint16_t";
 
-    private UInt16tBuiltinTypedef()
+    private UInt16TBuiltinTypedef()
     {
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)

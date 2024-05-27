@@ -1,6 +1,7 @@
 using CppAst;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinTypedefs;
 
 namespace CapiGenerator.Parser;
 
@@ -14,6 +15,13 @@ public class TypedefParser : BaseParser
         {
             foreach (var cppTypedef in compilation.Typedefs)
             {
+                var builtinTypedefs = AllBuiltinTypedefs.AllTypedefs.FirstOrDefault(typedef => typedef.TypedefIsBuiltin(cppTypedef));
+                if (builtinTypedefs != null)
+                {
+                    outputChannel.OnReceiveBuiltinTypedef(builtinTypedefs);
+                    continue;
+                }
+
                 FindTypeDefs(cppTypedef, typedef =>
                 {
                     var type = CTypeInstance.FromCppType(typedef.ElementType);

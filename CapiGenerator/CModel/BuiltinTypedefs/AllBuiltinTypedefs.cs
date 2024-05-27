@@ -31,5 +31,10 @@ public class AllBuiltinTypedefs
             UIntLeast32TBuiltinTypedef.Instance,
             UIntLeast64TBuiltinTypedef.Instance,
             UIntMaxTBuiltinTypedef.Instance,
+            IntPtrTBuiltinTypedef.Instance,
+            UIntPtrTBuiltinTypedef.Instance,
+            IntPtrTBuiltinTypedef.Instance,
+            SizeTBuiltinTypedefs.Instance,
+            PtrdiffTBuiltinTypedefs.Instance,
     ];
 }

@@ -11,7 +11,11 @@ public class CSStructWriter : BaseCSStructWriter
         var structName = csStruct.Name;
         var structFields = csStruct.Fields;
 
-        using var stream = new StreamWriter(Path.Combine(writeConfig.OutputDirectory, $"{structName}.cs"));
+        if (writeConfig.OutputDirectory is not null)
+        {
+            Directory.CreateDirectory(writeConfig.OutputDirectory);
+        }
+        using var stream = new StreamWriter(Path.Combine(writeConfig.OutputDirectory!, $"{structName}.cs"));
 
         foreach (var usingNamespace in writeConfig.Usings)
         {

@@ -23,23 +23,6 @@ public sealed class CPrimitiveType : ICType
 
     public enum Kind
     {
-        [Name("int8_t")] Int8_t,
-        [Name("int16_t")] Int16_t,
-        [Name("int32_t")] Int32_t,
-        [Name("int64_t")] Int64_t,
-        [Name("uint8_t")] UInt8_t,
-        [Name("uint16_t")] UInt16_t,
-        [Name("uint32_t")] UInt32_t,
-        [Name("uint64_t")] UInt64_t,
-
-        [Name("intptr_t")] Intptr_t,
-        [Name("uintptr_t")] UIntptr_t,
-
-        [Name("size_t")] Size_t,
-        [Name("ssize_t")] SSize_t,
-
-        [Name("ptrdiff_t")] Ptrdiff_t,
-
         [Name("char")] Char,
         [Name("signed char")] SignedChar,
         [Name("unsigned char")] UnsignedChar,
@@ -132,35 +115,22 @@ public sealed class CPrimitiveType : ICType
         _ => throw new NotImplementedException(),
     };
 
-    public static CPrimitiveType FromCConstType(CConstantType constType) => constType switch
-    {
-        CConstantType.Int => GetByKind(Kind.LongLong),
-        CConstantType.UnsignedInt => GetByKind(Kind.UnsignedLongLong),
-        CConstantType.LongLong => GetByKind(Kind.LongLong),
-        CConstantType.UnsignedLongLong => GetByKind(Kind.UnsignedLongLong),
-        CConstantType.Float => GetByKind(Kind.Double),
-        CConstantType.Double => GetByKind(Kind.Double),
-        CConstantType.Char => GetByKind(Kind.Char),
-        CConstantType.String => GetByKind(Kind.CString),
-        CConstantType.Size_t => GetByKind(Kind.Size_t),
-        _ => throw new ArgumentOutOfRangeException(nameof(constType))
-    };
+    // public static CPrimitiveType FromCConstType(CConstantType constType) => constType switch
+    // {
+    //     CConstantType.Int => GetByKind(Kind.LongLong),
+    //     CConstantType.UnsignedInt => GetByKind(Kind.UnsignedLongLong),
+    //     CConstantType.LongLong => GetByKind(Kind.LongLong),
+    //     CConstantType.UnsignedLongLong => GetByKind(Kind.UnsignedLongLong),
+    //     CConstantType.Float => GetByKind(Kind.Double),
+    //     CConstantType.Double => GetByKind(Kind.Double),
+    //     CConstantType.Char => GetByKind(Kind.Char),
+    //     CConstantType.String => GetByKind(Kind.CString),
+    //     CConstantType.Size_t => GetByKind(Kind.Size_t),
+    //     _ => throw new ArgumentOutOfRangeException(nameof(constType))
+    // };
 
     public static class Instances
     {
-        public static readonly CPrimitiveType Int8_t = GetByKind(Kind.Int8_t);
-        public static readonly CPrimitiveType Int16_t = GetByKind(Kind.Int16_t);
-        public static readonly CPrimitiveType Int32_t = GetByKind(Kind.Int32_t);
-        public static readonly CPrimitiveType Int64_t = GetByKind(Kind.Int64_t);
-        public static readonly CPrimitiveType UInt8_t = GetByKind(Kind.UInt8_t);
-        public static readonly CPrimitiveType UInt16_t = GetByKind(Kind.UInt16_t);
-        public static readonly CPrimitiveType UInt32_t = GetByKind(Kind.UInt32_t);
-        public static readonly CPrimitiveType UInt64_t = GetByKind(Kind.UInt64_t);
-        public static readonly CPrimitiveType Intptr_t = GetByKind(Kind.Intptr_t);
-        public static readonly CPrimitiveType UIntptr_t = GetByKind(Kind.UIntptr_t);
-        public static readonly CPrimitiveType Size_t = GetByKind(Kind.Size_t);
-        public static readonly CPrimitiveType SSize_t = GetByKind(Kind.SSize_t);
-        public static readonly CPrimitiveType Ptrdiff_t = GetByKind(Kind.Ptrdiff_t);
         public static readonly CPrimitiveType Char = GetByKind(Kind.Char);
         public static readonly CPrimitiveType SignedChar = GetByKind(Kind.SignedChar);
         public static readonly CPrimitiveType UnsignedChar = GetByKind(Kind.UnsignedChar);

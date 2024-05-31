@@ -90,20 +90,13 @@ public class CSTypeInstance : BaseCSAstItem
 
     public override string ToString()
     {
-        [DoesNotReturn]
-        static T Failed<T>()
-        {
-            Debugger.Break();
-            throw new Exception("unsupported type");
-        }
-
         var sb = new StringBuilder();
         sb.Append(Type switch
         {
             BaseCSType namedType => namedType.GetFullName(),
             BaseCSAnonymousType anonymousType => anonymousType.GetFullTypeDefString(),
             CSPrimitiveType primitiveType => primitiveType.Name,
-            _ => Failed<string>()
+            _ => throw new Exception("unsupported type")
         });
         foreach (var modifier in _modifier)
         {

@@ -11,5 +11,6 @@ public abstract class BaseParser
     public virtual void SecondPass(
         CCompilationUnit compilationUnit,
         BaseParserInputChannel inputChannel
-    ) {}
+    )
+    { }
 }

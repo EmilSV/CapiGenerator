@@ -2,7 +2,8 @@ using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSField : BaseCSAstItem, ICSFieldLike
+public sealed class CSField : BaseCSAstItem,
+    ICSFieldLike, ITypeReplace
 {
     private string? _name;
     public required string Name
@@ -26,7 +27,7 @@ public sealed class CSField : BaseCSAstItem, ICSFieldLike
     public required CSTypeInstance Type
     {
         get => _type!;
-        init
+        set
         {
             if (_type != value)
             {
@@ -40,7 +41,7 @@ public sealed class CSField : BaseCSAstItem, ICSFieldLike
     public CSDefaultValue DefaultValue
     {
         get => _defaultValue;
-        init
+        set
         {
             if (_defaultValue != value)
             {
@@ -161,5 +162,19 @@ public sealed class CSField : BaseCSAstItem, ICSFieldLike
         }
 
         return $"{ParentType.GetFullName()}.{Name}";
+    }
+
+    public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
+    {
+        var innerType = Type.Type;
+        if (innerType is null)
+        {
+            Console.Error.WriteLine($"field {Name} has null type and cannot be replaced");
+            return;
+        }
+        if (predicate(innerType, out var newType))
+        {
+            Type = CSTypeInstance.CopyWithNewType(Type, newType);
+        }
     }
 }

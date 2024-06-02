@@ -68,7 +68,7 @@ public class CSEnumTranslator : BaseTranslator
             Name = enumField.Name,
             Expression = csExpression
         };
-        
+
         newCSEnumValue.EnrichingDataStore.Add(new CSTranslationFromCAstData(enumField));
         enumField.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSEnumValue));
         return newCSEnumValue;

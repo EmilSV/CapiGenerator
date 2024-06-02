@@ -3,7 +3,7 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CModel;
 
-public abstract class BaseCAstItem : ICSecondPassable 
+public abstract class BaseCAstItem : ICSecondPassable
 {
     public EnrichingDataStore EnrichingDataStore { get; } = new();
 

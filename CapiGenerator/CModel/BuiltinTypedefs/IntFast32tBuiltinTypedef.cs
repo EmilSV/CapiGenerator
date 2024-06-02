@@ -13,6 +13,6 @@ public class IntFast32TBuiltinTypedef : BaseBuiltinTypedef
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)
     {
-        return typedef.Name == "int_fast32_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Int};
+        return typedef.Name == "int_fast32_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Int };
     }
 }

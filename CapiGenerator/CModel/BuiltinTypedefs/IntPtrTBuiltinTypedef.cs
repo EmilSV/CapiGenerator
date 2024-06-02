@@ -13,6 +13,6 @@ public class IntPtrTBuiltinTypedef : BaseBuiltinTypedef
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)
     {
-        return typedef.Name == "intptr_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.LongLong};
+        return typedef.Name == "intptr_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.LongLong };
     }
 }

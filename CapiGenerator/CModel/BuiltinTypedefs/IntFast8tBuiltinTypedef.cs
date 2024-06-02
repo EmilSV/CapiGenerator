@@ -13,6 +13,6 @@ public class IntFast8TBuiltinTypedef : BaseBuiltinTypedef
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)
     {
-        return typedef.Name == "int_fast8_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Char};
+        return typedef.Name == "int_fast8_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Char };
     }
 }

@@ -13,6 +13,6 @@ public class UIntLeast64TBuiltinTypedef : BaseBuiltinTypedef
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)
     {
-        return typedef.Name == "uint_least64_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.UnsignedLongLong};
+        return typedef.Name == "uint_least64_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.UnsignedLongLong };
     }
 }

@@ -112,7 +112,7 @@ public sealed class CCompilationUnit :
         {
             foreach (var type in types)
             {
-                if(compilationUnit._builtinTypedefs.TryAdd(type.Name, type))
+                if (compilationUnit._builtinTypedefs.TryAdd(type.Name, type))
                 {
                     compilationUnit._types.Add(type.Name, type);
                 }

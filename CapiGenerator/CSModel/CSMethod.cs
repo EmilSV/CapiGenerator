@@ -3,9 +3,10 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
+public class CSMethod : BaseCSAstItem,
+    INotifyReviver<CSParameter>, ITypeReplace
 {
-    private readonly CSTypeInstance? _returnType;
+    private CSTypeInstance? _returnType;
     private string? _name;
     private string? _body;
     private CSAccessModifier _accessModifier = CSAccessModifier.Public;
@@ -51,7 +52,7 @@ public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
     public required CSTypeInstance ReturnType
     {
         get => _returnType!;
-        init
+        set
         {
             if (_returnType != value)
             {
@@ -96,7 +97,7 @@ public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
             }
         }
     }
-    
+
     public NotifyUniqueList<CSParameter> Parameters { get; }
 
     public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
@@ -133,6 +134,39 @@ public class CSMethod : BaseCSAstItem, INotifyReviver<CSParameter>
         foreach (var item in items)
         {
             item.SetParentMethod(null);
+        }
+    }
+
+    public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
+    {
+        var innerReturnType = ReturnType.Type;
+
+        if (innerReturnType is not null)
+        {
+            if (predicate(innerReturnType, out var newType))
+            {
+                ReturnType = CSTypeInstance.CopyWithNewType(ReturnType, newType);
+            }
+        }
+        else
+        {
+            Console.Error.WriteLine($"method {Name} has null return type and cannot be replaced");
+        }
+
+        int count = Parameters.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var parameter = Parameters[i];
+            var innerType = parameter.Type.Type;
+            if (innerType is null)
+            {
+                Console.Error.WriteLine($"method {Name} has null parameter type and cannot be replaced");
+                continue;
+            }
+            if (predicate(innerType, out var newType))
+            {
+                Parameters.TryReplaceAt(i, CSParameter.CopyWithNewType(parameter, newType));
+            }
         }
     }
 }

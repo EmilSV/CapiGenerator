@@ -13,5 +13,6 @@ public abstract class BaseTranslator
     public virtual void SecondPass(
         CSTranslationUnit translationUnit,
         BaseTranslatorInputChannel inputChannel
-    ) {}
+    )
+    { }
 }

@@ -33,4 +33,9 @@ public sealed class CSParameter(
         type: CSTypeInstance.CreateFromCTypeInstance(parameter.GetParameterType()),
         defaultValue: CSDefaultValue.NullValue
     );
+
+    public static CSParameter CopyWithNewType(CSParameter original, ICSType newType)
+    {
+        return new CSParameter(original.Name, CSTypeInstance.CopyWithNewType(original.Type, newType), original.DefaultValue);
+    }
 }

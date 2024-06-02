@@ -6,7 +6,7 @@ public static class StreamWriterUtils
 {
     public static void WriteToStream(StreamWriter writer, CSMethod method)
     {
-        
+
         foreach (var attribute in method.Attributes)
         {
             WriteToStream(writer, attribute);
@@ -218,7 +218,7 @@ public static class StreamWriterUtils
                 writer.Write(", ");
             }
         }
-        
+
         using (var iter = attribute.Parameters.GetEnumerator())
         {
             if (iter.MoveNext())

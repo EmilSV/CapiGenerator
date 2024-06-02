@@ -28,6 +28,8 @@ public class CSTypeInstance : BaseCSAstItem
     public ICSType? Type => _rRefType.Output;
     public IReadOnlyList<BaseCSTypeModifier> Modifiers => _modifier;
 
+    public ReadOnlySpan<BaseCSTypeModifier> GetModifiersAsSpan() => _modifier;
+
     public override void OnSecondPass(CSTranslationUnit compilationUnit)
     {
         _rRefType.TrySetOutputFromResolver(compilationUnit);
@@ -104,5 +106,10 @@ public class CSTypeInstance : BaseCSAstItem
         }
 
         return sb.ToString();
+    }
+
+    public static CSTypeInstance CopyWithNewType(CSTypeInstance original, ICSType newType)
+    {
+        return new CSTypeInstance(newType, original._modifier);
     }
 }

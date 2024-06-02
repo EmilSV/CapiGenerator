@@ -13,6 +13,6 @@ public class IntLeast32TBuiltinTypedef : BaseBuiltinTypedef
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)
     {
-        return typedef.Name == "int_least32_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Int};
+        return typedef.Name == "int_least32_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Int };
     }
 }

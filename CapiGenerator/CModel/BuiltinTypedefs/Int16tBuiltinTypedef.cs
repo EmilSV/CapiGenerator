@@ -13,6 +13,6 @@ public class Int16TBuiltinTypedef : BaseBuiltinTypedef
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)
     {
-        return typedef.Name == "int16_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Short};
+        return typedef.Name == "int16_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Short };
     }
 }

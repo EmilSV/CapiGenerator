@@ -3,7 +3,8 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSStruct : BaseCSType, INotifyReviver<CSField>, INotifyReviver<CSMethod>
+public class CSStruct : BaseCSType, 
+    INotifyReviver<CSField>, INotifyReviver<CSMethod> , ITypeReplace
 {
     public CSStruct()
     {
@@ -23,6 +24,18 @@ public class CSStruct : BaseCSType, INotifyReviver<CSField>, INotifyReviver<CSMe
         foreach (var method in Methods)
         {
             method.OnSecondPass(unit);
+        }
+    }
+
+    public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
+    {
+        foreach (var field in Fields)
+        {
+            field.ReplaceTypes(predicate);
+        }
+        foreach (var method in Methods)
+        {
+            method.ReplaceTypes(predicate);
         }
     }
 

@@ -13,6 +13,6 @@ public class IntLeast8TBuiltinTypedef : BaseBuiltinTypedef
     }
     public override bool TypedefIsBuiltin(CppTypedef typedef)
     {
-        return typedef.Name == "int_least8_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Char};
+        return typedef.Name == "int_least8_t" && typedef.ElementType is CppPrimitiveType { Kind: CppPrimitiveKind.Char };
     }
 }

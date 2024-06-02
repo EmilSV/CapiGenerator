@@ -40,7 +40,7 @@ public sealed class HistoricList<T> : IReadOnlyList<T>, IHistoricChangeNotify<IR
         TypelessOnChange?.Invoke();
     }
 
-   public ReadOnlySpan<T> Slice(int start, int length)
+    public ReadOnlySpan<T> Slice(int start, int length)
     {
         return CurrentValue.Slice(start, length);
     }

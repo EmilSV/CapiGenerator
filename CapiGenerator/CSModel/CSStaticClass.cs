@@ -26,6 +26,18 @@ public class CSStaticClass : BaseCSType, INotifyReviver<CSField>, INotifyReviver
         }
     }
 
+    public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
+    {
+        foreach (var field in Fields)
+        {
+            field.ReplaceTypes(predicate);
+        }
+        foreach (var method in Methods)
+        {
+            method.ReplaceTypes(predicate);
+        }
+    }
+
     void INotifyReviver<CSField>.OnAddRange(ReadOnlySpan<CSField> items)
     {
         foreach (var item in items)

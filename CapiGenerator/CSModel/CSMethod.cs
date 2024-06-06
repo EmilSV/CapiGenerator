@@ -145,7 +145,7 @@ public class CSMethod : BaseCSAstItem,
         {
             if (predicate(innerReturnType, out var newType))
             {
-                ReturnType = CSTypeInstance.CopyWithNewType(ReturnType, newType);
+                ReturnType = CSTypeInstance.CopyWithNewType(ReturnType, newType!);
             }
         }
         else
@@ -165,7 +165,7 @@ public class CSMethod : BaseCSAstItem,
             }
             if (predicate(innerType, out var newType))
             {
-                Parameters.TryReplaceAt(i, CSParameter.CopyWithNewType(parameter, newType));
+                Parameters.TryReplaceAt(i, CSParameter.CopyWithNewType(parameter, newType!));
             }
         }
     }

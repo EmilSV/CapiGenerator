@@ -10,7 +10,12 @@ public class CSEnumWriter : BaseCSEnumWriter
         var enumName = csEnum.Name;
         var enumValues = csEnum.Values;
 
-        using var stream = new StreamWriter(Path.Combine(writeConfig.OutputDirectory, $"{enumName}.cs"));
+        if (writeConfig.OutputDirectory is not null)
+        {
+            Directory.CreateDirectory(writeConfig.OutputDirectory);
+        }
+
+        using var stream = new StreamWriter(Path.Combine(writeConfig.OutputDirectory!, $"{enumName}.cs"));
 
         foreach (var usingNamespace in writeConfig.Usings)
         {
@@ -23,6 +28,16 @@ public class CSEnumWriter : BaseCSEnumWriter
         {
             stream.WriteLine($"namespace {csEnum.Namespace};");
         }
+
+        stream.WriteLine();
+
+        foreach (var attribute in csEnum.Attributes)
+        {
+            StreamWriterUtils.WriteToStream(stream, attribute);
+            stream.WriteLine();
+        }
+
+        await stream.FlushAsync();
 
         stream.WriteLine($"public enum {enumName}");
         stream.WriteLine("{");

@@ -9,7 +9,11 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
     {
         var staticClassName = csStaticClass.Name;
 
-        var filePath = Path.Combine(writeConfig.OutputDirectory, $"{staticClassName}.cs");
+        string outputDirectory = writeConfig.OutputDirectory;
+
+        Directory.CreateDirectory(outputDirectory);
+
+        var filePath = Path.Combine(outputDirectory, $"{staticClassName}.cs");
 
         var directoryPath = Path.GetDirectoryName(filePath);
 
@@ -17,7 +21,7 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
         {
             Directory.CreateDirectory(directoryPath);
         }
-        using var stream = new StreamWriter(Path.Combine(writeConfig.OutputDirectory, $"{staticClassName}.cs"));
+        using var stream = new StreamWriter(Path.Combine(outputDirectory, $"{staticClassName}.cs"));
 
         foreach (var usingNamespace in writeConfig.Usings)
         {

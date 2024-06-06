@@ -1,10 +1,20 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace CapiGenerator.CSModel;
 
 public interface ITypeReplace
 {
-    public delegate bool ReplacePredicate(ICSType type, out ICSType? newType);
+    public delegate bool ReplacePredicate(ICSType type, [NotNullWhen(true)] out ICSType? newType);
 
     void ReplaceTypes(ReplacePredicate predicate);
+
+    public static void ReplaceTypes(IEnumerable<ITypeReplace> typeReplace, ReplacePredicate predicate)
+    {
+        foreach (var typeReplacer in typeReplace)
+        {
+            typeReplacer.ReplaceTypes(predicate);
+        }
+    }
 }
 
 public static class ITypeReplaceExtensions

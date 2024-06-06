@@ -3,7 +3,9 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSStaticClass : BaseCSType, INotifyReviver<CSField>, INotifyReviver<CSMethod>
+public class CSStaticClass :
+    BaseCSType, ITypeReplace,
+    INotifyReviver<CSField>, INotifyReviver<CSMethod>
 {
     public NotifySet<CSField> Fields { get; private set; }
     public NotifySet<CSMethod> Methods { get; private set; }

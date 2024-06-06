@@ -174,7 +174,7 @@ public sealed class CSField : BaseCSAstItem,
         }
         if (predicate(innerType, out var newType))
         {
-            Type = CSTypeInstance.CopyWithNewType(Type, newType);
+            Type = CSTypeInstance.CopyWithNewType(Type, newType!);
         }
     }
 }

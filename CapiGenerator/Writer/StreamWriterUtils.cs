@@ -207,6 +207,12 @@ public static class StreamWriterUtils
         writer.Write("[");
         writer.Write(attribute.GetFullAttributeName());
 
+        if(attribute.CtorArgs.Length == 0 && attribute.Parameters.Count == 0)
+        {
+            writer.Write("]");
+            return;
+        }
+
         writer.Write("(");
 
         for (int i = 0; i < attribute.CtorArgs.Length; i++)

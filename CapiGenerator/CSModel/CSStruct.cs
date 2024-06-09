@@ -3,13 +3,28 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSStruct : BaseCSType, 
-    INotifyReviver<CSField>, INotifyReviver<CSMethod> , ITypeReplace
+public class CSStruct : BaseCSType,
+    INotifyReviver<CSField>, INotifyReviver<CSMethod>, ITypeReplace
 {
     public CSStruct()
     {
         Fields = new(this);
         Methods = new(this);
+    }
+
+    private bool _isPartial;
+
+    public bool IsPartial
+    {
+        get => _isPartial;
+        set
+        {
+            if (_isPartial != value)
+            {
+                _isPartial = value;
+                NotifyChange();
+            }
+        }
     }
 
     public NotifySet<CSField> Fields { get; private set; }

@@ -7,6 +7,22 @@ public class CSStaticClass :
     BaseCSType, ITypeReplace,
     INotifyReviver<CSField>, INotifyReviver<CSMethod>
 {
+    private bool _isPartial;
+
+    public bool IsPartial
+    {
+        get => _isPartial;
+        set
+        {
+            if (_isPartial != value)
+            {
+                _isPartial = value;
+                NotifyChange();
+            }
+        }
+    }
+
+
     public NotifySet<CSField> Fields { get; private set; }
     public NotifySet<CSMethod> Methods { get; private set; }
 

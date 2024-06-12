@@ -35,7 +35,13 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
             stream.WriteLine($"namespace {csStaticClass.Namespace};");
         }
 
-        stream.WriteLine($"public unsafe static class {staticClassName}");
+        stream.Write($"public unsafe static");
+        if (csStaticClass.IsPartial)
+        {
+            stream.Write(" partial");
+        }
+        stream.Write($" class ");
+        stream.WriteLine(staticClassName);
         stream.WriteLine("{");
 
         await stream.FlushAsync();

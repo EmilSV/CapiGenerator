@@ -3,7 +3,7 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public abstract class BaseCSAnonymousType : ICSType, ICSSecondPassable
+public abstract class BaseCSAnonymousType : ICSType, ICSSecondPassable ,ITypeReplace
 {
     public BaseCSAnonymousType()
     {
@@ -22,4 +22,6 @@ public abstract class BaseCSAnonymousType : ICSType, ICSSecondPassable
     { }
 
     public abstract string GetFullTypeDefString();
+
+    public abstract void ReplaceTypes(ITypeReplace.ReplacePredicate predicate);
 }

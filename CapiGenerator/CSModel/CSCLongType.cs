@@ -1,16 +1,12 @@
-using CapiGenerator.UtilTypes;
+using System.Runtime.InteropServices;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSCLongType : ICSType
+public sealed class CSCLongType : BaseBuiltinType
 {
     public static CSCLongType Instance { get; } = new();
 
-    public InstanceId Id { get; } = new();
+    public override string Namespace { get; } = "System.Runtime.InteropServices";
 
-    public string Namespace { get; } = "System.Runtime.InteropServices";
-
-    public string Name { get; } = "CLong";
-
-    public bool IsAnonymous => false;
+    public override string Name { get; } = nameof(CLong);
 }

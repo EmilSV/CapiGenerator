@@ -29,7 +29,30 @@ public class CSStructWriter : BaseCSStructWriter
             stream.WriteLine($"namespace {csStruct.Namespace};");
         }
 
-        stream.WriteLine($"public unsafe struct {structName}");
+        stream.Write($"public unsafe ");
+        if (csStruct.IsPartial)
+        {
+            stream.Write("partial ");
+        }
+        stream.Write($"struct ");
+        stream.Write(structName);
+        if(csStruct.Interfaces.Count > 0)
+        {
+            stream.Write(" : ");
+            bool first = true;
+            foreach (var @interface in csStruct.Interfaces)
+            {
+                stream.Write($"{@interface}");
+                if (!first)
+                {
+                    stream.Write(", ");
+                }
+                first = false;
+            }
+        }
+        
+        stream.WriteLine();
+
         stream.WriteLine("{");
 
         await stream.FlushAsync();

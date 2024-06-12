@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.Translator;
 using CapiGenerator.UtilTypes;
 
@@ -8,10 +9,13 @@ public class CSMethod : BaseCSAstItem,
 {
     private CSTypeInstance? _returnType;
     private string? _name;
-    private string? _body;
+    private LazyFormatString? _body;
     private CSAccessModifier _accessModifier = CSAccessModifier.Public;
     private bool _isStatic;
     private bool _isExtern;
+    private bool _isOverride;
+    private CSMethodOperatorModifier _operatorModifier = CSMethodOperatorModifier.None;
+
     public BaseCSType? ParentType { get; private set; }
 
 
@@ -20,9 +24,21 @@ public class CSMethod : BaseCSAstItem,
         Parameters = new(this);
     }
 
-    public required string Name
+    [SetsRequiredMembers]
+    public CSMethod(
+        CSTypeInstance returnType,
+        string name,
+        ReadOnlySpan<CSParameter> parameters
+    )
     {
-        get => _name!;
+        ReturnType = returnType;
+        _name = name;
+        Parameters = new(this, parameters);
+    }
+
+    public string? Name
+    {
+        get => _name;
         set
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -36,7 +52,7 @@ public class CSMethod : BaseCSAstItem,
             }
         }
     }
-    public string? Body
+    public LazyFormatString? Body
     {
         get => _body;
         set
@@ -85,6 +101,19 @@ public class CSMethod : BaseCSAstItem,
             }
         }
     }
+
+    public bool IsOverride
+    {
+        get => _isOverride;
+        set
+        {
+            if (_isOverride != value)
+            {
+                _isOverride = value;
+                NotifyChange();
+            }
+        }
+    }
     public CSAccessModifier AccessModifier
     {
         get => _accessModifier;
@@ -98,8 +127,21 @@ public class CSMethod : BaseCSAstItem,
         }
     }
 
-    public NotifyUniqueList<CSParameter> Parameters { get; }
+    public CSMethodOperatorModifier OperatorModifier
+    {
+        get => _operatorModifier;
+        set
+        {
+            if (_operatorModifier != value)
+            {
+                _operatorModifier = value;
+                NotifyChange();
+            }
+        }
+    }
 
+
+    public NotifyUniqueList<CSParameter> Parameters { get; }
     public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
 
     public override void OnSecondPass(CSTranslationUnit unit)

@@ -172,6 +172,13 @@ public sealed class CSField : BaseCSAstItem,
             Console.Error.WriteLine($"field {Name} has null type and cannot be replaced");
             return;
         }
+
+        if(innerType is BaseCSAnonymousType anonymousType)
+        {
+            anonymousType.ReplaceTypes(predicate);
+            return;
+        }
+
         if (predicate(innerType, out var newType))
         {
             Type = CSTypeInstance.CopyWithNewType(Type, newType!);

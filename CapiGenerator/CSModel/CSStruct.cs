@@ -10,6 +10,7 @@ public class CSStruct : BaseCSType,
     {
         Fields = new(this);
         Methods = new(this);
+        Interfaces = new(null);
     }
 
     private bool _isPartial;
@@ -27,6 +28,7 @@ public class CSStruct : BaseCSType,
         }
     }
 
+    public NotifySet<LazyFormatString> Interfaces { get; private set; }
     public NotifySet<CSField> Fields { get; private set; }
     public NotifySet<CSMethod> Methods { get; private set; }
 

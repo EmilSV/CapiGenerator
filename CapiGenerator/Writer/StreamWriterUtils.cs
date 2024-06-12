@@ -11,7 +11,7 @@ public static class StreamWriterUtils
         {
             WriteToStream(writer, attribute);
             writer.WriteLine();
-            writer.Write("\t");
+            writer.Write('\t');
         }
 
         writer.Write(method.AccessModifier switch
@@ -35,35 +35,65 @@ public static class StreamWriterUtils
             writer.Write(" extern");
         }
 
-        writer.Write(" ");
-        writer.Write(method.ReturnType!.ToString());
-        writer.Write(" ");
-        writer.Write(method.Name);
-        writer.Write("(");
+        if (method.IsOverride)
+        {
+            writer.Write(" override");
+        }
+
+        writer.Write(' ');
+
+        if (method.OperatorModifier is CSMethodOperatorModifier.None or CSMethodOperatorModifier.Operator)
+        {
+            writer.Write(method.ReturnType!.ToString());
+            writer.Write(' ');
+        }
+
+        if (method.OperatorModifier != CSMethodOperatorModifier.None)
+        {
+            writer.Write(method.OperatorModifier switch
+            {
+                CSMethodOperatorModifier.Explicit => "explicit operator ",
+                CSMethodOperatorModifier.Implicit => "implicit operator ",
+                CSMethodOperatorModifier.Operator => "operator ",
+                _ => throw new NotImplementedException(),
+            });
+        }
+
+        if (method.OperatorModifier is CSMethodOperatorModifier.Explicit or CSMethodOperatorModifier.Implicit)
+        {
+            writer.Write(method.ReturnType!.ToString());
+            writer.Write(' ');
+        }
+
+        if (method.OperatorModifier is CSMethodOperatorModifier.None or CSMethodOperatorModifier.Operator)
+        {
+            writer.Write(method.Name);
+        }
+        writer.Write('(');
 
         for (var i = 0; i < method.Parameters.Count; i++)
         {
             var parameter = method.Parameters[i];
             writer.Write(parameter.Type.ToString());
-            writer.Write(" ");
+            writer.Write(' ');
             writer.Write(parameter.Name);
             if (i < method.Parameters.Count - 1)
             {
-                writer.Write(",");
+                writer.Write(',');
             }
         }
 
-        writer.Write(")");
+        writer.Write(')');
         if (method.Body is not null)
         {
             writer.WriteLine();
-            writer.WriteLine("{");
-            writer.Write(method.Body);
-            writer.WriteLine("}");
+            writer.WriteLine('{');
+            writer.Write(method.Body?.ToString() ?? "");
+            writer.WriteLine('}');
         }
         else
         {
-            writer.Write(";");
+            writer.Write(';');
         }
         writer.WriteLine();
     }
@@ -207,7 +237,7 @@ public static class StreamWriterUtils
         writer.Write("[");
         writer.Write(attribute.GetFullAttributeName());
 
-        if(attribute.CtorArgs.Length == 0 && attribute.Parameters.Count == 0)
+        if (attribute.CtorArgs.Length == 0 && attribute.Parameters.Count == 0)
         {
             writer.Write("]");
             return;

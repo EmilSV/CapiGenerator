@@ -28,6 +28,8 @@ public class CSTypeInstance : BaseCSAstItem
     public ICSType? Type => _rRefType.Output;
     public IReadOnlyList<BaseCSTypeModifier> Modifiers => _modifier;
 
+    public bool IsNullable { get; init; } = false;
+
     public ReadOnlySpan<BaseCSTypeModifier> GetModifiersAsSpan() => _modifier;
 
     public override void OnSecondPass(CSTranslationUnit compilationUnit)
@@ -98,8 +100,15 @@ public class CSTypeInstance : BaseCSAstItem
             BaseCSType namedType => namedType.GetFullName(),
             BaseCSAnonymousType anonymousType => anonymousType.GetFullTypeDefString(),
             CSPrimitiveType primitiveType => primitiveType.Name,
+            BaseBuiltinType builtinType => builtinType.GetFullName(),
             _ => throw new Exception("unsupported type")
         });
+
+        if (IsNullable)
+        {
+            sb.Append('?');
+        }
+
         foreach (var modifier in _modifier)
         {
             sb.Append(modifier.GetTypeString());

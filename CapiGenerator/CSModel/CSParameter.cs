@@ -4,7 +4,7 @@ using CapiGenerator.Translator;
 namespace CapiGenerator.CSModel;
 
 public sealed class CSParameter(
-    string name, CSTypeInstance type, CSDefaultValue defaultValue = default
+    CSTypeInstance type, string name, CSDefaultValue defaultValue = default
 ) : BaseCSAstItem
 {
     public string Name => name;
@@ -29,13 +29,15 @@ public sealed class CSParameter(
     }
 
     public static CSParameter FromCParameter(CParameter parameter) => new(
-        name: parameter.Name,
         type: CSTypeInstance.CreateFromCTypeInstance(parameter.GetParameterType()),
+        name: parameter.Name,
         defaultValue: CSDefaultValue.NullValue
     );
 
     public static CSParameter CopyWithNewType(CSParameter original, ICSType newType)
     {
-        return new CSParameter(original.Name, CSTypeInstance.CopyWithNewType(original.Type, newType), original.DefaultValue);
+        return new CSParameter(CSTypeInstance.CopyWithNewType(original.Type, newType), original.Name, original.DefaultValue);
     }
+
+    public static CSParameter[] EmptyParameters => [];
 }

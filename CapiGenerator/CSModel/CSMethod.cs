@@ -14,6 +14,12 @@ public class CSMethod : BaseCSAstItem,
     private bool _isStatic;
     private bool _isExtern;
     private bool _isOverride;
+    private bool _isVirtual;
+    private bool _isReadonly;
+    private bool _isNew;
+    private bool _isAbstract;
+    private bool _isAsync;
+    private bool _isPartial;
     private CSMethodOperatorModifier _operatorModifier = CSMethodOperatorModifier.None;
 
     public BaseCSType? ParentType { get; private set; }
@@ -26,6 +32,7 @@ public class CSMethod : BaseCSAstItem,
 
     [SetsRequiredMembers]
     public CSMethod(
+        CSClassMemberModifier modifiers,
         CSTypeInstance returnType,
         string name,
         ReadOnlySpan<CSParameter> parameters
@@ -34,7 +41,88 @@ public class CSMethod : BaseCSAstItem,
         ReturnType = returnType;
         _name = name;
         Parameters = new(this, parameters);
+        _accessModifier = CSAccessModifierHelper.GetAccessModifier(modifiers);
+        _isExtern = (modifiers & CSClassMemberModifier.Extern) != 0;
+        _isOverride = (modifiers & CSClassMemberModifier.Override) != 0;
+        _isStatic = (modifiers & CSClassMemberModifier.Static) != 0;
+        _isVirtual = (modifiers & CSClassMemberModifier.Virtual) != 0;
+        _isReadonly = (modifiers & CSClassMemberModifier.ReadOnly) != 0;
+        _isNew = (modifiers & CSClassMemberModifier.New) != 0;
+        _isAbstract = (modifiers & CSClassMemberModifier.Abstract) != 0;
+        _isAsync = (modifiers & CSClassMemberModifier.Async) != 0;
+        _isPartial = (modifiers & CSClassMemberModifier.Partial) != 0;
+        _operatorModifier = CSMethodOperatorModifierHelper.GetOperatorModifier(modifiers);
     }
+
+    [SetsRequiredMembers]
+    public CSMethod(
+        CSClassMemberModifier modifiers,
+        ICSType returnType,
+        string name,
+        ReadOnlySpan<CSParameter> parameters
+    ) : this(modifiers, new CSTypeInstance(returnType), name, parameters)
+    {
+    }
+
+
+    [SetsRequiredMembers]
+    public CSMethod(
+        CSClassMemberModifier modifiers,
+        CSTypeInstance returnType,
+        string name,
+        ReadOnlySpan<(CSTypeInstance type, string name)> parameters
+    ) : this(modifiers, returnType, name, GetParameters(parameters))
+    {
+    }
+
+    [SetsRequiredMembers]
+    public CSMethod(
+        CSClassMemberModifier modifiers,
+        ICSType returnType,
+        string name,
+        ReadOnlySpan<(CSTypeInstance type, string name)> parameters
+    ) : this(modifiers, returnType, name, GetParameters(parameters))
+    {
+    }
+
+    [SetsRequiredMembers]
+    public CSMethod(
+        CSClassMemberModifier modifiers,
+        CSTypeInstance returnType,
+        string name,
+        ReadOnlySpan<(ICSType type, string name)> parameters
+    ) : this(modifiers, returnType, name, GetParameters(parameters))
+    {
+    }
+
+    [SetsRequiredMembers]
+    public CSMethod(
+        CSClassMemberModifier modifiers,
+        ICSType returnType,
+        string name,
+        ReadOnlySpan<(ICSType type, string name)> parameters
+    ) : this(modifiers, new CSTypeInstance(returnType), name, GetParameters(parameters))
+    {
+    }
+
+    [SetsRequiredMembers]
+    public CSMethod(
+        CSClassMemberModifier modifiers,
+        CSTypeInstance returnType,
+        ReadOnlySpan<(ICSType type, string name)> parameters
+    ) : this(modifiers, returnType, "", GetParameters(parameters))
+    {
+    }
+
+    [SetsRequiredMembers]
+    public CSMethod(
+        CSClassMemberModifier modifiers,
+        ICSType returnType,
+        ReadOnlySpan<(ICSType type, string name)> parameters
+    ) : this(modifiers, returnType, "", GetParameters(parameters))
+    {
+    }
+
 
     public string? Name
     {
@@ -114,6 +202,85 @@ public class CSMethod : BaseCSAstItem,
             }
         }
     }
+
+    public bool IsVirtual
+    {
+        get => _isVirtual;
+        set
+        {
+            if (_isVirtual != value)
+            {
+                _isVirtual = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    public bool IsReadonly
+    {
+        get => _isReadonly;
+        set
+        {
+            if (_isReadonly != value)
+            {
+                _isReadonly = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    public bool IsNew
+    {
+        get => _isNew;
+        set
+        {
+            if (_isNew != value)
+            {
+                _isNew = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    public bool IsAbstract
+    {
+        get => _isAbstract;
+        set
+        {
+            if (_isAbstract != value)
+            {
+                _isAbstract = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    public bool IsAsync
+    {
+        get => _isAsync;
+        set
+        {
+            if (_isAsync != value)
+            {
+                _isAsync = value;
+                NotifyChange();
+            }
+        }
+    }
+
+    public bool IsPartial
+    {
+        get => _isPartial;
+        set
+        {
+            if (_isPartial != value)
+            {
+                _isPartial = value;
+                NotifyChange();
+            }
+        }
+    }
+
     public CSAccessModifier AccessModifier
     {
         get => _accessModifier;
@@ -210,5 +377,37 @@ public class CSMethod : BaseCSAstItem,
                 Parameters.TryReplaceAt(i, CSParameter.CopyWithNewType(parameter, newType!));
             }
         }
+    }
+
+    private static CSParameter[] GetParameters(ReadOnlySpan<(CSTypeInstance type, string name)> parameters)
+    {
+        if (parameters.Length == 0)
+        {
+            return Array.Empty<CSParameter>();
+        }
+
+        var array = new CSParameter[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var (type, name) = parameters[i];
+            array[i] = new(type, name);
+        }
+        return array;
+    }
+
+    private static CSParameter[] GetParameters(ReadOnlySpan<(ICSType type, string name)> parameters)
+    {
+        if (parameters.Length == 0)
+        {
+            return Array.Empty<CSParameter>();
+        }
+
+        var array = new CSParameter[parameters.Length];
+        for (int i = 0; i < parameters.Length; i++)
+        {
+            var (type, name) = parameters[i];
+            array[i] = new(new(type), name);
+        }
+        return array;
     }
 }

@@ -86,10 +86,19 @@ public static class StreamWriterUtils
         writer.Write(')');
         if (method.Body is not null)
         {
-            writer.WriteLine();
-            writer.WriteLine('{');
-            writer.Write(method.Body?.ToString() ?? "");
-            writer.WriteLine('}');
+            var body = method.Body?.ToString() ?? "";
+            if (body.TrimStart().StartsWith("=>"))
+            {
+                writer.Write(' ');
+                writer.Write(body.TrimStart());
+            }
+            else
+            {
+                writer.WriteLine();
+                writer.WriteLine('{');
+                writer.Write(method.Body?.ToString() ?? "");
+                writer.WriteLine('}');
+            }
         }
         else
         {

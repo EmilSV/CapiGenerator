@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace CapiGenerator.UtilTypes;
 
-public class LazyFormatString(string format, params object[] args)
+public readonly struct LazyFormatString(string format, params object[] args)
 {
     public readonly string Format = format;
     private readonly object[] _args = args;
@@ -26,4 +26,6 @@ public class LazyFormatString(string format, params object[] args)
 
         return string.Format(Format, args);
     }
+
+    public static implicit operator LazyFormatString(string format) => new(format);
 }

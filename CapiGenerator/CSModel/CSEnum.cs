@@ -43,7 +43,7 @@ public sealed class CSEnum : BaseCSType,
     {
         if (predicate(_type, out var newType))
         {
-            if(newType is CSPrimitiveType primitiveType)
+            if (newType is CSPrimitiveType primitiveType)
             {
                 _type = primitiveType;
             }

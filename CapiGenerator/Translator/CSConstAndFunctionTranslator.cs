@@ -49,7 +49,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
 
         foreach (var constant in constantsTransLated)
         {
-            constant.EnrichingDataStore.Add(new CSTranslationParentClassData(csStaticClass));
+            constant.EnrichingDataStore.Set(new CSTranslationParentClassData(csStaticClass));
         }
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
@@ -187,11 +187,11 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
         var cType = constant.GetCConstantType();
         ICSType csType = cType switch
         {
-            CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
-            CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
-            CConstantType.UnsignedInt => CSPrimitiveType.Get(CSPrimitiveType.Kind.UInt),
-            CConstantType.LongLong => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
-            CConstantType.UnsignedLongLong => CSPrimitiveType.Get(CSPrimitiveType.Kind.ULong),
+            CConstantType.Char or CConstantType.Int8_t or CConstantType.UInt8_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
+            CConstantType.Int or CConstantType.Int32_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
+            CConstantType.UnsignedInt or CConstantType.UInt32_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.UInt),
+            CConstantType.LongLong or CConstantType.Int64_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
+            CConstantType.UnsignedLongLong or CConstantType.UInt64_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.ULong),
             CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Double),
             CConstantType.Size_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.NUInt),
             CConstantType.String => CSUft8LiteralType.Instance,
@@ -231,7 +231,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
             throw new Exception("Unknown constant type");
         }
 
-        newCSField.EnrichingDataStore.Add(new CSTranslationFromCAstData(constant));
+        newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
         return newCSField;
     }
 
@@ -248,7 +248,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
         };
         method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 
-        method.EnrichingDataStore.Add(new CSTranslationFromCAstData(function));
+        method.EnrichingDataStore.Set(new CSTranslationFromCAstData(function));
         if (dllName is not null)
         {
             method.Attributes.Add(CSAttribute<DllImportAttribute>.Create(
@@ -260,7 +260,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
                 ]
             ));
         }
-        function.EnrichingDataStore.Add(new CTranslationToCSAstData(method));
+        function.EnrichingDataStore.Set(new CTranslationToCSAstData(method));
 
         return method;
     }

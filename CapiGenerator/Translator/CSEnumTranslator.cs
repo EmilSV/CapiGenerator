@@ -53,8 +53,8 @@ public class CSEnumTranslator : BaseTranslator
             Type = CSPrimitiveType.Instances.Int
         };
         newCSEnum.Values.AddRange(enumValue);
-        newCSEnum.EnrichingDataStore.Add(new CSTranslationFromCAstData(enumItem));
-        enumItem.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSEnum));
+        newCSEnum.EnrichingDataStore.Set(new CSTranslationFromCAstData(enumItem));
+        enumItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSEnum));
         return newCSEnum;
     }
 
@@ -69,8 +69,8 @@ public class CSEnumTranslator : BaseTranslator
             Expression = csExpression
         };
 
-        newCSEnumValue.EnrichingDataStore.Add(new CSTranslationFromCAstData(enumField));
-        enumField.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSEnumValue));
+        newCSEnumValue.EnrichingDataStore.Set(new CSTranslationFromCAstData(enumField));
+        enumField.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSEnumValue));
         return newCSEnumValue;
     }
 

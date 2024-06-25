@@ -2,6 +2,6 @@ using CapiGenerator.CModel;
 
 namespace CapiGenerator.CSModel.EnrichData;
 
-public record CSTranslationParentClassData(
+public sealed record CSTranslationParentClassData(
     BaseCSType Parent
 );

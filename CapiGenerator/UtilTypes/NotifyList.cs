@@ -4,14 +4,27 @@ using System.Runtime.InteropServices;
 
 namespace CapiGenerator.UtilTypes;
 
-public sealed class NotifyList<T>(INotifyReviver<T>? notifyReceiver) :
+public sealed class NotifyList<T> :
     ICollection<T>, IEnumerable<T>, IEnumerable, IReadOnlyCollection<T>, IReadOnlyList<T>, ICollection, IList, IList<T>
 {
     [ThreadStatic] private static List<T>? _tempList;
 
     private readonly List<T> _list = [];
-    private readonly INotifyReviver<T>? _notifyReceiver = notifyReceiver;
+    private readonly INotifyReviver<T>? _notifyReceiver;
     private volatile uint _changeCounter = 0;
+
+    public NotifyList(INotifyReviver<T>? notifyReceiver)
+    {
+        _notifyReceiver = notifyReceiver;
+        _list = [];
+    }
+
+    public NotifyList(INotifyReviver<T>? notifyReceiver, ReadOnlySpan<T> items)
+    {
+        _notifyReceiver = notifyReceiver;
+        _list = [.. items];
+    }
+
 
     public InstanceId Id { get; } = new();
     public uint ChangeCounter => _changeCounter;

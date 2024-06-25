@@ -1,12 +1,13 @@
+using System.Reflection.Metadata;
 using CapiGenerator.CSModel;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.Writer;
 
 public static class StreamWriterUtils
 {
-    public static void WriteToStream(StreamWriter writer, CSMethod method)
+    public static async Task WriteToStream(StreamWriter writer, CSMethod method)
     {
-
         foreach (var attribute in method.Attributes)
         {
             WriteToStream(writer, attribute);
@@ -69,36 +70,11 @@ public static class StreamWriterUtils
         {
             writer.Write(method.Name);
         }
-        writer.Write('(');
 
-        for (var i = 0; i < method.Parameters.Count; i++)
+        await WriteParameters(writer, method.Parameters);
+        if (method.Body is LazyFormatString body)
         {
-            var parameter = method.Parameters[i];
-            writer.Write(parameter.Type.ToString());
-            writer.Write(' ');
-            writer.Write(parameter.Name);
-            if (i < method.Parameters.Count - 1)
-            {
-                writer.Write(',');
-            }
-        }
-
-        writer.Write(')');
-        if (method.Body is not null)
-        {
-            var body = method.Body?.ToString() ?? "";
-            if (body.TrimStart().StartsWith("=>"))
-            {
-                writer.Write(' ');
-                writer.Write(body.TrimStart());
-            }
-            else
-            {
-                writer.WriteLine();
-                writer.WriteLine('{');
-                writer.Write(method.Body?.ToString() ?? "");
-                writer.WriteLine('}');
-            }
+            await WriteBody(writer, body);
         }
         else
         {
@@ -198,6 +174,32 @@ public static class StreamWriterUtils
         }
     }
 
+    public static async Task WriteToStream(StreamWriter writer, CSConstructor constructor)
+    {
+        writer.Write(constructor.AccessModifier switch
+        {
+            CSAccessModifier.Public => "public",
+            CSAccessModifier.Private => "private",
+            CSAccessModifier.Protected => "protected",
+            CSAccessModifier.Internal => "internal",
+            CSAccessModifier.ProtectedInternal => "protected internal",
+            CSAccessModifier.PrivateProtected => "private protected",
+            _ => throw new ArgumentOutOfRangeException("constructor.AccessModifier.Value")
+        });
+
+        writer.Write(" ");
+
+        if (constructor.ParentType is null)
+        {
+            throw new InvalidOperationException("Parent type is not set");
+        }
+
+        writer.Write(constructor.ParentType.Name);
+        await WriteParameters(writer, constructor.Parameters);
+        await WriteBody(writer, constructor.Body ?? "");
+        writer.WriteLine();
+    }
+
     public static void WriteToStreamGetterSetter(
         StreamWriter writer, CSPropertyBody? getterBody, CSPropertyBody? setterBody)
     {
@@ -286,5 +288,45 @@ public static class StreamWriterUtils
     public static bool HasGetterOrSetter(CSField field)
     {
         return field.GetterBody is not null || field.SetterBody is not null;
+    }
+
+    public static async Task WriteParameters(StreamWriter writer, IEnumerable<CSParameter> parameters)
+    {
+        writer.Write("(");
+        bool first = true;
+        foreach (var parameter in parameters)
+        {
+            if (!first)
+            {
+                writer.Write(", ");
+            }
+            first = false;
+            writer.Write(parameter.Type.ToString());
+            writer.Write(' ');
+            writer.Write(parameter.Name);
+        }
+        writer.Write(")");
+
+        await writer.FlushAsync();
+    }
+
+    public static async Task WriteBody(StreamWriter writer, LazyFormatString body)
+    {
+        string bodyString = body.ToString();
+
+        if (bodyString.TrimStart().StartsWith("=>"))
+        {
+            writer.Write(' ');
+            writer.Write(body.ToString().TrimStart());
+        }
+        else
+        {
+            writer.WriteLine();
+            writer.WriteLine('{');
+            writer.Write(body.ToString());
+            writer.WriteLine('}');
+        }
+
+        await writer.FlushAsync();
     }
 }

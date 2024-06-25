@@ -70,7 +70,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
         };
         method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 
-        method.EnrichingDataStore.Add(new CSTranslationFromCAstData(function));
+        method.EnrichingDataStore.Set(new CSTranslationFromCAstData(function));
         if (dllName is not null)
         {
             method.Attributes.Add(CSAttribute<DllImportAttribute>.Create(
@@ -82,7 +82,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
                 ]
             ));
         }
-        function.EnrichingDataStore.Add(new CTranslationToCSAstData(method));
+        function.EnrichingDataStore.Set(new CTranslationToCSAstData(method));
 
         return method;
     }

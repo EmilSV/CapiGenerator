@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using CapiGenerator.CModel;
 using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
@@ -137,6 +139,25 @@ public sealed class CSField : BaseCSAstItem,
 
     public BaseCSType? ParentType { get; private set; }
 
+
+    public CSField()
+    {
+
+    }
+
+#pragma warning disable 8618
+    [SetsRequiredMembers]
+    public CSField(CSClassMemberModifier modifier, CSTypeInstance type, string name)
+    {
+        _accessModifier = CSAccessModifierHelper.GetAccessModifier(modifier);
+        _type = type;
+        _name = name;
+        _isConst = (modifier & CSClassMemberModifier.Const) != 0;
+        _isReadOnly = (modifier & CSClassMemberModifier.ReadOnly) != 0;
+        _isStatic = (modifier & CSClassMemberModifier.Static) != 0;
+    }
+#pragma warning restore 8618
+
     public override void OnSecondPass(CSTranslationUnit unit)
     {
         Type.OnSecondPass(unit);
@@ -173,7 +194,7 @@ public sealed class CSField : BaseCSAstItem,
             return;
         }
 
-        if(innerType is BaseCSAnonymousType anonymousType)
+        if (innerType is BaseCSAnonymousType anonymousType)
         {
             anonymousType.ReplaceTypes(predicate);
             return;

@@ -63,7 +63,7 @@ public class CSConstTranslator(string className) : BaseTranslator
 
         foreach (var constant in constantsTransLated)
         {
-            constant.EnrichingDataStore.Add(new CSTranslationParentClassData(csStaticClass));
+            constant.EnrichingDataStore.Set(new CSTranslationParentClassData(csStaticClass));
         }
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
@@ -167,7 +167,7 @@ public class CSConstTranslator(string className) : BaseTranslator
             throw new Exception("Unknown constant type");
         }
 
-        newCSField.EnrichingDataStore.Add(new CSTranslationFromCAstData(constant));
+        newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
         return newCSField;
     }
 

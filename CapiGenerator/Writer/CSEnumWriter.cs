@@ -21,6 +21,7 @@ public class CSEnumWriter : BaseCSEnumWriter
         {
             stream.WriteLine($"using {usingNamespace};");
         }
+        stream.WriteLine();
 
         await stream.FlushAsync();
 

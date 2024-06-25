@@ -52,8 +52,8 @@ public class CSStructTranslator : BaseTranslator
         };
         newCSStruct.Fields.AddRange(fields);
 
-        newCSStruct.EnrichingDataStore.Add(new CSTranslationFromCAstData(structItem));
-        structItem.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSStruct));
+        newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(structItem));
+        structItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
         return newCSStruct;
     }
 
@@ -85,8 +85,8 @@ public class CSStructTranslator : BaseTranslator
             Type = csTypeInstance,
         };
 
-        newField.EnrichingDataStore.Add(new CSTranslationFromCAstData(field));
-        field.EnrichingDataStore.Add(new CTranslationToCSAstData(newField));
+        newField.EnrichingDataStore.Set(new CSTranslationFromCAstData(field));
+        field.EnrichingDataStore.Set(new CTranslationToCSAstData(newField));
 
         return newField;
     }

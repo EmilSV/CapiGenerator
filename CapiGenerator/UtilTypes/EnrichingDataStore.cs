@@ -5,140 +5,87 @@ namespace CapiGenerator.UtilTypes;
 
 public sealed class EnrichingDataStore
 {
-    private class ReflectionCache
+    private readonly Dictionary<ObjectType, object> enrichingData = [];
+    public void Set<T>(T data)
+        where T : notnull
     {
-        public List<ObjectType> interfaces;
-        public List<ObjectType> baseTypes;
-        public ObjectType selfType;
-
-        public ReflectionCache(ObjectType selfType)
+        if (!typeof(T).IsSealed && !typeof(T).IsValueType)
         {
-            this.selfType = selfType;
-
-            HashSet<ObjectType> interfaces = [];
-            HashSet<ObjectType> baseTypes = [];
-            AddType(interfaces, baseTypes, selfType);
-
-            this.interfaces = [.. interfaces];
-            this.baseTypes = [.. baseTypes];
+            throw new ArgumentException("T must be a value type or a sealed class");
+        }
+        if (data is null)
+        {
+            throw new ArgumentException("data cannot be null");
         }
 
-        private static void AddType(HashSet<ObjectType> interfaces, HashSet<ObjectType> baseTypes, ObjectType? type)
-        {
-            if (type == null)
-            {
-                return;
-            }
-
-            if (type.IsInterface)
-            {
-                interfaces.Add(type);
-            }
-            else
-            {
-                baseTypes.Add(type);
-                AddType(interfaces, baseTypes, type.BaseType);
-            }
-
-            foreach (ObjectType interfaceType in type.GetInterfaces())
-            {
-                AddType(interfaces, baseTypes, interfaceType);
-            }
-        }
+        enrichingData[typeof(T)] = data;
     }
 
-    private readonly static Dictionary<ObjectType, ReflectionCache> reflectionCache = [];
-
-    private Dictionary<ObjectType, object>? enrichingData;
-
-    private void AddOneType(ObjectType type, object data)
+    public bool SetIfEmpty<T>(T data)
+        where T : notnull
     {
-        enrichingData ??= [];
-        if (enrichingData.TryGetValue(type, out var currentData))
+        if (!typeof(T).IsSealed && !typeof(T).IsValueType)
         {
-            if (currentData is List<object> currentDataList)
-            {
-                currentDataList.Add(data);
-            }
-            else
-            {
-                enrichingData[type] = (List<object>)[currentData, data];
-            }
+            throw new ArgumentException("T must be a value type or a sealed class");
         }
-        else
+        if (data is null)
         {
-            enrichingData.Add(type, data);
+            throw new ArgumentException("data cannot be null");
         }
+
+        if (enrichingData.ContainsKey(typeof(T)))
+        {
+            return false;
+        }
+
+        enrichingData[typeof(T)] = data;
+        return true;
     }
 
-    public void Add(object data)
+    public bool Remove<T>()
+        where T : notnull
     {
-        if (!reflectionCache.TryGetValue(data.GetType(), out ReflectionCache? cache))
-        {
-            cache = new ReflectionCache(data.GetType());
-        }
-
-        foreach (ObjectType interfaceType in cache.interfaces)
-        {
-            AddOneType(interfaceType, data);
-        }
-
-        foreach (ObjectType interfaceType in cache.baseTypes)
-        {
-            AddOneType(interfaceType, data);
-        }
-
-        AddOneType(cache.selfType, data);
+        return enrichingData.Remove(typeof(T));
     }
 
-    public int Get<T>(List<T> output)
+    public bool TryGetValue<T>([MaybeNullWhen(false)] out T value)
+        where T : notnull
     {
-        if (enrichingData == null)
+        if (enrichingData.TryGetValue(typeof(T), out var untypedValue))
         {
-            return 0;
+            value = (T)untypedValue;
+            return true;
         }
-
-        if (enrichingData.TryGetValue(typeof(T), out var currentData))
-        {
-            if (currentData is List<object> currentDataList)
-            {
-                foreach (var item in currentDataList)
-                {
-                    output.Add((T)item);
-                }
-
-                return currentDataList.Count;
-            }
-            else
-            {
-                output.Add((T)currentData);
-                return 1;
-            }
-        }
-
-        return 0;
+        value = default;
+        return false;
     }
 
     [return: MaybeNull]
     public T Get<T>()
     {
-        if (enrichingData == null)
-        {
-            return default;
-        }
-
         if (enrichingData.TryGetValue(typeof(T), out var currentData))
         {
-            if (currentData is List<object> currentDataList)
-            {
-                return (T)currentDataList[^1];
-            }
-            else
-            {
-                return (T)currentData;
-            }
+            return (T)currentData;
         }
 
         return default;
+    }
+
+    public T Get<T>(Func<T> createIfEmptyFn)
+        where T : notnull
+    {
+        if (enrichingData.TryGetValue(typeof(T), out var currentData))
+        {
+            return (T)currentData;
+        }
+        var newData = createIfEmptyFn();
+        Set(newData);
+        return newData;
+    }
+
+    public bool Has<T>()
+        where T : notnull
+    {
+        return enrichingData.ContainsKey(typeof(T));
     }
 }

@@ -22,21 +22,36 @@ public class CSStructWriter : BaseCSStructWriter
             stream.WriteLine($"using {usingNamespace};");
         }
 
+        stream.WriteLine();
+
         await stream.FlushAsync();
 
         if (csStruct.Namespace is not null)
         {
             stream.WriteLine($"namespace {csStruct.Namespace};");
         }
+        stream.WriteLine();
 
-        stream.Write($"public unsafe ");
+        stream.Write(csStruct.AccessModifier switch
+        {
+            CSAccessModifier.Public => "public ",
+            CSAccessModifier.Private => "private ",
+            CSAccessModifier.Internal => "internal ",
+            _ => throw new ArgumentOutOfRangeException("csStruct.AccessModifier.Value")
+        });
+
+        if (csStruct.IsUnsafe)
+        {
+            stream.Write("unsafe ");
+        }
+
         if (csStruct.IsPartial)
         {
             stream.Write("partial ");
         }
         stream.Write($"struct ");
         stream.Write(structName);
-        if(csStruct.Interfaces.Count > 0)
+        if (csStruct.Interfaces.Count > 0)
         {
             stream.Write(" : ");
             bool first = true;
@@ -50,12 +65,13 @@ public class CSStructWriter : BaseCSStructWriter
                 first = false;
             }
         }
-        
+
         stream.WriteLine();
 
         stream.WriteLine("{");
 
         await stream.FlushAsync();
+
 
         foreach (var structField in structFields)
         {
@@ -64,10 +80,18 @@ public class CSStructWriter : BaseCSStructWriter
             await stream.FlushAsync();
         }
 
+        foreach (var constructor in csStruct.Constructors)
+        {
+            stream.Write('\t');
+            await WriteToStream(stream, constructor);
+            await stream.FlushAsync();
+        }
+
+
         foreach (var structMethod in csStruct.Methods)
         {
             stream.Write('\t');
-            WriteToStream(stream, structMethod);
+            await WriteToStream(stream, structMethod);
             await stream.FlushAsync();
         }
 

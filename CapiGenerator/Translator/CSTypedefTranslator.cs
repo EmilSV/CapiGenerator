@@ -71,8 +71,8 @@ public class CSTypedefTranslator : BaseTranslator
             Type = CSTypeInstance.CreateFromCTypeInstance(typedefItem.InnerType)
         });
 
-        newCSStruct.EnrichingDataStore.Add(new CSTranslationFromCAstData(typedefItem));
-        typedefItem.EnrichingDataStore.Add(new CTranslationToCSAstData(newCSStruct));
+        newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(typedefItem));
+        typedefItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
         return newCSStruct;
     }
 }

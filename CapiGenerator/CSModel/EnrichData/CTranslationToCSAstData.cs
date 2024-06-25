@@ -1,5 +1,5 @@
 namespace CapiGenerator.CSModel.EnrichData;
 
-public record CTranslationToCSAstData(
+public sealed record CTranslationToCSAstData(
     BaseCSAstItem AstItem
 );

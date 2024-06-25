@@ -28,12 +28,16 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
             stream.WriteLine($"using {usingNamespace};");
         }
 
+        stream.WriteLine();
+
         await stream.FlushAsync();
 
         if (csStaticClass.Namespace is not null)
         {
             stream.WriteLine($"namespace {csStaticClass.Namespace};");
         }
+
+        stream.WriteLine();
 
         stream.Write($"public unsafe static");
         if (csStaticClass.IsPartial)
@@ -53,10 +57,12 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
             await stream.FlushAsync();
         }
 
+        stream.WriteLine();
+
         foreach (var structMethod in csStaticClass.Methods)
         {
             stream.Write('\t');
-            WriteToStream(stream, structMethod);
+            await WriteToStream(stream, structMethod);
             await stream.FlushAsync();
         }
 

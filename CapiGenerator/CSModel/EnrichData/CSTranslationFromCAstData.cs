@@ -2,6 +2,6 @@ using CapiGenerator.CModel;
 
 namespace CapiGenerator.CSModel.EnrichData;
 
-public record CSTranslationFromCAstData(
+public sealed record CSTranslationFromCAstData(
     BaseCAstItem AstItem
 );

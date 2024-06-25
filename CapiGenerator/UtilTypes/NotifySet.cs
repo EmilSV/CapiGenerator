@@ -210,7 +210,7 @@ public sealed class NotifySet<T>(INotifyReviver<T>? notifyReceiver) :
 
     IEnumerator<T> IEnumerable<T>.GetEnumerator()
     {
-        return this.GetEnumerator();
+        return _set.GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()

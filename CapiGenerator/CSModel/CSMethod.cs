@@ -116,6 +116,16 @@ public class CSMethod : BaseCSAstItem,
 
     [SetsRequiredMembers]
     public CSMethod(
+    CSClassMemberModifier modifiers,
+        CSTypeInstance returnType,
+        ReadOnlySpan<(CSTypeInstance type, string name)> parameters
+    ) : this(modifiers, returnType, "", GetParameters(parameters))
+    {
+    }
+
+
+    [SetsRequiredMembers]
+    public CSMethod(
         CSClassMemberModifier modifiers,
         ICSType returnType,
         ReadOnlySpan<(ICSType type, string name)> parameters
@@ -308,7 +318,7 @@ public class CSMethod : BaseCSAstItem,
     }
 
 
-    public NotifyUniqueList<CSParameter> Parameters { get; }
+    public NotifyList<CSParameter> Parameters { get; }
     public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
 
     public override void OnSecondPass(CSTranslationUnit unit)

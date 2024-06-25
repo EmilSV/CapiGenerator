@@ -15,12 +15,12 @@ public static class CSAccessModifierHelper
 {
     public static CSAccessModifier GetAccessModifier(CSClassMemberModifier modifiers)
     {
-        if ((modifiers & CSClassMemberModifier.ProtectedInternal) != 0)
+        if ((modifiers & CSClassMemberModifier.ProtectedInternal) == CSClassMemberModifier.ProtectedInternal)
         {
             return CSAccessModifier.ProtectedInternal;
         }
 
-        if ((modifiers & CSClassMemberModifier.PrivateProtected) != 0)
+        if ((modifiers & CSClassMemberModifier.PrivateProtected) == CSClassMemberModifier.PrivateProtected)
         {
             return CSAccessModifier.PrivateProtected;
         }

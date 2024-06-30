@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel;
+using CapiGenerator.CSModel.ConstantToken;
 using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
@@ -121,4 +122,5 @@ public readonly record struct CSDefaultValue
     }
 
     public static readonly CSDefaultValue NullValue = default;
+    public static readonly CSDefaultValue DefaultValue = new(new CSConstantExpression([CSDefaultToken.Instance]));
 }

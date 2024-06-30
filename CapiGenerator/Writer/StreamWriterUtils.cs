@@ -176,6 +176,8 @@ public static class StreamWriterUtils
 
     public static async Task WriteToStream(StreamWriter writer, CSConstructor constructor)
     {
+        writer.WriteLine();
+
         writer.Write(constructor.AccessModifier switch
         {
             CSAccessModifier.Public => "public",
@@ -304,6 +306,7 @@ public static class StreamWriterUtils
             writer.Write(parameter.Type.ToString());
             writer.Write(' ');
             writer.Write(parameter.Name);
+            WriteToStream(writer, parameter.DefaultValue);
         }
         writer.Write(")");
 

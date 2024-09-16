@@ -44,6 +44,27 @@ public class ConstantParser : BaseParser
                     outputChannel.OnReceiveConstant(newConst);
                 }
             }
+
+            foreach (var field in compilation.Fields)
+            {
+                if (field.StorageQualifier != CppStorageQualifier.Static)
+                {
+                    continue;
+                }
+
+                if (field.Type is not CppQualifiedType type || type.Qualifier != CppTypeQualifier.Const)
+                {
+                    continue;
+                }
+
+                if (ShouldSkip(field))
+                {
+                    continue;
+                }
+
+                
+
+            }
         }
     }
 
@@ -73,6 +94,7 @@ public class ConstantParser : BaseParser
     }
 
     protected virtual bool ShouldSkip(CppMacro constant) => false;
+    protected virtual bool ShouldSkip(CppField constant) => false;
     protected virtual void OnError(CppMacro macro, string message)
     {
         Console.Error.WriteLine($"Error parsing constant {macro.Name}: {message}");

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
@@ -20,5 +21,11 @@ public abstract class BaseBuiltinType : ICSType
     public override string ToString()
     {
         return GetFullName();
+    }
+
+    public bool TryGetName([NotNullWhen(true)] out string? name)
+    {
+        name = Name;
+        return true;
     }
 }

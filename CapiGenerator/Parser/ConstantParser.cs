@@ -1,6 +1,7 @@
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.BuiltinConstants;
 using CapiGenerator.CModel.ConstantToken;
+using CapiGenerator.CModel.Type;
 using CppAst;
 
 namespace CapiGenerator.Parser;
@@ -62,8 +63,11 @@ public class ConstantParser : BaseParser
                     continue;
                 }
 
-                
-
+                var newConstant = FirstPass(field);
+                if (newConstant is not null)
+                {
+                    outputChannel.OnReceiveConstant(newConstant);
+                }
             }
         }
     }
@@ -93,11 +97,76 @@ public class ConstantParser : BaseParser
         return new(macro.Name, new(constantTokens!));
     }
 
+    protected virtual CStaticConstant? FirstPass(CppField field)
+    {
+        var constantType = CppTypeToConstantType(field.Type);
+        if (constantType is null)
+        {
+            return null;
+        }
+
+        return new(
+            realType: CTypeInstance.FromCppType(field.Type),
+            constantType: constantType.Value,
+            name: field.Name,
+            expression: [new CConstLiteralToken(field.InitValue.Value!.ToString()!)]
+        );
+    }
+
     protected virtual bool ShouldSkip(CppMacro constant) => false;
     protected virtual bool ShouldSkip(CppField constant) => false;
     protected virtual void OnError(CppMacro macro, string message)
     {
         Console.Error.WriteLine($"Error parsing constant {macro.Name}: {message}");
+    }
+
+    protected virtual void OnError(CppField field, string message)
+    {
+        Console.Error.WriteLine($"Error parsing constant {field.Name}: {message}");
+    }
+
+
+    public static CConstantType? CppTypeToConstantType(CppType type)
+    {
+        static CppPrimitiveKind? GetPrimitiveType(CppType type)
+        {
+            if (type is CppPrimitiveType primitiveType)
+            {
+                return primitiveType.Kind;
+            }
+            if (type is CppTypedef typedef)
+            {
+                return GetPrimitiveType(typedef.ElementType);
+            }
+            if (type is CppQualifiedType qualifiedType && qualifiedType.Qualifier == CppTypeQualifier.Const)
+            {
+                return GetPrimitiveType(qualifiedType.ElementType);
+            }
+            return null;
+        }
+
+        var primitiveType = GetPrimitiveType(type);
+        if (primitiveType is null)
+        {
+            return null;
+        }
+
+        return primitiveType switch
+        {
+            CppPrimitiveKind.Char => CConstantType.Char,
+            CppPrimitiveKind.Int => CConstantType.Int,
+            CppPrimitiveKind.UnsignedInt => CConstantType.UnsignedInt,
+            CppPrimitiveKind.LongLong => CConstantType.LongLong,
+            CppPrimitiveKind.UnsignedLongLong => CConstantType.UnsignedLongLong,
+            CppPrimitiveKind.Float => CConstantType.Float,
+            CppPrimitiveKind.Double => CConstantType.Double,
+            CppPrimitiveKind.Short => CConstantType.Short,
+            CppPrimitiveKind.Long => CConstantType.Long,
+            CppPrimitiveKind.UnsignedChar => CConstantType.UnsignedChar,
+            CppPrimitiveKind.UnsignedShort => CConstantType.UnsignedShort,
+            CppPrimitiveKind.UnsignedLong => CConstantType.UnsignedLong,
+            _ => null
+        };
     }
 
     public static BaseCConstantToken? CppTokenToConstantToken(CppToken token) => token.Kind switch

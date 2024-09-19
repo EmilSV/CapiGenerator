@@ -121,6 +121,21 @@ public readonly record struct CSDefaultValue
         }
     }
 
+
+    public CSConstantExpression? ToCSConstantExpression()
+    {
+        return Value switch
+        {
+            CSConstantExpression c => c,
+            long l => [new CSConstLiteralToken(l.ToString(), CSConstantType.Long)],
+            ulong ul => [new CSConstLiteralToken(ul.ToString(), CSConstantType.Ulong)],
+            double d => [new CSConstLiteralToken(d.ToString(), CSConstantType.Double)],
+            string s => [new CSConstLiteralToken(s, CSConstantType.String)],
+            bool b => [new CSConstLiteralToken(b.ToString(), CSConstantType.Bool)],
+            _ => null
+        };
+    }
+
     public static readonly CSDefaultValue NullValue = default;
     public static readonly CSDefaultValue DefaultValue = new(new CSConstantExpression([CSDefaultToken.Instance]));
 }

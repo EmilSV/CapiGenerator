@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
@@ -17,4 +18,10 @@ public sealed class CSBannedType : ICSType
     public string Name => "__BanedType__";
 
     public bool IsAnonymous => false;
+
+    public bool TryGetName([NotNullWhen(true)] out string? name)
+    {
+        name = null;
+        return false;
+    }
 }

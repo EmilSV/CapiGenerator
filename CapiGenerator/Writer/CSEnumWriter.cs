@@ -40,7 +40,12 @@ public class CSEnumWriter : BaseCSEnumWriter
 
         await stream.FlushAsync();
 
-        stream.WriteLine($"public enum {enumName}");
+        stream.Write($"public enum {enumName}");
+        if (csEnum.Type.KindValue != CSPrimitiveType.Kind.Int)
+        {
+            stream.Write($" : {csEnum.Type.Name}");
+        }
+        stream.WriteLine();
         stream.WriteLine("{");
 
         await stream.FlushAsync();

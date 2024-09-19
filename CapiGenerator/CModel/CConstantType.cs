@@ -23,4 +23,9 @@ public enum CConstantType
     Double,
     Size_t,
     String,
+    Short,
+    Long,
+    UnsignedChar,
+    UnsignedShort,
+    UnsignedLong,
 }

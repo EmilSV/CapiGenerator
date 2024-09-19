@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.Translator;
 using CapiGenerator.UtilTypes;
 
@@ -24,4 +25,10 @@ public abstract class BaseCSAnonymousType : ICSType, ICSSecondPassable, ITypeRep
     public abstract string GetFullTypeDefString();
 
     public abstract void ReplaceTypes(ITypeReplace.ReplacePredicate predicate);
+
+    public bool TryGetName([NotNullWhen(true)] out string? name)
+    {
+        name = null;
+        return false;
+    }
 }

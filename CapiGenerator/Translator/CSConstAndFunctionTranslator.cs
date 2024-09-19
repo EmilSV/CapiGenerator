@@ -147,6 +147,10 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
                         constantFields.Add(TranslateConstant(cConstant));
                         constantsTransLated.Add(constant);
                         break;
+                    case CStaticConstant staticConstant:
+                        constantFields.Add(TranslateConstant(staticConstant));
+                        constantsTransLated.Add(constant);
+                        break;
                     case BaseBuiltInCConstant builtinConstant:
                         var builtinCsConstant = AllBuiltInCsConstants.csConstants.First(i => i.CConstantTranslateToBuiltin(builtinConstant));
                         outputChannel.OnReceiveBuiltInConstant(builtinConstant, builtinCsConstant);
@@ -234,6 +238,64 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
         newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
         return newCSField;
     }
+
+    protected CSField TranslateConstant(CStaticConstant constant)
+    {
+        var cType = constant.GetCConstantType();
+        ICSType csType = cType switch
+        {
+            CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
+            CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
+            CConstantType.UnsignedInt => CSPrimitiveType.Get(CSPrimitiveType.Kind.UInt),
+            CConstantType.LongLong => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
+            CConstantType.UnsignedLongLong => CSPrimitiveType.Get(CSPrimitiveType.Kind.ULong),
+            CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Double),
+            CConstantType.Size_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.NUInt),
+            CConstantType.Short => CSPrimitiveType.Get(CSPrimitiveType.Kind.Short),
+            CConstantType.Long => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
+            CConstantType.UnsignedShort => CSPrimitiveType.Get(CSPrimitiveType.Kind.UShort),
+            CConstantType.UnsignedLong => CSPrimitiveType.Get(CSPrimitiveType.Kind.ULong),
+            CConstantType.String => CSUft8LiteralType.Instance,
+            _ => throw new Exception("Unknown constant type"),
+        };
+
+        bool IsStaticGetter = csType == CSUft8LiteralType.Instance;
+        bool IsConstant = csType != CSUft8LiteralType.Instance;
+
+        var typeInstance = new CSTypeInstance(csType);
+        var csConstantExpression = CSConstantExpression.FromCConstantExpression(constant.Expression);
+        var defaultValue = new CSDefaultValue(csConstantExpression);
+        CSField newCSField;
+
+        if (IsConstant)
+        {
+            newCSField = new CSField
+            {
+                Name = NameSelector(constant),
+                Type = typeInstance,
+                DefaultValue = defaultValue,
+                IsConst = true
+            };
+        }
+        else if (IsStaticGetter)
+        {
+            newCSField = new CSField
+            {
+                Name = NameSelector(constant),
+                Type = typeInstance,
+                IsStatic = true,
+                GetterBody = new($" => {csConstantExpression}u8;"),
+            };
+        }
+        else
+        {
+            throw new Exception("Unknown constant type");
+        }
+
+        newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
+        return newCSField;
+    }
+
 
     protected CSMethod TranslateFunction(CFunction function)
     {

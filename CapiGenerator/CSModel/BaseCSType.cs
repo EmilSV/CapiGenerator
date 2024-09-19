@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
@@ -41,6 +42,12 @@ public abstract class BaseCSType
         }
 
         return Name;
+    }
+
+    public bool TryGetName([NotNullWhen(true)] out string? name)
+    {
+        name = Name;
+        return true;
     }
 
     InstanceId ICSType.Id => Id;

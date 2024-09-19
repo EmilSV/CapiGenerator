@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel;
 using CapiGenerator.UtilTypes;
 
@@ -98,8 +99,18 @@ public sealed class CSPrimitiveType : ICSType
         CConstantType.Char => Get(Kind.Byte),
         CConstantType.Float => Get(Kind.Float),
         CConstantType.Double => Get(Kind.Double),
+        CConstantType.Short => Get(Kind.Short),
+        CConstantType.Long => Get(Kind.Long),
+        CConstantType.UnsignedShort => Get(Kind.UShort),
+        CConstantType.UnsignedLong => Get(Kind.ULong),
         _ => throw new ArgumentOutOfRangeException(nameof(constType))
     };
+
+    public bool TryGetName([NotNullWhen(true)] out string? name)
+    {
+        name = Name;
+        return true;
+    }
 
     public static class Instances
     {

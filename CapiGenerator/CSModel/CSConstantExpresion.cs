@@ -23,6 +23,8 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
     private readonly BaseCSConstantToken[] _tokens = tokens.ToArray();
     public ReadOnlySpan<BaseCSConstantToken> Tokens => _tokens;
 
+    public int Count => _tokens.Length;
+
 
     public void OnSecondPass(CSTranslationUnit compilationUnit)
     {
@@ -31,6 +33,8 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
             token.OnSecondPass(compilationUnit);
         }
     }
+
+    public BaseCSConstantToken this[int index] => _tokens[index];
 
     public IEnumerator<BaseCSConstantToken> GetEnumerator()
     {

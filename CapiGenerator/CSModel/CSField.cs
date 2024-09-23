@@ -95,6 +95,20 @@ public sealed class CSField : BaseCSAstItem,
         }
     }
 
+    private bool _isRequired;
+    public bool IsRequired
+    {
+        get => _isRequired;
+        set
+        {
+            if (_isRequired != value)
+            {
+                _isRequired = value;
+                NotifyChange();
+            }
+        }
+    }
+
     private CSAccessModifier _accessModifier = CSAccessModifier.Public;
     public CSAccessModifier AccessModifier
     {

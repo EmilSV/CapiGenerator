@@ -9,15 +9,18 @@ namespace CapiGenerator.CSModel.ConstantToken;
 public class CSConstIdentifierToken : BaseCSConstantToken
 {
     private readonly ResoleRef<ICSFieldLike, ICConstAssignable> _constantField;
+    public readonly bool castEnum;
 
     public CSConstIdentifierToken(ICConstAssignable constAssignable)
     {
         _constantField = new(constAssignable);
+        castEnum = true;
     }
 
-    public CSConstIdentifierToken(ICSFieldLike field)
+    public CSConstIdentifierToken(ICSFieldLike field, bool castEnum)
     {
         _constantField = new(field);
+        this.castEnum = castEnum;
     }
 
     public ICSFieldLike? GetField()
@@ -43,7 +46,7 @@ public class CSConstIdentifierToken : BaseCSConstantToken
     public override string? ToString()
     {
         var output = _constantField.Output;
-        if (output is CSEnumField enumField)
+        if (output is CSEnumField enumField && castEnum)
         {
             return enumField.ParentEnum?.Type?.KindValue switch
             {
@@ -60,6 +63,7 @@ public class CSConstIdentifierToken : BaseCSConstantToken
                 _ => throw new InvalidOperationException("Unknown enum type")
             };
         }
+
         return output?.GetFullName();
     }
 }

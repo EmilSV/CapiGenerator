@@ -111,6 +111,11 @@ public static class StreamWriterUtils
             writer.Write(" readonly");
         }
 
+        if (field.IsRequired)
+        {
+            writer.Write(" required");
+        }
+
         writer.Write(" ");
         writer.Write(field.Type.ToString());
 

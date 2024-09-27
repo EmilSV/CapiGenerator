@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel;
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
@@ -108,6 +109,8 @@ public sealed class CSField : BaseCSAstItem,
             }
         }
     }
+
+    public CommentSummery? Comments { get; set; }
 
     private CSAccessModifier _accessModifier = CSAccessModifier.Public;
     public CSAccessModifier AccessModifier

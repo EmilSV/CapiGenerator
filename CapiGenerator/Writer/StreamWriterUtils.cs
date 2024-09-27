@@ -1,5 +1,6 @@
 using System.Reflection.Metadata;
 using CapiGenerator.CSModel;
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.Writer;
@@ -335,6 +336,40 @@ public static class StreamWriterUtils
             writer.WriteLine('}');
         }
 
+        await writer.FlushAsync();
+    }
+
+    public static async Task WriteToStream(StreamWriter writer, CommentSummery? comment)
+    {
+        if (comment == null || !comment.HasValue())
+        {
+            return;
+        }
+
+        writer.WriteLine("/// <summary>");
+
+        if (comment.SummaryText != null && comment.SummaryText.Length != 0)
+        {
+            foreach (var commentLine in comment.SummaryText.Split('\n'))
+            {
+                writer.WriteLine($"/// {commentLine}");
+            }
+        }
+
+        await writer.FlushAsync();
+
+        writer.WriteLine("/// </summary>");
+
+        foreach (var param in comment.Params)
+        {
+            writer.WriteLine($"/// <param name=\"{param.Name}\">{param.Description}</param>");
+        }
+
+        if (comment.ReturnsText != null && comment.ReturnsText.Length != 0)
+        {
+            writer.WriteLine($"/// <returns>{comment.ReturnsText}</returns>");
+        }
+        
         await writer.FlushAsync();
     }
 }

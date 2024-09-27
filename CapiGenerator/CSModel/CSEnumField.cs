@@ -1,5 +1,6 @@
 using CapiGenerator.UtilTypes;
 using CapiGenerator.Translator;
+using CapiGenerator.CSModel.Comments;
 
 namespace CapiGenerator.CSModel;
 
@@ -38,6 +39,9 @@ public class CSEnumField : BaseCSAstItem, ICSFieldLike
             }
         }
     }
+
+
+    public CommentSummery? Comments { get; set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

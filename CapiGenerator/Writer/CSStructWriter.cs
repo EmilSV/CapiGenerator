@@ -32,6 +32,8 @@ public class CSStructWriter : BaseCSStructWriter
         }
         stream.WriteLine();
 
+        await WriteToStream(stream, csStruct.Comments);
+
         stream.Write(csStruct.AccessModifier switch
         {
             CSAccessModifier.Public => "public ",
@@ -75,6 +77,7 @@ public class CSStructWriter : BaseCSStructWriter
 
         foreach (var structField in structFields)
         {
+            await WriteToStream(stream, structField.Comments);
             stream.Write('\t');
             WriteToStream(stream, structField);
             await stream.FlushAsync();
@@ -82,6 +85,7 @@ public class CSStructWriter : BaseCSStructWriter
 
         foreach (var constructor in csStruct.Constructors)
         {
+            //await WriteToStream(stream, constructor.Comments);
             stream.Write('\t');
             await WriteToStream(stream, constructor);
             await stream.FlushAsync();
@@ -90,6 +94,7 @@ public class CSStructWriter : BaseCSStructWriter
 
         foreach (var structMethod in csStruct.Methods)
         {
+            await WriteToStream(stream, structMethod.Comments);
             stream.Write('\t');
             await WriteToStream(stream, structMethod);
             await stream.FlushAsync();

@@ -39,6 +39,7 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
 
         stream.WriteLine();
 
+        await WriteToStream(stream, csStaticClass.Comments);
         stream.Write($"public unsafe static");
         if (csStaticClass.IsPartial)
         {
@@ -52,6 +53,7 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
 
         foreach (var structField in csStaticClass.Fields)
         {
+            await WriteToStream(stream, csStaticClass.Comments);
             stream.Write('\t');
             WriteToStream(stream, structField);
             await stream.FlushAsync();
@@ -61,6 +63,7 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
 
         foreach (var structMethod in csStaticClass.Methods)
         {
+            await WriteToStream(stream, csStaticClass.Comments);
             stream.Write('\t');
             await WriteToStream(stream, structMethod);
             await stream.FlushAsync();

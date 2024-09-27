@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
@@ -33,6 +34,9 @@ public abstract class BaseCSType
             }
         }
     }
+
+
+    public CommentSummery? Comments { get; set; }
 
     public string GetFullName()
     {

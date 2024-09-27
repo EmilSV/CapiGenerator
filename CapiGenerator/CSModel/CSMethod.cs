@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.Translator;
 using CapiGenerator.UtilTypes;
 
@@ -320,6 +321,8 @@ public class CSMethod : BaseCSAstItem,
 
     public NotifyList<CSParameter> Parameters { get; }
     public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
+
+    public CommentSummery? Comments { get; set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

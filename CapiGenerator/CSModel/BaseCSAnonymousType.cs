@@ -16,16 +16,21 @@ public abstract class BaseCSAnonymousType : ICSType, ICSSecondPassable, ITypeRep
     public string? Namespace => null;
 
     public string Name { get; }
-
+    
     public bool IsAnonymous => true;
 
     public virtual void OnSecondPass(CSTranslationUnit unit)
     { }
 
     public abstract string GetFullTypeDefString();
-
+    
     public abstract void ReplaceTypes(ITypeReplace.ReplacePredicate predicate);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="name"></param>
+    /// <returns></returns>
     public bool TryGetName([NotNullWhen(true)] out string? name)
     {
         name = null;

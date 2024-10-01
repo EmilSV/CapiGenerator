@@ -392,6 +392,16 @@ public class CSMethod : BaseCSAstItem,
         }
     }
 
+    public string GetFullName()
+    {
+        if (ParentType == null)
+        {
+            throw new InvalidOperationException("Parent type is not set");
+        }
+
+        return $"{ParentType.GetFullName()}.{Name}";
+    }
+
     private static CSParameter[] GetParameters(ReadOnlySpan<(CSTypeInstance type, string name)> parameters)
     {
         if (parameters.Length == 0)

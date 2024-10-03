@@ -362,14 +362,40 @@ public static class StreamWriterUtils
 
         foreach (var param in comment.Params)
         {
-            writer.WriteLine($"/// <param name=\"{param.Name}\">{param.Description}</param>");
+            var descriptionLines = param.Description.Split('\n');
+            if (descriptionLines.Length == 1)
+            {
+                writer.WriteLine($"/// <param name=\"{param.Name}\">{param.Description}</param>");
+            }
+            else
+            {
+                writer.WriteLine($"/// <param name=\"{param.Name}\">");
+                foreach (var descriptionLine in descriptionLines)
+                {
+                    writer.WriteLine($"/// {descriptionLine}");
+                }
+                writer.WriteLine($"/// </param>");
+            }
         }
 
         if (comment.ReturnsText != null && comment.ReturnsText.Length != 0)
         {
-            writer.WriteLine($"/// <returns>{comment.ReturnsText}</returns>");
+            var returnsTextLines = comment.ReturnsText.Split('\n');
+            if (returnsTextLines.Length == 1)
+            {
+                writer.WriteLine($"/// <returns>{comment.ReturnsText}</returns>");
+            }
+            else
+            {
+                writer.WriteLine($"/// <returns>");
+                foreach (var returnsTextLine in returnsTextLines)
+                {
+                    writer.WriteLine($"/// {returnsTextLine}");
+                }
+                writer.WriteLine($"/// </returns>");
+            }
         }
-        
+
         await writer.FlushAsync();
     }
 }

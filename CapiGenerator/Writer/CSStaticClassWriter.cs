@@ -53,7 +53,7 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
 
         foreach (var structField in csStaticClass.Fields)
         {
-            await WriteToStream(stream, csStaticClass.Comments);
+            await WriteToStream(stream, structField.Comments);
             stream.Write('\t');
             WriteToStream(stream, structField);
             await stream.FlushAsync();
@@ -63,7 +63,7 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
 
         foreach (var structMethod in csStaticClass.Methods)
         {
-            await WriteToStream(stream, csStaticClass.Comments);
+            await WriteToStream(stream, structMethod.Comments);
             stream.Write('\t');
             await WriteToStream(stream, structMethod);
             await stream.FlushAsync();

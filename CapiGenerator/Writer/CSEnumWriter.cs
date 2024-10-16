@@ -53,7 +53,7 @@ public class CSEnumWriter : BaseCSEnumWriter
 
         foreach (var enumValue in enumValues)
         {
-            await StreamWriterUtils.WriteToStream(stream, csEnum.Comments);
+            await StreamWriterUtils.WriteToStream(stream, enumValue.Comments);
             stream.WriteLine($"\t{enumValue.Name} = {enumValue.Expression},");
             await stream.FlushAsync();
         }

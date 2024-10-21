@@ -8,33 +8,8 @@ namespace CapiGenerator.CSModel;
 public abstract class BaseCSType
     : BaseCSAstItem, ICSType
 {
-    private string? _namespace;
-    private string? _name;
-    public string? Namespace
-    {
-        get => _namespace;
-        set
-        {
-            if (_namespace != value)
-            {
-                _namespace = value;
-                NotifyChange();
-            }
-        }
-    }
-    public required string Name
-    {
-        get => _name!;
-        set
-        {
-            if (_name != value)
-            {
-                _name = value;
-                NotifyChange();
-            }
-        }
-    }
-
+    public string? Namespace;
+    public required string Name;
 
     public CommentSummery? Comments { get; set; }
 

@@ -8,151 +8,19 @@ namespace CapiGenerator.CSModel;
 public sealed class CSField : BaseCSAstItem,
     ICSFieldLike, ITypeReplace
 {
-    private string? _name;
-    public required string Name
-    {
-        get => _name!;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                throw new ArgumentException("Name cannot be null or empty");
-            }
-            if (_name != value)
-            {
-                _name = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    private CSTypeInstance? _type;
-    public required CSTypeInstance Type
-    {
-        get => _type!;
-        set
-        {
-            if (_type != value)
-            {
-                _type = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    private CSDefaultValue _defaultValue;
-    public CSDefaultValue DefaultValue
-    {
-        get => _defaultValue;
-        set
-        {
-            if (_defaultValue != value)
-            {
-                _defaultValue = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    private bool _isConst;
-    public bool IsConst
-    {
-        get => _isConst;
-        set
-        {
-            if (_isConst != value)
-            {
-                _isConst = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    private bool _isStatic;
-    public bool IsStatic
-    {
-        get => _isStatic;
-        set
-        {
-            if (_isStatic != value)
-            {
-                _isStatic = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    private bool _isReadOnly;
-    public bool IsReadOnly
-    {
-        get => _isReadOnly;
-        set
-        {
-            if (_isReadOnly != value)
-            {
-                _isReadOnly = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    private bool _isRequired;
-    public bool IsRequired
-    {
-        get => _isRequired;
-        set
-        {
-            if (_isRequired != value)
-            {
-                _isRequired = value;
-                NotifyChange();
-            }
-        }
-    }
-
+    public required string Name { get; set; }
+    public required CSTypeInstance Type;
+    public CSDefaultValue DefaultValue;
+    public bool IsConst;
+    public bool IsStatic;
+    public bool IsReadOnly;
+    public bool IsRequired;
     public CommentSummery? Comments { get; set; }
 
-    private CSAccessModifier _accessModifier = CSAccessModifier.Public;
-    public CSAccessModifier AccessModifier
-    {
-        get => _accessModifier;
-        set
-        {
-            if (_accessModifier != value)
-            {
-                _accessModifier = value;
-                NotifyChange();
-            }
-        }
-    }
+    public CSAccessModifier AccessModifier;
 
-    private CSPropertyBody? _getterBody;
-    public CSPropertyBody? GetterBody
-    {
-        get => _getterBody;
-        set
-        {
-            if (_getterBody != value)
-            {
-                _getterBody = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    private CSPropertyBody? _setterBody;
-    public CSPropertyBody? SetterBody
-    {
-        get => _setterBody;
-        set
-        {
-            if (_setterBody != value)
-            {
-                _setterBody = value;
-                NotifyChange();
-            }
-        }
-    }
+    public CSPropertyBody? GetterBody;
+    public CSPropertyBody? SetterBody;
 
     public BaseCSType? ParentType { get; private set; }
 
@@ -166,12 +34,20 @@ public sealed class CSField : BaseCSAstItem,
     [SetsRequiredMembers]
     public CSField(CSClassMemberModifier modifier, CSTypeInstance type, string name)
     {
-        _accessModifier = CSAccessModifierHelper.GetAccessModifier(modifier);
-        _type = type;
-        _name = name;
-        _isConst = (modifier & CSClassMemberModifier.Const) != 0;
-        _isReadOnly = (modifier & CSClassMemberModifier.ReadOnly) != 0;
-        _isStatic = (modifier & CSClassMemberModifier.Static) != 0;
+        AccessModifier = CSAccessModifierHelper.GetAccessModifier(modifier);
+        Type = type;
+        Name = name;
+        IsConst = (modifier & CSClassMemberModifier.Const) != 0;
+        IsReadOnly = (modifier & CSClassMemberModifier.ReadOnly) != 0;
+        IsStatic = (modifier & CSClassMemberModifier.Static) != 0;
+    }
+
+    [SetsRequiredMembers]
+    public CSField(CSTypeInstance type, string name)
+    {
+        AccessModifier = CSAccessModifier.Private;
+        Type = type;
+        Name = name;
     }
 #pragma warning restore 8618
 
@@ -189,7 +65,6 @@ public sealed class CSField : BaseCSAstItem,
         }
 
         ParentType = parent;
-        NotifyChange();
     }
 
     public string GetFullName()

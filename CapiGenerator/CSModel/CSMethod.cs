@@ -8,20 +8,20 @@ namespace CapiGenerator.CSModel;
 public class CSMethod : BaseCSAstItem,
     INotifyReviver<CSParameter>, ITypeReplace
 {
-    private CSTypeInstance? _returnType;
-    private string? _name;
-    private LazyFormatString? _body;
-    private CSAccessModifier _accessModifier = CSAccessModifier.Public;
-    private bool _isStatic;
-    private bool _isExtern;
-    private bool _isOverride;
-    private bool _isVirtual;
-    private bool _isReadonly;
-    private bool _isNew;
-    private bool _isAbstract;
-    private bool _isAsync;
-    private bool _isPartial;
-    private CSMethodOperatorModifier _operatorModifier = CSMethodOperatorModifier.None;
+    public required CSTypeInstance ReturnType;
+    public string? Name;
+    public LazyFormatString? Body;
+    public CSAccessModifier AccessModifier;
+    public bool IsStatic;
+    public bool IsExtern;
+    public bool IsOverride;
+    public bool IsVirtual;
+    public bool IsReadonly;
+    public bool IsNew;
+    public bool IsAbstract;
+    public bool IsAsync;
+    public bool IsPartial;
+    public CSMethodOperatorModifier OperatorModifier = CSMethodOperatorModifier.None;
 
     public BaseCSType? ParentType { get; private set; }
 
@@ -40,19 +40,19 @@ public class CSMethod : BaseCSAstItem,
     )
     {
         ReturnType = returnType;
-        _name = name;
+        Name = name;
         Parameters = new(this, parameters);
-        _accessModifier = CSAccessModifierHelper.GetAccessModifier(modifiers);
-        _isExtern = (modifiers & CSClassMemberModifier.Extern) != 0;
-        _isOverride = (modifiers & CSClassMemberModifier.Override) != 0;
-        _isStatic = (modifiers & CSClassMemberModifier.Static) != 0;
-        _isVirtual = (modifiers & CSClassMemberModifier.Virtual) != 0;
-        _isReadonly = (modifiers & CSClassMemberModifier.ReadOnly) != 0;
-        _isNew = (modifiers & CSClassMemberModifier.New) != 0;
-        _isAbstract = (modifiers & CSClassMemberModifier.Abstract) != 0;
-        _isAsync = (modifiers & CSClassMemberModifier.Async) != 0;
-        _isPartial = (modifiers & CSClassMemberModifier.Partial) != 0;
-        _operatorModifier = CSMethodOperatorModifierHelper.GetOperatorModifier(modifiers);
+        AccessModifier = CSAccessModifierHelper.GetAccessModifier(modifiers);
+        IsExtern = (modifiers & CSClassMemberModifier.Extern) != 0;
+        IsOverride = (modifiers & CSClassMemberModifier.Override) != 0;
+        IsStatic = (modifiers & CSClassMemberModifier.Static) != 0;
+        IsVirtual = (modifiers & CSClassMemberModifier.Virtual) != 0;
+        IsReadonly = (modifiers & CSClassMemberModifier.ReadOnly) != 0;
+        IsNew = (modifiers & CSClassMemberModifier.New) != 0;
+        IsAbstract = (modifiers & CSClassMemberModifier.Abstract) != 0;
+        IsAsync = (modifiers & CSClassMemberModifier.Async) != 0;
+        IsPartial = (modifiers & CSClassMemberModifier.Partial) != 0;
+        OperatorModifier = CSMethodOperatorModifierHelper.GetOperatorModifier(modifiers);
     }
 
     [SetsRequiredMembers]
@@ -134,191 +134,6 @@ public class CSMethod : BaseCSAstItem,
     {
     }
 
-
-    public string? Name
-    {
-        get => _name;
-        set
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                throw new ArgumentException("Name cannot be null or empty");
-            }
-            if (_name != value)
-            {
-                _name = value;
-                NotifyChange();
-            }
-        }
-    }
-    public LazyFormatString? Body
-    {
-        get => _body;
-        set
-        {
-            if (_body != value)
-            {
-                _body = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public required CSTypeInstance ReturnType
-    {
-        get => _returnType!;
-        set
-        {
-            if (_returnType != value)
-            {
-                _returnType = value;
-                NotifyChange();
-            }
-        }
-    }
-    public bool IsStatic
-    {
-        get => _isStatic;
-        set
-        {
-            if (_isStatic != value)
-            {
-                _isStatic = value;
-                NotifyChange();
-            }
-        }
-    }
-    public bool IsExtern
-    {
-        get => _isExtern;
-        set
-        {
-            if (_isExtern != value)
-            {
-                _isExtern = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public bool IsOverride
-    {
-        get => _isOverride;
-        set
-        {
-            if (_isOverride != value)
-            {
-                _isOverride = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public bool IsVirtual
-    {
-        get => _isVirtual;
-        set
-        {
-            if (_isVirtual != value)
-            {
-                _isVirtual = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public bool IsReadonly
-    {
-        get => _isReadonly;
-        set
-        {
-            if (_isReadonly != value)
-            {
-                _isReadonly = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public bool IsNew
-    {
-        get => _isNew;
-        set
-        {
-            if (_isNew != value)
-            {
-                _isNew = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public bool IsAbstract
-    {
-        get => _isAbstract;
-        set
-        {
-            if (_isAbstract != value)
-            {
-                _isAbstract = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public bool IsAsync
-    {
-        get => _isAsync;
-        set
-        {
-            if (_isAsync != value)
-            {
-                _isAsync = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public bool IsPartial
-    {
-        get => _isPartial;
-        set
-        {
-            if (_isPartial != value)
-            {
-                _isPartial = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public CSAccessModifier AccessModifier
-    {
-        get => _accessModifier;
-        set
-        {
-            if (_accessModifier != value)
-            {
-                _accessModifier = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public CSMethodOperatorModifier OperatorModifier
-    {
-        get => _operatorModifier;
-        set
-        {
-            if (_operatorModifier != value)
-            {
-                _operatorModifier = value;
-                NotifyChange();
-            }
-        }
-    }
-
-
     public NotifyList<CSParameter> Parameters { get; }
     public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
 
@@ -326,7 +141,7 @@ public class CSMethod : BaseCSAstItem,
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        _returnType?.OnSecondPass(unit);
+        ReturnType?.OnSecondPass(unit);
         foreach (var parameter in Parameters)
         {
             parameter.OnSecondPass(unit);
@@ -340,7 +155,6 @@ public class CSMethod : BaseCSAstItem,
             throw new InvalidOperationException("Parent method is already set");
         }
         ParentType = parent;
-        NotifyChange();
     }
 
     void INotifyReviver<CSParameter>.OnAddRange(ReadOnlySpan<CSParameter> items)

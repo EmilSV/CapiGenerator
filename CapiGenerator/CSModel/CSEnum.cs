@@ -7,7 +7,7 @@ namespace CapiGenerator.CSModel;
 public sealed class CSEnum : BaseCSType,
     INotifyReviver<CSEnumField>, ITypeReplace
 {
-    private CSPrimitiveType _type = CSPrimitiveType.Instances.Int;
+    public CSPrimitiveType Type = CSPrimitiveType.Instances.Int;
 
     public CSEnum()
     {
@@ -15,18 +15,6 @@ public sealed class CSEnum : BaseCSType,
         Attributes = new(null);
     }
 
-    public CSPrimitiveType Type
-    {
-        get => _type;
-        set
-        {
-            if (_type != value)
-            {
-                _type = value;
-                NotifyChange();
-            }
-        }
-    }
 
     public NotifyUniqueList<CSEnumField> Values { get; private set; }
     public NotifyList<BaseCSAttribute> Attributes { get; private set; }
@@ -41,11 +29,11 @@ public sealed class CSEnum : BaseCSType,
 
     public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
     {
-        if (predicate(_type, out var newType))
+        if (predicate(Type, out var newType))
         {
             if (newType is CSPrimitiveType primitiveType)
             {
-                _type = primitiveType;
+                Type = primitiveType;
             }
             else
             {

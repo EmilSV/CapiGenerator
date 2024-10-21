@@ -16,63 +16,10 @@ public class CSStruct : BaseCSType, ITypeReplace,
         Constructors = new(this);
     }
 
-    private bool _isPartial;
-    private bool _isReadOnly;
-    private bool _isUnsafe;
-    private CSAccessModifier _accessModifier;
-
-    public CSAccessModifier AccessModifier
-    {
-        get => _accessModifier;
-        set
-        {
-            if (_accessModifier != value)
-            {
-                _accessModifier = value;
-                NotifyChange();
-            }
-        }
-    }
-
-
-    public bool IsUnsafe
-    {
-        get => _isUnsafe;
-        set
-        {
-            if (_isUnsafe != value)
-            {
-                _isUnsafe = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public bool IsPartial
-    {
-        get => _isPartial;
-        set
-        {
-            if (_isPartial != value)
-            {
-                _isPartial = value;
-                NotifyChange();
-            }
-        }
-    }
-
-    public bool IsReadOnly
-    {
-        get => _isReadOnly;
-        set
-        {
-            if (_isReadOnly != value)
-            {
-                _isReadOnly = value;
-                NotifyChange();
-            }
-        }
-    }
+    public CSAccessModifier AccessModifier;
+    public bool IsUnsafe;
+    public bool IsPartial;
+    public bool IsReadOnly;
 
     public NotifySet<LazyFormatString> Interfaces { get; private set; }
     public NotifySet<CSField> Fields { get; private set; }

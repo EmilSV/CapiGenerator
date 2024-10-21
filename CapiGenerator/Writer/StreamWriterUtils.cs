@@ -322,20 +322,8 @@ public static class StreamWriterUtils
     public static async Task WriteBody(StreamWriter writer, LazyFormatString body)
     {
         string bodyString = body.ToString();
-
-        if (bodyString.TrimStart().StartsWith("=>"))
-        {
-            writer.Write(' ');
-            writer.Write(body.ToString().TrimStart());
-        }
-        else
-        {
-            writer.WriteLine();
-            writer.WriteLine('{');
-            writer.Write(body.ToString());
-            writer.WriteLine('}');
-        }
-
+        writer.Write(bodyString);
+        writer.WriteLine();
         await writer.FlushAsync();
     }
 

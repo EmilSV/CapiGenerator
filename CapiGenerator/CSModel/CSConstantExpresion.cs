@@ -12,9 +12,9 @@ namespace CapiGenerator.CSModel;
 [CollectionBuilder(typeof(CSConstantExpressionBuilder), "Create")]
 public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> tokens) : IEnumerable<BaseCSConstantToken>
 {
-    internal static class CSConstantExpressionBuilder
+    public static class CSConstantExpressionBuilder
     {
-        internal static CSConstantExpression Create(ReadOnlySpan<BaseCSConstantToken> tokens)
+        public static CSConstantExpression Create(ReadOnlySpan<BaseCSConstantToken> tokens)
         {
             return new CSConstantExpression(tokens);
         }

@@ -20,6 +20,7 @@ public static class AllBuiltInCsConstants
         ShortMinValue.Instance,
         UIntMaxValue.Instance,
         ULongMaxValue.Instance,
-        UShortMaxValue.Instance
+        UShortMaxValue.Instance,
+        Nan.Instance,
     ];
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.Parser;
@@ -47,8 +48,12 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
             }
             else if (token is CConstIdentifierToken identifierToken)
             {
-                var identifierTokenConstant = identifierToken.GetConstantModel() ??
+                var identifierTokenConstant = identifierToken.GetConstantModel();
+                if (identifierTokenConstant == null)
+                {
+                    Debugger.Break();
                     throw new InvalidOperationException($"Constant {identifierToken} not resolve");
+                }
                 constantType = GetConstantType(constantType, identifierTokenConstant.GetCConstantType());
             }
 

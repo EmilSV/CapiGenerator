@@ -22,5 +22,6 @@ public class AllBuiltinCConstants
         UInt32MaxBuiltinConstant.Instance,
         UInt64MaxBuiltinConstant.Instance,
         UIntPtrMaxBuiltinConstant.Instance,
+        NanBuiltinConstant.Instance,
     ];
 }

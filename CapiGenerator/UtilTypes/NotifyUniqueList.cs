@@ -192,6 +192,33 @@ public sealed class NotifyUniqueList<T> :
         _notifyReceiver?.OnRemove(item);
     }
 
+    public void RemoveWhere(Predicate<T> predicate)
+    {
+        List<T>? elementsRemoved = _tempList;
+        if (elementsRemoved == null)
+        {
+            elementsRemoved = [];
+        }
+        else
+        {
+            elementsRemoved.Clear();
+            _tempList = null;
+        }
+
+        int removeCount = _list.RemoveAll(item =>
+        {
+            if (predicate(item))
+            {
+                elementsRemoved.Add(item);
+                return true;
+            }
+            return false;
+        });
+        _changeCounter++;
+        _notifyReceiver?.OnRemoveRange(CollectionsMarshal.AsSpan(elementsRemoved));
+        _tempList ??= elementsRemoved;
+    }
+
     public Enumerator GetEnumerator()
     {
         return new Enumerator(_list);

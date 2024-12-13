@@ -203,6 +203,34 @@ public sealed class NotifySet<T>(INotifyReviver<T>? notifyReceiver) :
         return removeCount;
     }
 
+    public int RemoveWhere(Predicate<T> predicate)
+    {
+        List<T>? elementsRemoved = _tempList;
+        if (elementsRemoved == null)
+        {
+            elementsRemoved = [];
+        }
+        else
+        {
+            elementsRemoved.Clear();
+            _tempList = null;
+        }
+
+        int removeCount = _set.RemoveWhere(item =>
+        {
+            if (predicate(item))
+            {
+                elementsRemoved.Add(item);
+                return true;
+            }
+            return false;
+        });
+        _changeCounter++;
+        _notifyReceiver?.OnRemoveRange(CollectionsMarshal.AsSpan(elementsRemoved));
+        _tempList ??= elementsRemoved;
+        return removeCount;
+    }
+
     public Enumerator GetEnumerator()
     {
         return new Enumerator(_set);

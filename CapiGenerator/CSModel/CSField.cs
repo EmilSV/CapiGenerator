@@ -15,7 +15,7 @@ public sealed class CSField : BaseCSAstItem,
     public bool IsStatic;
     public bool IsReadOnly;
     public bool IsRequired;
-    public CommentSummery? Comments { get; set; }
+    public DocComment? Comments { get; set; }
 
     public CSAccessModifier AccessModifier;
 

@@ -327,28 +327,49 @@ public static class StreamWriterUtils
         await writer.FlushAsync();
     }
 
-    public static async Task WriteToStream(StreamWriter writer, CommentSummery? comment)
+    public static async Task WriteToStream(StreamWriter writer, DocComment? comment)
     {
         if (comment == null || !comment.HasValue())
         {
             return;
         }
 
-        writer.WriteLine("/// <summary>");
-
-        if (comment.SummaryText != null && comment.SummaryText.Length != 0)
+        if (comment.Summary != null)
         {
-            foreach (var commentLine in comment.SummaryText.Split('\n'))
+            comment.Summary.WriteToStream(writer);
+            await writer.FlushAsync();
+        }
+
+        if (comment.Value != null)
+        {
+            comment.Value.WriteToStream(writer);
+            await writer.FlushAsync();
+        }
+
+        foreach (var remarks in comment.Remarks)
+        {
+            var descriptionLines = remarks.Description?.Split('\n');
+            if (descriptionLines == null)
             {
-                writer.WriteLine($"/// {commentLine}");
+                continue;
+            }
+
+            if (descriptionLines.Length == 1)
+            {
+                writer.WriteLine($"/// <remarks\">{remarks.Description}</remarks>");
+            }
+            else
+            {
+                writer.WriteLine("/// <remarks>");
+                foreach (var descriptionLine in descriptionLines)
+                {
+                    writer.WriteLine($"/// {descriptionLine}");
+                }
+                writer.WriteLine("/// </remarks>");
             }
         }
 
-        await writer.FlushAsync();
-
-        writer.WriteLine("/// </summary>");
-
-        foreach (var param in comment.Params)
+        foreach (var param in comment.Parameters)
         {
             var descriptionLines = param.Description.Split('\n');
             if (descriptionLines.Length == 1)
@@ -366,23 +387,24 @@ public static class StreamWriterUtils
             }
         }
 
-        if (comment.ReturnsText != null && comment.ReturnsText.Length != 0)
+        if (comment.Return?.HasValue() == true)
         {
-            var returnsTextLines = comment.ReturnsText.Split('\n');
+            var returnsTextLines = comment.Return!.Description!.Split('\n');
             if (returnsTextLines.Length == 1)
             {
-                writer.WriteLine($"/// <returns>{comment.ReturnsText}</returns>");
+                writer.WriteLine($"/// <returns>{comment.Return!.Description}</returns>");
             }
             else
             {
-                writer.WriteLine($"/// <returns>");
+                writer.WriteLine("/// <returns>");
                 foreach (var returnsTextLine in returnsTextLines)
                 {
                     writer.WriteLine($"/// {returnsTextLine}");
                 }
-                writer.WriteLine($"/// </returns>");
+                writer.WriteLine("/// </returns>");
             }
         }
+
 
         await writer.FlushAsync();
     }

@@ -9,7 +9,7 @@ public class CSEnumField : BaseCSAstItem, ICSFieldLike
     public required string Name { get; set; }
     public CSConstantExpression Expression = [];
 
-    public CommentSummery? Comments { get; set; }
+    public DocComment? Comments { get; set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

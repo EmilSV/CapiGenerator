@@ -137,7 +137,7 @@ public class CSMethod : BaseCSAstItem,
     public NotifyList<CSParameter> Parameters { get; }
     public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
 
-    public CommentSummery? Comments { get; set; }
+    public DocComment? Comments { get; set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

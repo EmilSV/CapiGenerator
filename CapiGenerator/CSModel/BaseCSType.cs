@@ -4,14 +4,13 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-
 public abstract class BaseCSType
     : BaseCSAstItem, ICSType
 {
     public string? Namespace;
     public required string Name;
 
-    public CommentSummery? Comments { get; set; }
+    public DocComment? Comments { get; set; }
 
     public string GetFullName()
     {

@@ -1,8 +1,8 @@
-using System;
+
 
 namespace CapiGenerator.CSModel.Comments;
 
-public sealed class CommentSummery
+public sealed class CommentValue
 {
     public string? Description { get; set; }
 
@@ -18,14 +18,12 @@ public sealed class CommentSummery
             return;
         }
 
-        writer.WriteLine("/// <summary>");
-
+        writer.WriteLine("/// <value>");
         var descriptionSpan = Description.AsSpan();
         foreach (var range in descriptionSpan.Split('\n'))
         {
             writer.WriteLine($"/// {descriptionSpan[range]}");
         }
-
-        writer.WriteLine("/// </summary>");
+        writer.WriteLine("/// </value>");
     }
 }

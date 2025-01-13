@@ -1,12 +1,14 @@
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
-
 
 public class CSConstructor : BaseCSAstItem
 {
     public BaseCSType? ParentType { get; private set; }
     public LazyFormatString? Body;
+
+    public DocComment? Comments { get; set; }
 
     public CSConstructor(CSClassMemberModifier modifiers, ReadOnlySpan<CSParameter> parameters)
     {
@@ -70,5 +72,38 @@ public class CSConstructor : BaseCSAstItem
             array[i] = new(new(type), name);
         }
         return array;
+    }
+
+    public string GetFullName()
+    {
+        if (ParentType == null)
+        {
+            throw new InvalidOperationException("Parent type is not set");
+        }
+
+        return $"{ParentType.GetFullName()}.{ParentType.Name}";
+    }
+
+    public string? GetFullNameWithParameters()
+    {
+        if (ParentType == null)
+        {
+            throw new InvalidOperationException("Parent type is not set");
+        }
+
+        List<string> parametersTypeNames = new();
+        foreach (var parameter in Parameters)
+        {
+            if (parameter.Type?.Type?.TryGetName(out var typeName) == true)
+            {
+                parametersTypeNames.Add(typeName);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        return $"{GetFullName}({string.Join(",", parametersTypeNames)})";
     }
 }

@@ -25,7 +25,6 @@ public class CSMethod : BaseCSAstItem,
 
     public BaseCSType? ParentType { get; private set; }
 
-
     public CSMethod()
     {
         Parameters = new(this);
@@ -214,6 +213,29 @@ public class CSMethod : BaseCSAstItem,
         }
 
         return $"{ParentType.GetFullName()}.{Name}";
+    }
+
+    public string? GetFullNameWithParameters()
+    {
+        if (ParentType == null)
+        {
+            throw new InvalidOperationException("Parent type is not set");
+        }
+
+        List<string> parametersTypeNames = new();
+        foreach (var parameter in Parameters)
+        {
+            if (parameter.Type?.Type?.TryGetName(out var typeName) == true)
+            {
+                parametersTypeNames.Add(typeName);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        return $"{GetFullName()}({string.Join(",", parametersTypeNames)})";
     }
 
     private static CSParameter[] GetParameters(ReadOnlySpan<(CSTypeInstance type, string name)> parameters)

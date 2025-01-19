@@ -6,7 +6,7 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 public class CSMethod : BaseCSAstItem,
-    INotifyReviver<CSParameter>, ITypeReplace
+    INotifyReviver<CSParameter>, ITypeReplace, ICommendableItem
 {
     public required CSTypeInstance ReturnType;
     public string? Name;
@@ -212,7 +212,36 @@ public class CSMethod : BaseCSAstItem,
             throw new InvalidOperationException("Parent type is not set");
         }
 
-        return $"{ParentType.GetFullName()}.{Name}";
+        var parentFullName = ParentType.GetFullName();
+
+        string? returnTypeName;
+
+        switch (OperatorModifier)
+        {
+            case CSMethodOperatorModifier.Explicit:
+                if (ReturnType!.Type!.TryGetName(out returnTypeName))
+                {
+                    return $"{parentFullName}.explicit operator {returnTypeName}";
+                }
+                else
+                {
+                    return $"{parentFullName}.explicit operator \"Unknown\"";
+                }
+            case CSMethodOperatorModifier.Implicit:
+                if (ReturnType!.Type!.TryGetName(out returnTypeName))
+                {
+                    return $"{parentFullName}.implicit operator {returnTypeName}";
+                }
+                else
+                {
+                    return $"{parentFullName}.implicit operator \"Unknown\"";
+                }
+            case CSMethodOperatorModifier.Operator:
+                return $"{parentFullName}.operator {Name}";
+
+            default:
+                return $"{parentFullName}.{Name}";
+        }
     }
 
     public string? GetFullNameWithParameters()
@@ -225,7 +254,16 @@ public class CSMethod : BaseCSAstItem,
         List<string> parametersTypeNames = new();
         foreach (var parameter in Parameters)
         {
-            if (parameter.Type?.Type?.TryGetName(out var typeName) == true)
+            var type = parameter.Type?.Type;
+            if (type == null)
+            {
+                return null;
+            }
+            if (type is BaseCSAnonymousType anonymousType)
+            {
+                parametersTypeNames.Add(anonymousType.GetFullTypeDefString());
+            }
+            else if (parameter.Type?.Type?.TryGetName(out var typeName) == true)
             {
                 parametersTypeNames.Add(typeName);
             }

@@ -3,7 +3,7 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSConstructor : BaseCSAstItem
+public class CSConstructor : BaseCSAstItem, ICommendableItem
 {
     public BaseCSType? ParentType { get; private set; }
     public LazyFormatString? Body;

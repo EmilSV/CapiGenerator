@@ -6,7 +6,7 @@ using CapiGenerator.Translator;
 namespace CapiGenerator.CSModel;
 
 public sealed class CSField : BaseCSAstItem,
-    ICSFieldLike, ITypeReplace
+    ICSFieldLike, ITypeReplace, ICommendableItem
 {
     public required string Name { get; set; }
     public required CSTypeInstance Type;

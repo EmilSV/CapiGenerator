@@ -3,7 +3,7 @@ using CapiGenerator.CSModel.Comments;
 
 namespace CapiGenerator.CSModel;
 
-public class CSEnumField : BaseCSAstItem, ICSFieldLike
+public class CSEnumField : BaseCSAstItem, ICSFieldLike, ICommendableItem
 {
     public CSEnum? ParentEnum { get; private set; }
     public required string Name { get; set; }

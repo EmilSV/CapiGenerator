@@ -5,7 +5,7 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 public abstract class BaseCSType
-    : BaseCSAstItem, ICSType
+    : BaseCSAstItem, ICSType, ICommendableItem
 {
     public string? Namespace;
     public required string Name;

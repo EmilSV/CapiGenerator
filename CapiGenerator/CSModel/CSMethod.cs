@@ -254,23 +254,12 @@ public class CSMethod : BaseCSAstItem,
         List<string> parametersTypeNames = new();
         foreach (var parameter in Parameters)
         {
-            var type = parameter.Type?.Type;
+            var type = parameter.Type?.ToString();
             if (type == null)
             {
                 return null;
             }
-            if (type is BaseCSAnonymousType anonymousType)
-            {
-                parametersTypeNames.Add(anonymousType.GetFullTypeDefString());
-            }
-            else if (parameter.Type?.Type?.TryGetName(out var typeName) == true)
-            {
-                parametersTypeNames.Add(typeName);
-            }
-            else
-            {
-                return null;
-            }
+            parametersTypeNames.Add(type);
         }
 
         return $"{GetFullName()}({string.Join(",", parametersTypeNames)})";

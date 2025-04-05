@@ -1,4 +1,5 @@
 using System;
+using CapiGenerator.Extensions;
 
 namespace CapiGenerator.CSModel.Comments;
 
@@ -19,13 +20,10 @@ public sealed class CommentSummery
         }
 
         writer.WriteLine("/// <summary>");
-
-        var descriptionSpan = Description.AsSpan();
-        foreach (var range in descriptionSpan.Split('\n'))
+        foreach (var item in Description?.SplitNewLine() ?? [])
         {
-            writer.WriteLine($"/// {descriptionSpan[range]}");
+            writer.WriteLine($"/// {item}");
         }
-
         writer.WriteLine("/// </summary>");
     }
 }

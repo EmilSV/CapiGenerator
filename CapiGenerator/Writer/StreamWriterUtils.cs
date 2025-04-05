@@ -1,6 +1,7 @@
 using System.Reflection.Metadata;
 using CapiGenerator.CSModel;
 using CapiGenerator.CSModel.Comments;
+using CapiGenerator.Extensions;
 using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.Writer;
@@ -348,7 +349,7 @@ public static class StreamWriterUtils
 
         foreach (var remarks in comment.Remarks)
         {
-            var descriptionLines = remarks.Description?.Split('\n');
+            var descriptionLines = remarks.Description?.SplitNewLine();
             if (descriptionLines == null)
             {
                 continue;
@@ -371,7 +372,7 @@ public static class StreamWriterUtils
 
         foreach (var param in comment.Parameters)
         {
-            var descriptionLines = param.Description.Split('\n');
+            var descriptionLines = param.Description.SplitNewLine();
             if (descriptionLines.Length == 1)
             {
                 writer.WriteLine($"/// <param name=\"{param.Name}\">{param.Description}</param>");
@@ -389,7 +390,7 @@ public static class StreamWriterUtils
 
         if (comment.Return?.HasValue() == true)
         {
-            var returnsTextLines = comment.Return!.Description!.Split('\n');
+            var returnsTextLines = comment.Return!.Description!.SplitNewLine();
             if (returnsTextLines.Length == 1)
             {
                 writer.WriteLine($"/// <returns>{comment.Return!.Description}</returns>");

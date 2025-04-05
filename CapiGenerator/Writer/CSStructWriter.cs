@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using CapiGenerator.CSModel;
 using static CapiGenerator.Writer.StreamWriterUtils;
 
@@ -77,6 +78,11 @@ public class CSStructWriter : BaseCSStructWriter
 
         foreach (var structField in structFields)
         {
+            if(structName == "TextureDescriptorFFI" && structField.Name == "ViewFormats")
+            {
+                Debugger.Break();
+            }
+
             await WriteToStream(stream, structField.Comments);
             stream.Write('\t');
             WriteToStream(stream, structField);

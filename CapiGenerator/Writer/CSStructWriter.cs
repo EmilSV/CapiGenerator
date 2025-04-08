@@ -78,11 +78,6 @@ public class CSStructWriter : BaseCSStructWriter
 
         foreach (var structField in structFields)
         {
-            if(structName == "TextureDescriptorFFI" && structField.Name == "ViewFormats")
-            {
-                Debugger.Break();
-            }
-
             await WriteToStream(stream, structField.Comments);
             stream.Write('\t');
             WriteToStream(stream, structField);

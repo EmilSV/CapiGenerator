@@ -10,6 +10,7 @@ public class CSStaticClass :
     public bool IsPartial;
     public NotifySet<CSField> Fields { get; private set; }
     public NotifySet<CSMethod> Methods { get; private set; }
+     public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
 
     public CSStaticClass()
     {

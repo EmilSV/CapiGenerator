@@ -1,5 +1,6 @@
 using CapiGenerator.Translator;
 using CapiGenerator.CSModel.Comments;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
@@ -10,6 +11,7 @@ public class CSEnumField : BaseCSAstItem, ICSFieldLike, ICommendableItem
     public CSConstantExpression Expression = [];
 
     public DocComment? Comments { get; set; }
+    public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

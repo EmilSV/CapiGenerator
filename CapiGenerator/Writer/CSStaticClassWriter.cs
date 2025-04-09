@@ -40,6 +40,11 @@ public class CSStaticClassWriter : BaseCSStaticClassWriter
         stream.WriteLine();
 
         await WriteToStream(stream, csStaticClass.Comments);
+        foreach (var attribute in csStaticClass.Attributes)
+        {
+            WriteToStream(stream, attribute);
+            stream.WriteLine();
+        }
         stream.Write($"public unsafe static");
         if (csStaticClass.IsPartial)
         {

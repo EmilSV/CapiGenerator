@@ -87,6 +87,13 @@ public static class StreamWriterUtils
 
     public static void WriteToStream(StreamWriter writer, CSField field)
     {
+        foreach (var attribute in field.Attributes)
+        {
+            WriteToStream(writer, attribute);
+            writer.WriteLine();
+            writer.Write('\t');
+        }
+
         writer.Write(field.AccessModifier switch
         {
             CSAccessModifier.Public => "public",

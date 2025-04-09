@@ -35,6 +35,12 @@ public class CSStructWriter : BaseCSStructWriter
 
         await WriteToStream(stream, csStruct.Comments);
 
+        foreach (var attribute in csStruct.Attributes)
+        {
+            WriteToStream(stream, attribute);
+            stream.WriteLine();
+        }
+
         stream.Write(csStruct.AccessModifier switch
         {
             CSAccessModifier.Public => "public ",

@@ -12,12 +12,9 @@ public sealed class CSEnum : BaseCSType,
     public CSEnum()
     {
         Values = new(this);
-        Attributes = new(null);
     }
 
-
     public NotifyUniqueList<CSEnumField> Values { get; private set; }
-    public NotifyList<BaseCSAttribute> Attributes { get; private set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

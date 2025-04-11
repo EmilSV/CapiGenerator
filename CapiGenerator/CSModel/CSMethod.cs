@@ -6,7 +6,7 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 public class CSMethod : BaseCSAstItem,
-    INotifyReviver<CSParameter>, ITypeReplace, ICommendableItem
+    INotifyReviver<CSParameter>, ITypeReplace, ICommendableItem, IAttributeAssignableItem
 {
     public required CSTypeInstance ReturnType;
     public string? Name;

@@ -25,7 +25,7 @@ public class CSStruct : BaseCSType, ITypeReplace,
     public NotifySet<CSField> Fields { get; private set; }
     public NotifySet<CSMethod> Methods { get; private set; }
     public NotifySet<CSConstructor> Constructors { get; private set; }
-    public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
+ 
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

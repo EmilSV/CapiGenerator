@@ -3,12 +3,14 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSConstructor : BaseCSAstItem, ICommendableItem
+public class CSConstructor : BaseCSAstItem, ICommendableItem, IAttributeAssignableItem
 {
     public BaseCSType? ParentType { get; private set; }
     public LazyFormatString? Body;
 
     public DocComment? Comments { get; set; }
+
+    public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
 
     public CSConstructor(CSClassMemberModifier modifiers, ReadOnlySpan<CSParameter> parameters)
     {
@@ -32,6 +34,8 @@ public class CSConstructor : BaseCSAstItem, ICommendableItem
     public CSAccessModifier AccessModifier;
 
     public NotifyList<CSParameter> Parameters { get; }
+
+
 
     internal void SetParent(BaseCSType? parent)
     {

@@ -7,7 +7,7 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 public sealed class CSField : BaseCSAstItem,
-    ICSFieldLike, ITypeReplace, ICommendableItem
+    ICSFieldLike, ITypeReplace, ICommendableItem , IAttributeAssignableItem
 {
     public required string Name { get; set; }
     public required CSTypeInstance Type;

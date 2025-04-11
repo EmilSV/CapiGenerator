@@ -4,7 +4,7 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSEnumField : BaseCSAstItem, ICSFieldLike, ICommendableItem
+public class CSEnumField : BaseCSAstItem, ICSFieldLike, ICommendableItem, IAttributeAssignableItem
 {
     public CSEnum? ParentEnum { get; private set; }
     public required string Name { get; set; }

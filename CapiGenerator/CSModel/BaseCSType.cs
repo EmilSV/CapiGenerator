@@ -5,12 +5,13 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 public abstract class BaseCSType
-    : BaseCSAstItem, ICSType, ICommendableItem
+    : BaseCSAstItem, ICSType, ICommendableItem, IAttributeAssignableItem
 {
     public string? Namespace;
     public required string Name;
 
     public DocComment? Comments { get; set; }
+    public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
 
     public string GetFullName()
     {

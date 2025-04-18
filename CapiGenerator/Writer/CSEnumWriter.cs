@@ -32,6 +32,7 @@ public class CSEnumWriter : BaseCSEnumWriter
 
         stream.WriteLine();
 
+        await StreamWriterUtils.WriteToStream(stream, csEnum.Comments);
         foreach (var attribute in csEnum.Attributes)
         {
             StreamWriterUtils.WriteToStream(stream, attribute);
@@ -39,13 +40,6 @@ public class CSEnumWriter : BaseCSEnumWriter
         }
 
         await stream.FlushAsync();
-
-        await StreamWriterUtils.WriteToStream(stream, csEnum.Comments);
-        foreach (var attribute in csEnum.Attributes)
-        {
-            StreamWriterUtils.WriteToStream(stream, attribute);
-            stream.WriteLine();
-        }
         stream.Write($"public enum {enumName}");
         if (csEnum.Type.KindValue != CSPrimitiveType.Kind.Int)
         {

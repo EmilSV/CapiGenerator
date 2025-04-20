@@ -9,6 +9,11 @@ public sealed class CSAttribute<T> : BaseCSAttribute
         return typeof(T).FullName!;
     }
 
+    public override Type GetAttributeType()
+    {
+        return typeof(T);
+    }
+
     public static CSAttribute<T> Create(IEnumerable<string> attributeCtorArgs, IEnumerable<KeyValuePair<string, string>> attributeParameters)
     {
         return new CSAttribute<T>

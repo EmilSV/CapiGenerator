@@ -364,7 +364,7 @@ public static class StreamWriterUtils
 
             if (descriptionLines.Length == 1)
             {
-                writer.WriteLine($"/// <remarks\">{remarks.Description}</remarks>");
+                writer.WriteLine($"/// <remarks>{remarks.Description}</remarks>");
             }
             else
             {

@@ -10,7 +10,7 @@ public readonly record struct ResoleRef<TOutput, TKey>
         private TOutput? _output = null;
         private readonly TKey _key = key;
 
-        public override TKey Key => throw new NotImplementedException();
+        public override TKey Key => _key;
 
         public override TOutput? Output => _output;
 
@@ -55,6 +55,18 @@ public readonly record struct ResoleRef<TOutput, TKey>
     {
         resolveRef = _object as BaseResolveRef<TOutput, TKey>;
         return resolveRef is not null;
+    }
+
+    public bool TryGetKey(out TKey? key)
+    {
+        if (_object is ResoleRefClass rRef)
+        {
+            key = rRef.Key;
+            return true;
+        }
+
+        key = default;
+        return false;
     }
 
     public bool IsNull => _object is null;

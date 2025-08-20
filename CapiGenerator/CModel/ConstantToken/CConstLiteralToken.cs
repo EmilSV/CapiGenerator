@@ -19,6 +19,12 @@ public class CConstLiteralToken : BaseCConstantToken
         }
     }
 
+    public CConstLiteralToken(string value, CConstantType type)
+    {
+        Value = value;
+        _type = type;
+    }
+
     public bool TryParseValueAsFloat(out double value)
     {
         return double.TryParse(Value, NumberStyles.Float, null, out value);

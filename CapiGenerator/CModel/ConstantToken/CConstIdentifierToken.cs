@@ -22,6 +22,12 @@ public class CConstIdentifierToken : BaseCConstantToken
         return _constantRef.IsOutputResolved() ? _constantRef.Output : null;
     }
 
+    public bool TryGetName(out string? name)
+    {
+        name = _constantRef.TryGetKey(out var key) ? key : null;
+        return name is not null;
+    }
+
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
         _constantRef.TrySetOutputFromResolver(compilationUnit);

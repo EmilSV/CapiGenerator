@@ -25,14 +25,14 @@ public class CSConstLiteralToken(string value, CSConstantType type) : BaseCSCons
     {
         return token.Type switch
         {
-            CConstantType.Int => new CSConstLiteralToken(token.Value, CSConstantType.Int),
-            CConstantType.UnsignedInt => new CSConstLiteralToken(token.Value, CSConstantType.Uint),
-            CConstantType.LongLong => new CSConstLiteralToken(token.Value, CSConstantType.Long),
-            CConstantType.UnsignedLongLong => new CSConstLiteralToken(token.Value, CSConstantType.Ulong),
+            CConstantType.Int or CConstantType.Int32_t => new CSConstLiteralToken(token.Value, CSConstantType.Int),
+            CConstantType.UnsignedInt or CConstantType.UInt32_t => new CSConstLiteralToken(token.Value, CSConstantType.Uint),
+            CConstantType.LongLong or CConstantType.Int64_t => new CSConstLiteralToken(token.Value, CSConstantType.Long),
+            CConstantType.UnsignedLongLong or CConstantType.UInt64_t => new CSConstLiteralToken(token.Value, CSConstantType.Ulong),
             CConstantType.Float => new CSConstLiteralToken(token.Value, CSConstantType.Float),
             CConstantType.Double => new CSConstLiteralToken(token.Value, CSConstantType.Double),
             CConstantType.String => new CSConstLiteralToken(token.Value, CSConstantType.Byte) { Utf8Literal = true },
-            CConstantType.Char => new CSConstLiteralToken(token.Value, CSConstantType.Byte) { CastFromChar = true },
+            CConstantType.Char or CConstantType.UInt8_t => new CSConstLiteralToken(token.Value, CSConstantType.Byte) { CastFromChar = true },
             _ => throw new NotImplementedException()
         };
     }

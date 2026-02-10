@@ -33,5 +33,8 @@ public readonly record struct LazyFormatString
         return string.Format(_format, args);
     }
 
+    public string Format => _format;
+    public ReadOnlySpan<object> Args => _args;
+
     public static implicit operator LazyFormatString(string format) => new(format);
 }

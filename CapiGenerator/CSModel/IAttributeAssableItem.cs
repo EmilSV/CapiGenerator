@@ -4,5 +4,5 @@ namespace CapiGenerator.CSModel;
 
 public interface IAttributeAssignableItem
 {
-    public NotifyList<BaseCSAttribute> Attributes { get; }
+    public List<BaseCSAttribute> Attributes { get; }
 }

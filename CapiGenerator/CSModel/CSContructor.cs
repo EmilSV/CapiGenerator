@@ -3,39 +3,86 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSConstructor : BaseCSAstItem, ICommendableItem, IAttributeAssignableItem
+public class CSConstructor : BaseCSAstItem, ICommendableItem
 {
+    private readonly List<CSParameter> _parameters = [];
+
     public BaseCSType? ParentType { get; private set; }
     public LazyFormatString? Body;
 
     public DocComment? Comments { get; set; }
 
-    public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
+    public List<BaseCSAttribute> Attributes { get; } = [];
 
     public CSConstructor(CSClassMemberModifier modifiers, ReadOnlySpan<CSParameter> parameters)
     {
         AccessModifier = CSAccessModifierHelper.GetAccessModifier(modifiers);
-        Parameters = new(null, parameters);
+        AddParameters(parameters);
     }
 
     public CSConstructor(CSClassMemberModifier modifiers, ReadOnlySpan<(CSTypeInstance, string)> parameters)
     {
         AccessModifier = CSAccessModifierHelper.GetAccessModifier(modifiers);
-        Parameters = new(null, ToParameters(parameters));
+        AddParameters(ToParameters(parameters).AsSpan());
     }
 
 
     public CSConstructor(CSClassMemberModifier modifiers, ReadOnlySpan<(ICSType, string)> parameters)
     {
         AccessModifier = CSAccessModifierHelper.GetAccessModifier(modifiers);
-        Parameters = new(null, ToParameters(parameters));
+        AddParameters(ToParameters(parameters).AsSpan());
     }
 
     public CSAccessModifier AccessModifier;
 
-    public NotifyList<CSParameter> Parameters { get; }
+    public IReadOnlyList<CSParameter> Parameters => _parameters;
 
+    public void AddParameter(CSParameter parameter)
+    {
+        parameter.SetParentMethod(this);
+        _parameters.Add(parameter);
+    }
 
+    public void AddParameters(IEnumerable<CSParameter> parameters)
+    {
+        _parameters.AddRange(parameters);
+    }
+
+    public void AddParameters(ReadOnlySpan<CSParameter> parameters)
+    {
+        foreach (var parameter in parameters)
+        {
+            AddParameter(parameter);
+        }
+    }
+
+    public bool RemoveParameter(CSParameter parameter)
+    {
+        return _parameters.Remove(parameter);
+    }
+
+    public int RemoveAllParameters(Predicate<CSParameter>? predicate = null)
+    {
+        if (predicate is null)
+        {
+            var removedCount = _parameters.Count;
+            _parameters.Clear();
+            return removedCount;
+        }
+
+        return _parameters.RemoveAll(predicate);
+    }
+
+    public bool TryReplaceParameterAt(int index, CSParameter parameter)
+    {
+        if ((uint)index >= (uint)_parameters.Count)
+        {
+            return false;
+        }
+
+        _parameters[index] = parameter;
+        return true;
+    }
 
     internal void SetParent(BaseCSType? parent)
     {
@@ -108,6 +155,6 @@ public class CSConstructor : BaseCSAstItem, ICommendableItem, IAttributeAssignab
             }
         }
 
-        return $"{GetFullName}({string.Join(",", parametersTypeNames)})";
+        return $"{GetFullName()}({string.Join(",", parametersTypeNames)})";
     }
 }

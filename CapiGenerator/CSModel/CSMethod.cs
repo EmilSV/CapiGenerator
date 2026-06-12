@@ -6,8 +6,10 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 public class CSMethod : BaseCSAstItem,
-    INotifyReviver<CSParameter>, ITypeReplace, ICommendableItem, IAttributeAssignableItem
+    ITypeReplace, ICommendableItem, IAttributeAssignableItem
 {
+    private readonly List<CSParameter> _parameters = [];
+
     public required CSTypeInstance ReturnType;
     public string? Name;
     public LazyFormatString? Body;
@@ -27,7 +29,6 @@ public class CSMethod : BaseCSAstItem,
 
     public CSMethod()
     {
-        Parameters = new(this);
     }
 
     [SetsRequiredMembers]
@@ -40,7 +41,7 @@ public class CSMethod : BaseCSAstItem,
     {
         ReturnType = returnType;
         Name = name;
-        Parameters = new(this, parameters);
+        AddParameters(parameters);
         AccessModifier = CSAccessModifierHelper.GetAccessModifier(modifiers);
         IsExtern = (modifiers & CSClassMemberModifier.Extern) != 0;
         IsOverride = (modifiers & CSClassMemberModifier.Override) != 0;
@@ -116,7 +117,7 @@ public class CSMethod : BaseCSAstItem,
 
     [SetsRequiredMembers]
     public CSMethod(
-    CSClassMemberModifier modifiers,
+        CSClassMemberModifier modifiers,
         CSTypeInstance returnType,
         ReadOnlySpan<(CSTypeInstance type, string name)> parameters
     ) : this(modifiers, returnType, "", GetParameters(parameters))
@@ -133,10 +134,91 @@ public class CSMethod : BaseCSAstItem,
     {
     }
 
-    public NotifyList<CSParameter> Parameters { get; }
-    public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
+    public IReadOnlyList<CSParameter> Parameters => _parameters;
+    public List<BaseCSAttribute> Attributes { get; } = [];
 
     public DocComment? Comments { get; set; }
+
+    public void AddParameter(CSParameter parameter)
+    {
+        parameter.SetParentMethod(this);
+        _parameters.Add(parameter);
+    }
+
+    public void AddParameters(IEnumerable<CSParameter> parameters)
+    {
+        foreach (var parameter in parameters)
+        {
+            AddParameter(parameter);
+        }
+    }
+
+    public void AddParameters(ReadOnlySpan<CSParameter> parameters)
+    {
+        foreach (var parameter in parameters)
+        {
+            AddParameter(parameter);
+        }
+    }
+
+    public bool RemoveParameter(CSParameter parameter)
+    {
+        if (!_parameters.Remove(parameter))
+        {
+            return false;
+        }
+
+        parameter.SetParentMethod(null);
+        return true;
+    }
+
+    public int RemoveAllParameters(Predicate<CSParameter>? predicate = null)
+    {
+        if (predicate is null)
+        {
+            var removedCount = _parameters.Count;
+            foreach (var parameter in _parameters)
+            {
+                parameter.SetParentMethod(null);
+            }
+            _parameters.Clear();
+            return removedCount;
+        }
+
+        var removed = 0;
+        for (int i = _parameters.Count - 1; i >= 0; i--)
+        {
+            var parameter = _parameters[i];
+            if (!predicate(parameter))
+            {
+                continue;
+            }
+
+            _parameters.RemoveAt(i);
+            parameter.SetParentMethod(null);
+            removed++;
+        }
+        return removed;
+    }
+
+    public bool TryReplaceParameterAt(int index, CSParameter parameter)
+    {
+        if ((uint)index >= (uint)_parameters.Count)
+        {
+            return false;
+        }
+
+        var oldParameter = _parameters[index];
+        if (ReferenceEquals(oldParameter, parameter))
+        {
+            return true;
+        }
+
+        parameter.SetParentMethod(this);
+        oldParameter.SetParentMethod(null);
+        _parameters[index] = parameter;
+        return true;
+    }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
@@ -154,22 +236,6 @@ public class CSMethod : BaseCSAstItem,
             throw new InvalidOperationException("Parent method is already set");
         }
         ParentType = parent;
-    }
-
-    void INotifyReviver<CSParameter>.OnAddRange(ReadOnlySpan<CSParameter> items)
-    {
-        foreach (var item in items)
-        {
-            item.SetParentMethod(this);
-        }
-    }
-
-    void INotifyReviver<CSParameter>.OnRemoveRange(ReadOnlySpan<CSParameter> items)
-    {
-        foreach (var item in items)
-        {
-            item.SetParentMethod(null);
-        }
     }
 
     public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
@@ -200,7 +266,7 @@ public class CSMethod : BaseCSAstItem,
             }
             if (predicate(innerType, out var newType))
             {
-                Parameters.TryReplaceAt(i, CSParameter.CopyWithNewType(parameter, newType!));
+                TryReplaceParameterAt(i, CSParameter.CopyWithNewType(parameter, newType!));
             }
         }
     }

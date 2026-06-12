@@ -11,7 +11,7 @@ public abstract class BaseCSType
     public required string Name;
 
     public DocComment? Comments { get; set; }
-    public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
+    public List<BaseCSAttribute> Attributes { get; } = [];
 
     public string GetFullName()
     {

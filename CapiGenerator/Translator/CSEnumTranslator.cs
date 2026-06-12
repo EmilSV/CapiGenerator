@@ -52,7 +52,7 @@ public class CSEnumTranslator : BaseTranslator
             Name = enumItem.Name,
             Type = CSPrimitiveType.Instances.Int
         };
-        newCSEnum.Values.AddRange(enumValue);
+        newCSEnum.AddValues(enumValue);
         newCSEnum.EnrichingDataStore.Set(new CSTranslationFromCAstData(enumItem));
         enumItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSEnum));
         return newCSEnum;

@@ -44,8 +44,8 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
         {
             Name = className
         };
-        csStaticClass.Fields.AddRange(constantFields);
-        csStaticClass.Methods.AddRange(methods);
+        csStaticClass.AddFields(constantFields);
+        csStaticClass.AddMethods(methods);
 
         foreach (var constant in constantsTransLated)
         {
@@ -309,7 +309,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
             IsExtern = true,
             IsStatic = true
         };
-        method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
+        method.AddParameters(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 
         method.EnrichingDataStore.Set(new CSTranslationFromCAstData(function));
         if (dllName is not null)

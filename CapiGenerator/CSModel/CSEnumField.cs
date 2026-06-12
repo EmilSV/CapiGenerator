@@ -11,7 +11,7 @@ public class CSEnumField : BaseCSAstItem, ICSFieldLike, ICommendableItem, IAttri
     public CSConstantExpression Expression = [];
 
     public DocComment? Comments { get; set; }
-    public NotifyList<BaseCSAttribute> Attributes { get; } = new(null);
+    public List<BaseCSAttribute> Attributes { get; } = [];
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {

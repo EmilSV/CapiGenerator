@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel;
 using CapiGenerator.CSModel.Comments;
 using CapiGenerator.Translator;
-using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 

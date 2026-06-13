@@ -1,4 +1,5 @@
 using System.Collections;
+using CapiGenerator.CSModel;
 
 namespace CapiGenerator.UtilTypes;
 

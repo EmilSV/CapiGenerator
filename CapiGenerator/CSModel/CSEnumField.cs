@@ -1,6 +1,5 @@
 using CapiGenerator.Translator;
 using CapiGenerator.CSModel.Comments;
-using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 

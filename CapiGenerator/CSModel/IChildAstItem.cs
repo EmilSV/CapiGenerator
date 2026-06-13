@@ -1,4 +1,4 @@
-namespace CapiGenerator.UtilTypes;
+namespace CapiGenerator.CSModel;
 
 
 public interface IChildAstItem<TParent>

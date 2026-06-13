@@ -1,10 +1,13 @@
 
+using CapiGenerator.UtilTypes;
+
 namespace CapiGenerator.CSModel;
 
-public class BaseCSCallableType : BaseCSAstItem
+public abstract class BaseCSCallableType : BaseCSAstItem
 {
-    public IReadOnlyList<CSParameter> Parameters => _parameters;
-    private readonly List<CSParameter> _parameters = new();
-
-
+    public readonly ChildList<CSParameter, BaseCSCallableType> Parameters;
+    public BaseCSCallableType()
+    {
+        Parameters = new ChildList<CSParameter, BaseCSCallableType>(this);
+    }
 }

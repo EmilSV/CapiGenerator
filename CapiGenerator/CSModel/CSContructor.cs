@@ -3,7 +3,9 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSConstructor : BaseCSCallableType, ICommendableItem, IChildAstItem<BaseCSType>
+public class CSConstructor :
+    BaseCSCallableType, ICommendableItem,
+    ITypeReplace, IChildAstItem<BaseCSType>
 {
     public BaseCSType? Parent { get; private set; }
     public LazyFormatString? Body;
@@ -74,4 +76,25 @@ public class CSConstructor : BaseCSCallableType, ICommendableItem, IChildAstItem
 
         return $"{GetFullName()}({string.Join(",", parametersTypeNames)})";
     }
+
+    public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
+    {
+        int count = Parameters.Count;
+        for (int i = 0; i < count; i++)
+        {
+            var parameter = Parameters[i];
+            var innerType = parameter.Type.Type;
+            if (innerType is null)
+            {
+                var fullName = Parent is not null ? GetFullName() : "Unknown";
+                Console.Error.WriteLine($"CSConstructor {fullName} has null parameter type and cannot be replaced");
+                continue;
+            }
+            if (predicate(innerType, out var newType))
+            {
+                Parameters.TryReplaceAt(i, CSParameter.CopyWithNewType(parameter, newType!));
+            }
+        }
+    }
+
 }

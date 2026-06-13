@@ -3,12 +3,10 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public class CSStruct : BaseCSType, ITypeReplace
+public class CSStruct : BaseCSMemberContainer
 {
     public CSStruct()
     {
-        Fields = new(this);
-        Methods = new(this);
         Constructors = new(this);
     }
 
@@ -18,31 +16,23 @@ public class CSStruct : BaseCSType, ITypeReplace
     public bool IsReadOnly;
 
     public HashSet<LazyFormatString> Interfaces { get; } = [];
-    public ChildList<CSField, BaseCSType> Fields { get; }
-    public ChildList<CSMethod, BaseCSType> Methods { get; }
     public ChildList<CSConstructor, BaseCSType> Constructors { get; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        foreach (var field in Fields)
+        base.OnSecondPass(unit);
+        foreach (var constructor in Constructors)
         {
-            field.OnSecondPass(unit);
-        }
-        foreach (var method in Methods)
-        {
-            method.OnSecondPass(unit);
+            constructor.OnSecondPass(unit);
         }
     }
 
-    public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
+    public override void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
     {
-        foreach (var field in Fields)
+        base.ReplaceTypes(predicate);
+        foreach (var constructor in Constructors)
         {
-            field.ReplaceTypes(predicate);
-        }
-        foreach (var method in Methods)
-        {
-            method.ReplaceTypes(predicate);
+            constructor.ReplaceTypes(predicate);
         }
     }
 }

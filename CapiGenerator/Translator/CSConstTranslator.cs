@@ -63,7 +63,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         {
             Name = className
         };
-        csStaticClass.AddFields(constantFields);
+        csStaticClass.Fields.AddRange(constantFields);
 
         foreach (var constant in constantsTransLated)
         {

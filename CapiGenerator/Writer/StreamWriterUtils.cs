@@ -205,12 +205,12 @@ public static class StreamWriterUtils
 
         writer.Write(" ");
 
-        if (constructor.ParentType is null)
+        if (constructor.Parent is null)
         {
             throw new InvalidOperationException("Parent type is not set");
         }
 
-        writer.Write(constructor.ParentType.Name);
+        writer.Write(constructor.Parent.Name);
         await WriteParameters(writer, constructor.Parameters);
         await WriteBody(writer, constructor.Body ?? "");
         writer.WriteLine();

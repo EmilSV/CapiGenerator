@@ -41,7 +41,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
         {
             Name = className,
         };
-        csStaticClass.AddMethods(methods);
+        csStaticClass.Methods.AddRange(methods);
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
     }
@@ -68,7 +68,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
             IsExtern = true,
             IsStatic = true
         };
-        method.AddParameters(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
+        method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 
         method.EnrichingDataStore.Set(new CSTranslationFromCAstData(function));
         if (dllName is not null)

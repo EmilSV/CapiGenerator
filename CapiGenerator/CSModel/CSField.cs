@@ -7,7 +7,7 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 public sealed class CSField : BaseCSAstItem,
-    ICSFieldLike, ITypeReplace, ICommendableItem
+    ICSFieldLike, ITypeReplace, ICommendableItem, IChildAstItem<BaseCSType>
 {
     public required string Name { get; set; }
     public required CSTypeInstance Type;
@@ -23,7 +23,7 @@ public sealed class CSField : BaseCSAstItem,
     public CSPropertyBody? GetterBody;
     public CSPropertyBody? SetterBody;
 
-    public BaseCSType? ParentType { get; private set; }
+    public BaseCSType? Parent { get; private set; }
     public List<BaseCSAttribute> Attributes { get; } = [];
 
 
@@ -59,24 +59,24 @@ public sealed class CSField : BaseCSAstItem,
         DefaultValue.OnSecondPass(unit);
     }
 
-    internal void SetParent(BaseCSType? parent)
+    void IChildAstItem<BaseCSType>.SetParent(BaseCSType? parent)
     {
-        if (ParentType != null && parent != null)
+        if (Parent != null && parent != null)
         {
             throw new InvalidOperationException("Parent method is already set");
         }
 
-        ParentType = parent;
+        Parent = parent;
     }
 
     public string GetFullName()
     {
-        if (ParentType == null)
+        if (Parent == null)
         {
             throw new InvalidOperationException("Parent type is not set");
         }
 
-        return $"{ParentType.GetFullName()}.{Name}";
+        return $"{Parent.GetFullName()}.{Name}";
     }
 
     public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)

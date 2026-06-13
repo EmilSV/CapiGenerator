@@ -50,7 +50,7 @@ public class CSStructTranslator : BaseTranslator
         {
             Name = structItem.Name,
         };
-        newCSStruct.AddFields(fields);
+        newCSStruct.Fields.AddRange(fields);
 
         newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(structItem));
         structItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));

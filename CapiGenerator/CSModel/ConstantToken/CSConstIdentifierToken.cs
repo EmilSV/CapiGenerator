@@ -48,7 +48,7 @@ public class CSConstIdentifierToken : BaseCSConstantToken
         var output = _constantField.Output;
         if (output is CSEnumField enumField && castEnum)
         {
-            return enumField.ParentEnum?.Type?.KindValue switch
+            return enumField.Parent?.Type?.KindValue switch
             {
                 CSPrimitiveType.Kind.Byte => $"(byte){enumField.GetFullName()}",
                 CSPrimitiveType.Kind.SByte => $"(sbyte){enumField.GetFullName()}",

@@ -6,7 +6,7 @@ using CapiGenerator.UtilTypes;
 namespace CapiGenerator.CSModel;
 
 public class CSMethod : BaseCSCallableType,
-    ITypeReplace, ICommendableItem, IAttributeAssignableItem
+    ITypeReplace, ICommendableItem, IAttributeAssignableItem, IChildAstItem<BaseCSType>
 {
     public required CSTypeInstance ReturnType;
     public string? Name;
@@ -24,6 +24,7 @@ public class CSMethod : BaseCSCallableType,
     public CSMethodOperatorModifier OperatorModifier = CSMethodOperatorModifier.None;
 
     public BaseCSType? ParentType { get; private set; }
+    public BaseCSType? Parent => ParentType;
 
     public CSMethod()
     {
@@ -145,7 +146,7 @@ public class CSMethod : BaseCSCallableType,
         }
     }
 
-    internal void SetParent(BaseCSType? parent)
+    void IChildAstItem<BaseCSType>.SetParent(BaseCSType? parent)
     {
         if (ParentType != null && parent != null)
         {

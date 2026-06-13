@@ -65,7 +65,7 @@ public class CSTypedefTranslator : BaseTranslator
         {
             Name = typedefItem.Name,
         };
-        newCSStruct.AddField(new()
+        newCSStruct.Fields.Add(new()
         {
             Name = "Value",
             Type = CSTypeInstance.CreateFromCTypeInstance(typedefItem.InnerType)

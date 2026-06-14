@@ -5,12 +5,14 @@ using CapiGenerator.CSModel;
 using CapiGenerator.CSModel.EnrichData;
 using CapiGenerator.Parser;
 using CapiGenerator.UtilTypes;
+using CapiGenerator.XmlComments;
 
 namespace CapiGenerator.Translator;
 
 public sealed class CSTranslationUnit :
     IResolver<ICSType, ICType>,
-    IResolver<ICSFieldLike, ICConstAssignable>
+    IResolver<ICSFieldLike, ICConstAssignable>,
+    IXmlCommentsTypeProvider
 {
     private class TranslatorOutputChannel(CSTranslationUnit translationUnit) : BaseTranslatorOutputChannel
     {
@@ -285,6 +287,6 @@ public sealed class CSTranslationUnit :
     }
 
     public IEnumerable<CSStaticClass> GetCSStaticClassesEnumerable() => _staticClassesByName.Values;
-    public IEnumerable<CSStruct> GetCSStructEnumerable() => _structByName.Values;
-    public IEnumerable<CSEnum> GetCSEnumEnumerable() => _enumByName.Values;
+    public IEnumerable<CSStruct> GetCSStructsEnumerable() => _structByName.Values;
+    public IEnumerable<CSEnum> GetCSEnumsEnumerable() => _enumByName.Values;
 }

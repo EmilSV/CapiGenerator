@@ -47,12 +47,16 @@ public class CSTypeInstance : BaseCSAstItem
 
         foreach (var cModifier in cModifiers)
         {
-            BaseCSTypeModifier modifier = cModifier switch
+            BaseCSTypeModifier? modifier = cModifier switch
             {
                 PointerType => CsPointerType.Instance,
+                ArrayType arrayType when arrayType.SizeValue.TryAsValue(out var size) => new CSFixedInlineArrayType(size),
                 _ => throw new Exception("unsupported modifier"),
             };
-            modifiers.Add(modifier);
+            if (modifier != null)
+            {
+                modifiers.Add(modifier);
+            }
         }
 
 
@@ -61,7 +65,7 @@ public class CSTypeInstance : BaseCSAstItem
 
     public static CSTypeInstance CreateFromCTypeInstance(CTypeInstance cTypeInstance)
     {
-        var cType = cTypeInstance.GetCType() ?? throw new Exception("cType is null");
+        var cType = cTypeInstance.GetCType() ?? throw new Exception($"cType is null {(cTypeInstance.CTypeRef.TryGetKey(out var key) ? key : "unknown")}");
         var modifiers = TranslateModifiers(cTypeInstance.Modifiers);
 
         if (cType.IsAnonymous)
@@ -111,7 +115,7 @@ public class CSTypeInstance : BaseCSAstItem
 
         foreach (var modifier in _modifier)
         {
-            sb.Append(modifier.GetTypeString());
+            sb.Append(modifier.GetTypePostFixString());
         }
 
         return sb.ToString();

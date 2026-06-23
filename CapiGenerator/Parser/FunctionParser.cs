@@ -57,7 +57,10 @@ public class FunctionParser : BaseParser
 
     }
 
-    protected virtual bool ShouldSkip(CppFunction constant) => false;
+    protected virtual bool ShouldSkip(CppFunction function)
+    {
+        return function.Parameters.Any(i => i.Type.TypeKind == CppTypeKind.Typedef && i.Type.GetDisplayName() == "va_list");
+    }
     protected virtual void OnError(CppFunction constant, string message)
     {
         Console.Error.WriteLine($"Error parsing function {constant.Name}: {message}");

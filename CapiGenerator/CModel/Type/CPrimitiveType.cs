@@ -112,7 +112,11 @@ public sealed class CPrimitiveType : ICType
         CppPrimitiveKind.UnsignedShort => GetByKind(Kind.UnsignedShortInt),
         CppPrimitiveKind.UnsignedInt => GetByKind(Kind.UnsignedInt),
         CppPrimitiveKind.UnsignedLongLong => GetByKind(Kind.UnsignedLongLong),
-        _ => throw new NotImplementedException(),
+        CppPrimitiveKind.Long => GetByKind(Kind.Long),
+        CppPrimitiveKind.UnsignedLong => GetByKind(Kind.UnsignedLong),
+
+        CppPrimitiveKind.WChar => GetByKind(Kind.UnsignedShortInt),
+        _ => throw new NotImplementedException($"Unknown primitive kind: {cppType.Kind}"),
     };
 
     // public static CPrimitiveType FromCConstType(CConstantType constType) => constType switch

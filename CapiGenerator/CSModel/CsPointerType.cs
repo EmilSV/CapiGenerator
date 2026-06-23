@@ -2,7 +2,7 @@ namespace CapiGenerator.CSModel;
 
 public class CsPointerType : BaseCSTypeModifier
 {
-    public override string GetTypeString()
+    public override string GetTypePostFixString()
     {
         return "*";
     }

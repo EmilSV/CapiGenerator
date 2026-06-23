@@ -13,7 +13,7 @@ public abstract class BaseBuiltinType : ICSType
 
     public abstract string Namespace { get; }
 
-    public string GetFullName()
+    public virtual string GetFullName()
     {
         return $"{Namespace}.{Name}";
     }

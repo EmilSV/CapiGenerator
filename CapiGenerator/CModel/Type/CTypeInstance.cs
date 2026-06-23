@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using CapiGenerator.CModel.BuiltinTypedefs;
 using CapiGenerator.Parser;
 using CapiGenerator.UtilTypes;
 using CppAst;
@@ -47,6 +48,15 @@ public class CTypeInstance : BaseCAstItem
     public static CTypeInstance FromCppType(CppType type)
     {
         var (convertedType, modifiers) = UnpackModifiers(type);
+        if (convertedType is CppTypedef cppTypedef)
+        {
+            var builtinTypedef = AllBuiltinTypedefs.AllTypedefs.FirstOrDefault(item => item.Name == cppTypedef.Name);
+            if (builtinTypedef is not null)
+            {
+                return new CTypeInstance(builtinTypedef, modifiers);
+            }
+        }
+
         if (TryConvertToCType(convertedType, out var cType))
         {
             return new CTypeInstance(cType, modifiers);

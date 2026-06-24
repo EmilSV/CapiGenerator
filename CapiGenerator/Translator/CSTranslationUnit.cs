@@ -34,23 +34,7 @@ public sealed class CSTranslationUnit :
             foreach (var item in enums)
             {
                 translationUnit._enumByName.Add(item.GetFullName(), item);
-                var cAstType = item.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
-                if (cAstType is ICType cType)
-                {
-                    translationUnit._csTypeByCType.Add(cType, item);
-                }
-
-                foreach (var field in item.Values)
-                {
-                    var cAst = field.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
-                    if (cAst is not CEnumField cEnumField)
-                    {
-                        continue;
-                    }
-
-                    translationUnit._felidLikeByCConst.Add(cEnumField, field);
-                }
-
+                RegisterTypeForResolution(item);
             }
         }
 
@@ -65,16 +49,7 @@ public sealed class CSTranslationUnit :
             foreach (var staticClass in staticClasses)
             {
                 translationUnit._staticClassesByName.Add(staticClass.GetFullName(), staticClass);
-                foreach (var field in staticClass.Fields)
-                {
-                    var cAst = field.EnrichingDataStore.Get<CSTranslationFromCAstData>();
-                    if (cAst?.AstItem is not CConstant cConstant)
-                    {
-                        continue;
-                    }
-
-                    translationUnit._felidLikeByCConst.Add(cConstant, field);
-                }
+                RegisterTypeForResolution(staticClass);
             }
         }
 
@@ -89,22 +64,61 @@ public sealed class CSTranslationUnit :
             foreach (var item in structs)
             {
                 translationUnit._structByName.Add(item.GetFullName(), item);
-                var cAstType = item.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
-                if (cAstType is ICType cType)
-                {
-                    translationUnit._csTypeByCType.Add(cType, item);
-                }
+                RegisterTypeForResolution(item);
+            }
+        }
 
-                foreach (var field in item.Fields)
-                {
-                    var cAst = field.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
-                    if (cAst is not CConstant cConstant)
+        private void RegisterTypeForResolution(BaseCSType type)
+        {
+            var cAstType = type.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
+            if (cAstType is ICType cType)
+            {
+                translationUnit._csTypeByCType.Add(cType, type);
+            }
+
+            switch (type)
+            {
+                case CSEnum csEnum:
+                    RegisterEnumValues(csEnum);
+                    break;
+                case CSStruct csStruct:
+                    RegisterFields(csStruct.Fields);
+                    foreach (var nestedType in csStruct.NestedTypes)
                     {
-                        continue;
+                        RegisterTypeForResolution(nestedType);
                     }
+                    break;
+                case CSStaticClass csStaticClass:
+                    RegisterFields(csStaticClass.Fields);
+                    break;
+            }
+        }
 
-                    translationUnit._felidLikeByCConst.Add(cConstant, field);
+        private void RegisterEnumValues(CSEnum csEnum)
+        {
+            foreach (var field in csEnum.Values)
+            {
+                var cAst = field.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
+                if (cAst is not CEnumField cEnumField)
+                {
+                    continue;
                 }
+
+                translationUnit._felidLikeByCConst.Add(cEnumField, field);
+            }
+        }
+
+        private void RegisterFields(IEnumerable<CSField> fields)
+        {
+            foreach (var field in fields)
+            {
+                var cAst = field.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
+                if (cAst is not CConstant cConstant)
+                {
+                    continue;
+                }
+
+                translationUnit._felidLikeByCConst.Add(cConstant, field);
             }
         }
 

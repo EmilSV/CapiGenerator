@@ -1,4 +1,3 @@
-using System.Text;
 using CapiGenerator.CSModel;
 
 namespace CapiGenerator.Writer;
@@ -8,7 +7,6 @@ public class CSEnumWriter : BaseCSEnumWriter
     public override async Task Write(CSEnum csEnum, CSWriteConfig writeConfig)
     {
         var enumName = csEnum.Name;
-        var enumValues = csEnum.Values;
 
         if (writeConfig.OutputDirectory is not null)
         {
@@ -21,8 +19,8 @@ public class CSEnumWriter : BaseCSEnumWriter
         {
             stream.WriteLine($"using {usingNamespace};");
         }
-        stream.WriteLine();
 
+        stream.WriteLine();
         await stream.FlushAsync();
 
         if (csEnum.Namespace is not null)
@@ -32,32 +30,6 @@ public class CSEnumWriter : BaseCSEnumWriter
 
         stream.WriteLine();
 
-        await StreamWriterUtils.WriteToStream(stream, csEnum.Comments);
-        foreach (var attribute in csEnum.Attributes)
-        {
-            StreamWriterUtils.WriteToStream(stream, attribute);
-            stream.WriteLine();
-        }
-
-        await stream.FlushAsync();
-        stream.Write($"public enum {enumName}");
-        if (csEnum.Type.KindValue != CSPrimitiveType.Kind.Int)
-        {
-            stream.Write($" : {csEnum.Type.Name}");
-        }
-        stream.WriteLine();
-        stream.WriteLine("{");
-
-        await stream.FlushAsync();
-
-        foreach (var enumValue in enumValues)
-        {
-            await StreamWriterUtils.WriteToStream(stream, enumValue.Comments);
-            stream.WriteLine($"\t{enumValue.Name} = {enumValue.Expression},");
-            await stream.FlushAsync();
-        }
-
-        stream.WriteLine("}");
-        await stream.FlushAsync();
+        await CSTypeDeclarationWriter.WriteEnumDeclaration(stream, csEnum);
     }
 }

@@ -8,6 +8,7 @@ public class CSStruct : BaseCSMemberContainer
     public CSStruct()
     {
         Constructors = new(this);
+        NestedTypes = new(this);
     }
 
     public CSAccessModifier AccessModifier;
@@ -17,6 +18,7 @@ public class CSStruct : BaseCSMemberContainer
 
     public HashSet<LazyFormatString> Interfaces { get; } = [];
     public ChildList<CSConstructor, BaseCSType> Constructors { get; }
+    public ChildList<BaseCSType, BaseCSType> NestedTypes { get; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
@@ -24,6 +26,10 @@ public class CSStruct : BaseCSMemberContainer
         foreach (var constructor in Constructors)
         {
             constructor.OnSecondPass(unit);
+        }
+        foreach (var nestedType in NestedTypes)
+        {
+            nestedType.OnSecondPass(unit);
         }
     }
 
@@ -33,6 +39,13 @@ public class CSStruct : BaseCSMemberContainer
         foreach (var constructor in Constructors)
         {
             constructor.ReplaceTypes(predicate);
+        }
+        foreach (var nestedType in NestedTypes)
+        {
+            if (nestedType is ITypeReplace typeReplace)
+            {
+                typeReplace.ReplaceTypes(predicate);
+            }
         }
     }
 }

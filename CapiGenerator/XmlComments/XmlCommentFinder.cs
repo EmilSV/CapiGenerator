@@ -9,103 +9,110 @@ public static partial class XmlCommentFinder
     public static ICommendableItem? FindComments(IXmlCommentsTypeProvider translationResult, string location)
     {
         location = RemoveWhitespace(location);
+
         foreach (var csEnum in translationResult.GetCSEnumsEnumerable())
         {
-            var fullName = RemoveWhitespace(csEnum.GetFullName());
-            if (fullName == location)
+            var result = FindCommentsInType(csEnum, location);
+            if (result is not null)
             {
-                return csEnum;
-            }
-
-            foreach (var field in csEnum.Values)
-            {
-                var fullNameField = RemoveWhitespace(field.GetFullName());
-                if (fullNameField == location)
-                {
-                    return field;
-                }
+                return result;
             }
         }
 
         foreach (var csStruct in translationResult.GetCSStructsEnumerable())
         {
+            var result = FindCommentsInType(csStruct, location);
+            if (result is not null)
             {
-                var typeFullName = RemoveWhitespace(csStruct.GetFullName());
-                if (typeFullName == location)
-                {
-                    return csStruct;
-                }
-            }
-
-            foreach (var field in csStruct.Fields)
-            {
-                var fullNameField = RemoveWhitespace(field.GetFullName());
-                if (fullNameField == location)
-                {
-                    return field;
-                }
-            }
-
-            foreach (var method in csStruct.Methods)
-            {
-                var fullName = RemoveWhitespace(method.GetFullName());
-                var fullNameWithParameters = RemoveWhitespace(method.GetFullNameWithParameters());
-                if (fullName == location)
-                {
-                    return method;
-                }
-                else if (fullNameWithParameters == location)
-                {
-                    return method;
-                }
-            }
-
-            foreach (var constructor in csStruct.Constructors)
-            {
-                var fullName = RemoveWhitespace(constructor.GetFullName());
-                var fullNameWithParameters = RemoveWhitespace(constructor.GetFullNameWithParameters());
-                if (fullName == location)
-                {
-                    return constructor;
-                }
-                else if (fullNameWithParameters == location)
-                {
-                    return constructor;
-                }
+                return result;
             }
         }
 
         foreach (var staticClass in translationResult.GetCSStaticClassesEnumerable())
         {
+            var result = FindCommentsInType(staticClass, location);
+            if (result is not null)
             {
-                var typeFullName = RemoveWhitespace(staticClass.GetFullName());
-                if (typeFullName == location)
-                {
-                    return staticClass;
-                }
+                return result;
             }
+        }
 
-            foreach (var field in staticClass.Fields)
-            {
-                var fullName = RemoveWhitespace(field.GetFullName());
-                if (fullName == location)
+        return null;
+    }
+
+    private static ICommendableItem? FindCommentsInType(BaseCSType type, string location)
+    {
+        var typeFullName = RemoveWhitespace(type.GetFullName());
+        if (typeFullName == location)
+        {
+            return type;
+        }
+
+        switch (type)
+        {
+            case CSEnum csEnum:
+                foreach (var field in csEnum.Values)
                 {
-                    return field;
+                    var fullNameField = RemoveWhitespace(field.GetFullName());
+                    if (fullNameField == location)
+                    {
+                        return field;
+                    }
                 }
+                break;
+
+            case CSStruct csStruct:
+                var structMemberResult = FindCommentsInMemberContainer(csStruct, location);
+                if (structMemberResult is not null)
+                {
+                    return structMemberResult;
+                }
+
+                foreach (var constructor in csStruct.Constructors)
+                {
+                    var fullName = RemoveWhitespace(constructor.GetFullName());
+                    var fullNameWithParameters = RemoveWhitespace(constructor.GetFullNameWithParameters());
+                    if (fullName == location || fullNameWithParameters == location)
+                    {
+                        return constructor;
+                    }
+                }
+
+                foreach (var nestedType in csStruct.NestedTypes)
+                {
+                    var nestedResult = FindCommentsInType(nestedType, location);
+                    if (nestedResult is not null)
+                    {
+                        return nestedResult;
+                    }
+                }
+                break;
+
+            case CSStaticClass csStaticClass:
+                return FindCommentsInMemberContainer(csStaticClass, location);
+        }
+
+        return null;
+    }
+
+    private static ICommendableItem? FindCommentsInMemberContainer(BaseCSMemberContainer memberContainer, string location)
+    {
+        foreach (var field in memberContainer.Fields)
+        {
+            var fullNameField = RemoveWhitespace(field.GetFullName());
+            if (fullNameField == location)
+            {
+                return field;
             }
+        }
 
-            foreach (var method in staticClass.Methods)
+        foreach (var method in memberContainer.Methods)
+        {
+            var fullName = RemoveWhitespace(method.GetFullName());
+            var fullNameWithParameters = RemoveWhitespace(method.GetFullNameWithParameters());
+            if (fullName == location || fullNameWithParameters == location)
             {
-                var fullName = RemoveWhitespace(method.GetFullName());
-                var fullNameWithParameters = RemoveWhitespace(method.GetFullNameWithParameters());
-                if (fullName == location)
-                {
-                    return method;
-                }
-                else if (fullNameWithParameters == location)
-                {
-                    return method;
-                }
+                return method;
             }
         }
 

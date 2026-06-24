@@ -11,6 +11,7 @@ public sealed class CSEnum : BaseCSType, ITypeReplace
         Values = new(this);
     }
 
+    public CSAccessModifier AccessModifier = CSAccessModifier.Public;
     public CSPrimitiveType Type = CSPrimitiveType.Instances.Int;
 
     public readonly ChildList<CSEnumField, CSEnum> Values;

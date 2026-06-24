@@ -50,7 +50,7 @@ compilationUnit.AddParser([
 
 compilationUnit.Parse([cppCompilation]);
 
-foreach (var constant in compilationUnit.GetEnumEnumerable())
+foreach (var constant in compilationUnit.GetEnumsEnumerable())
 {
     Console.WriteLine(constant.Name);
 }
@@ -70,7 +70,7 @@ translationUnit.Translate([compilationUnit]);
 var structWriter = new CSStructWriter();
 var enumWriter = new CSEnumWriter();
 
-foreach (var csStruct in translationUnit.GetCSStructEnumerable())
+foreach (var csStruct in translationUnit.GetCSStructsEnumerable())
 {
     csStruct.Namespace = "TestProject";
 
@@ -83,7 +83,7 @@ foreach (var csStruct in translationUnit.GetCSStructEnumerable())
     });
 }
 
-foreach (var csEnum in translationUnit.GetCSEnumEnumerable())
+foreach (var csEnum in translationUnit.GetCSEnumsEnumerable())
 {
     csEnum.Namespace = "TestProject";
 

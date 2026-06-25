@@ -3,10 +3,11 @@ using CapiGenerator.CModel.Type;
 
 namespace CapiGenerator.CModel;
 
-public class CField(string name, CTypeInstance type)
+public class CField(string name, CTypeInstance type, int offset = 0)
     : BaseCAstItem
 {
     public readonly string Name = name;
+    public readonly int Offset = offset;
     private CTypeInstance _type = type;
 
     public CTypeInstance GetFieldType()

@@ -17,6 +17,7 @@ public sealed class CCompilationUnit :
         private readonly List<BaseCConstant> _receiveConstants = [];
         private readonly List<CEnum> _receiveEnums = [];
         private readonly List<CStruct> _receiveStructs = [];
+        private readonly List<CUnion> _receiveUnions = [];
         private readonly List<CFunction> _receiveFunctions = [];
         private readonly List<CTypedef> _receiveTypedefs = [];
 
@@ -88,6 +89,26 @@ public sealed class CCompilationUnit :
             }
         }
 
+        public override void OnReceiveUnion(ReadOnlySpan<CUnion> unions)
+        {
+            foreach (var union in unions)
+            {
+                if (compilationUnit._types.ContainsKey(union.Name))
+                {
+                    continue;
+                }
+
+                if (compilationUnit._unions.ContainsKey(union.Name))
+                {
+                    continue;
+                }
+
+                compilationUnit._types.Add(union.Name, union);
+                compilationUnit._unions.Add(union.Name, union);
+                _receiveUnions.Add(union);
+            }
+        }
+
         public override void OnReceiveTypedef(ReadOnlySpan<CTypedef> types)
         {
             foreach (var type in types)
@@ -134,6 +155,11 @@ public sealed class CCompilationUnit :
             return [.. _receiveStructs];
         }
 
+        public CUnion[] ReceiveUnionsToArray()
+        {
+            return [.. _receiveUnions];
+        }
+
         public CFunction[] ReceiveFunctionsToArray()
         {
             return [.. _receiveFunctions];
@@ -157,6 +183,7 @@ public sealed class CCompilationUnit :
         BaseCConstant[]? constants,
         CEnum[]? enums,
         CStruct[]? structs,
+        CUnion[]? unions,
         CFunction[]? functions,
         CTypedef[]? typedefs
     ) : BaseParserInputChannel
@@ -173,6 +200,9 @@ public sealed class CCompilationUnit :
         public override ReadOnlySpan<CStruct> GetStructs() =>
             structs is null ? ReadOnlySpan<CStruct>.Empty : structs;
 
+        public override ReadOnlySpan<CUnion> GetUnions() =>
+            unions is null ? ReadOnlySpan<CUnion>.Empty : unions;
+
         public override ReadOnlySpan<CTypedef> GetTypedefs() =>
             typedefs is null ? ReadOnlySpan<CTypedef>.Empty : typedefs;
     }
@@ -184,6 +214,7 @@ public sealed class CCompilationUnit :
     private readonly Dictionary<string, CEnum> _enums = [];
     private readonly Dictionary<string, CEnumField> _enumFields = [];
     private readonly Dictionary<string, CStruct> _structs = [];
+    private readonly Dictionary<string, CUnion> _unions = [];
     private readonly Dictionary<string, CFunction> _functions = [];
     private readonly Dictionary<string, CTypedef> _typedefs = [];
     private readonly Dictionary<string, BaseBuiltinTypedef> _builtinTypedefs = [];
@@ -204,6 +235,9 @@ public sealed class CCompilationUnit :
 
     public CStruct? GetStructByName(string name) =>
         _structs.TryGetValue(name, out var @struct) ? @struct : null;
+
+    public CUnion? GetUnionByName(string name) =>
+        _unions.TryGetValue(name, out var union) ? union : null;
 
     public CFunction? GetFunctionByName(string name) =>
         _functions.TryGetValue(name, out var function) ? function : null;
@@ -240,6 +274,7 @@ public sealed class CCompilationUnit :
                 constants: outputChannel.ReceiveConstantsToArray(),
                 enums: outputChannel.ReceiveEnumsToArray(),
                 structs: outputChannel.ReceiveStructsToArray(),
+                unions: outputChannel.ReceiveUnionsToArray(),
                 functions: outputChannel.ReceiveFunctionsToArray(),
                 typedefs: outputChannel.ReceiveTypedefsToArray()
             );
@@ -257,6 +292,7 @@ public sealed class CCompilationUnit :
     public IEnumerable<BaseCConstant> GetConstantEnumerable() => _constants.Values;
     public IEnumerable<CEnum> GetEnumEnumerable() => _enums.Values;
     public IEnumerable<CStruct> GetStructEnumerable() => _structs.Values;
+    public IEnumerable<CUnion> GetUnionEnumerable() => _unions.Values;
     public IEnumerable<CFunction> GetFunctionEnumerable() => _functions.Values;
     public IEnumerable<CTypedef> GetTypedefEnumerable() => _typedefs.Values;
 

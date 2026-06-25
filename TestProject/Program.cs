@@ -19,6 +19,7 @@ string headerPath = FakeCStdHeader.CreateFakeStdHeaderFolder();
 var options = new CppParserOptions
 {
     ParseMacros = true,
+    ParseComments = true,
 };
 
 options.IncludeFolders.Add(headerPath);
@@ -44,13 +45,14 @@ compilationUnit.AddParser([
     new EnumParser(),
     new FunctionParser(),
     new StructParser(),
+    new UnionParser(),
     new TypedefParser()
 ]);
 
 
 compilationUnit.Parse([cppCompilation]);
 
-foreach (var constant in compilationUnit.GetEnumsEnumerable())
+foreach (var constant in compilationUnit.GetEnumEnumerable())
 {
     Console.WriteLine(constant.Name);
 }
@@ -62,6 +64,7 @@ translationUnit.AddTranslator([
     new CSEnumTranslator(),
     new CSFunctionTranslator("TestProjectFunction", "TestProject.Interop"),
     new CSStructTranslator(),
+    new CSUnionTranslator(),
     new CSTypedefTranslator()
 ]);
 

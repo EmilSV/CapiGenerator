@@ -23,6 +23,12 @@ public abstract class BaseParserOutputChannel
         OnReceiveStruct([structValue]);
     }
 
+    public abstract void OnReceiveUnion(ReadOnlySpan<CUnion> unions);
+    public virtual void OnReceiveUnion(CUnion unionValue)
+    {
+        OnReceiveUnion([unionValue]);
+    }
+
     public abstract void OnReceiveFunction(ReadOnlySpan<CFunction> types);
     public virtual void OnReceiveFunction(CFunction type)
     {

@@ -54,7 +54,8 @@ public class StructParser : BaseParser
         }
     }
 
-    protected virtual bool ShouldSkip(CppClass cppStruct) => false;
+    protected virtual bool ShouldSkip(CppClass cppStruct) =>
+        cppStruct.ClassKind == CppClassKind.Union;
     protected virtual void OnError(CppClass cppStruct, string message)
     {
         Console.Error.WriteLine($"Error parsing struct {cppStruct.Name}: {message}");
@@ -63,6 +64,6 @@ public class StructParser : BaseParser
     private static CField? CppFieldToCField(CppField field)
     {
         var fieldType = CTypeInstance.FromCppType(field.Type);
-        return new CField(field.Name, fieldType);
+        return new CField(field.Name, fieldType, checked((int)field.Offset));
     }
 }

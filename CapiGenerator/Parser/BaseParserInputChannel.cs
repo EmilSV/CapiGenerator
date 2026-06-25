@@ -7,6 +7,7 @@ public abstract class BaseParserInputChannel
     public abstract ReadOnlySpan<BaseCConstant> GetConstants();
     public abstract ReadOnlySpan<CEnum> GetEnums();
     public abstract ReadOnlySpan<CStruct> GetStructs();
+    public abstract ReadOnlySpan<CUnion> GetUnions();
     public abstract ReadOnlySpan<CFunction> GetFunctions();
     public abstract ReadOnlySpan<CTypedef> GetTypedefs();
 }

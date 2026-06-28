@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CapiGenerator": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\emils\\git_repos\\CapiGenerator\\TestHeader\\UnionTest.h"
+    }
+  }
+}

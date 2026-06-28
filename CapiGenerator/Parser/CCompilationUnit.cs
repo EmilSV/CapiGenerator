@@ -265,6 +265,12 @@ public sealed class CCompilationUnit :
     {
         List<(BaseParser, ParserInputChannel)> parserChannels = [];
 
+        var parserCollection = new ParserCollection(_parsers);
+        foreach (var parser in _parsers)
+        {
+            parser.Init(parserCollection);
+        }
+
         foreach (var parser in _parsers)
         {
             ParserOutputChannel outputChannel = new(this);

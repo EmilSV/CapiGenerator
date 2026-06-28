@@ -92,6 +92,8 @@ public class CSTypeInstance : BaseCSAstItem
                     return new CSTypeInstance(csFunctionType, modifiers[1..]);
                 }
                 return new CSTypeInstance(csFunctionType, modifiers);
+            case CStruct or CUnion:
+                return new CSTypeInstance(cType, modifiers);
             default: throw new Exception("unsupported anonymous type");
         }
     }

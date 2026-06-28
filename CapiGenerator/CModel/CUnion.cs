@@ -5,16 +5,14 @@ namespace CapiGenerator.CModel;
 public class CUnion(
     string name,
     ReadOnlySpan<CField> fields,
-    int? sizeOf = null,
-    int? alignOf = null) :
+    bool isAnonymous = false) :
     BaseCAstItem, ICType
 {
     private readonly CField[] _fields = fields.ToArray();
 
     public string Name => name;
     public ReadOnlySpan<CField> Fields => _fields;
-    public int? SizeOf => sizeOf;
-    public int? AlignOf => alignOf;
+    public bool IsAnonymous => isAnonymous;
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {

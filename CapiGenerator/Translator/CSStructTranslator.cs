@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;
@@ -41,22 +42,72 @@ public class CSStructTranslator : BaseTranslator
 
     protected static CSStruct TranslateStruct(CStruct structItem)
     {
-        List<CSField> fields = [];
-
-        foreach (var field in structItem.Fields)
-        {
-            fields.Add(TranslateField(field));
-        }
-
         var newCSStruct = new CSStruct
         {
             Name = structItem.Name,
         };
-        newCSStruct.Fields.AddRange(fields);
+
+        foreach (var field in structItem.Fields)
+        {
+            newCSStruct.Fields.Add(TranslateField(field));
+            AddNestedAnonymousRecord(newCSStruct, field);
+        }
 
         newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(structItem));
         structItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
         return newCSStruct;
+    }
+
+    protected static CSStruct TranslateUnionRecord(CUnion unionItem)
+    {
+        var newCSStruct = new CSStruct
+        {
+            Name = unionItem.Name,
+        };
+
+        newCSStruct.Attributes.Add(CreateExplicitLayoutAttribute());
+
+        foreach (var field in unionItem.Fields)
+        {
+            var newField = TranslateField(field);
+            newField.Attributes.Add(CSAttribute<FieldOffsetAttribute>.Create(
+                [0.ToString()],
+                []));
+            newCSStruct.Fields.Add(newField);
+            AddNestedAnonymousRecord(newCSStruct, field);
+        }
+
+        newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(unionItem));
+        unionItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
+        return newCSStruct;
+    }
+
+    protected static void AddNestedAnonymousRecord(CSStruct parent, CField field)
+    {
+        var cType = field.GetFieldType().GetCType();
+        if (cType is not { IsAnonymous: true })
+        {
+            return;
+        }
+
+        var nestedType = cType switch
+        {
+            CStruct cStruct => TranslateStruct(cStruct),
+            CUnion cUnion => TranslateUnionRecord(cUnion),
+            _ => null,
+        };
+
+        if (nestedType is not null)
+        {
+            parent.NestedTypes.Add(nestedType);
+        }
+    }
+
+    private static CSAttribute<StructLayoutAttribute> CreateExplicitLayoutAttribute()
+    {
+        return CSAttribute<StructLayoutAttribute>.Create(
+            ["System.Runtime.InteropServices.LayoutKind.Explicit"],
+            []);
     }
 
     protected static CSField TranslateField(CField field)

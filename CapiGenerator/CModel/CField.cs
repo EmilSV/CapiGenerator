@@ -20,16 +20,23 @@ public class CField(string name, CTypeInstance type)
         _type.OnSecondPass(compilationUnit);
     }
 
-    public static CField FromCppField(CppField field, AnonymousCTypeFactory anonymousTypeFactory)
+    public static CField FromCppField(
+        CppClass parent,
+        CppField field,
+        NestedCTypeFactory nestedTypeFactory,
+        List<ICType> nestedTypes)
     {
-        if (field.Type is not CppClass { IsAnonymous: true })
+        var (fieldType, modifiers) = field.Type.UnpackModifiers();
+        if (nestedTypeFactory.TryCreateNestedTypeForFieldType(parent, field, fieldType, out var nestedType))
         {
-            return new CField(field.Name, CTypeInstance.FromCppType(field.Type));
+            if (!nestedTypes.Contains(nestedType))
+            {
+                nestedTypes.Add(nestedType);
+            }
+
+            return new CField(field.Name, new CTypeInstance(nestedType, modifiers));
         }
-        if (anonymousTypeFactory.TryCreateAnonymousTypeForFieldType(field, out var anonymousType))
-        {
-            return new CField(field.Name, new CTypeInstance(anonymousType!, []));
-        }
-        throw new InvalidOperationException($"Failed to create anonymous type for field {field.Name}");
+
+        return new CField(field.Name, CTypeInstance.FromCppType(field.Type));
     }
 }

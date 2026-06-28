@@ -1,12 +1,12 @@
 using CapiGenerator.CModel;
-using CapiGenerator.CModel.Type;
+
 using CppAst;
 
 namespace CapiGenerator.Parser;
 
 public class UnionParser : BaseParser
 {
-    private AnonymousCTypeFactory _anonymousCTypeFactory => field ??= new AnonymousCTypeFactory(Parsers);
+    private NestedCTypeFactory _nestedCTypeFactory => field ??= new NestedCTypeFactory(Parsers);
 
     public override void FirstPass(
         ReadOnlySpan<CppCompilation> compilations,
@@ -56,7 +56,7 @@ public class UnionParser : BaseParser
     }
 
     protected virtual bool ShouldSkip(CppClass cppUnion) =>
-        cppUnion.IsAnonymous || cppUnion.ClassKind != CppClassKind.Union;
+        cppUnion.IsAnonymous || cppUnion.Parent is CppClass || cppUnion.ClassKind != CppClassKind.Union;
 
     protected virtual void OnError(CppClass cppUnion, string message)
     {
@@ -68,13 +68,10 @@ public class UnionParser : BaseParser
         string? nameOverride = null,
         bool isAnonymous = false)
     {
-        var structParser = Parsers.GetParser<StructParser>();
-        if (structParser is null)
-        {
-            return null;
-        }
-
-        var fields = cppUnion.Fields.Select(i => CField.FromCppField(i, _anonymousCTypeFactory)).ToArray();
+        List<ICType> nestedTypes = [];
+        var fields = cppUnion.Fields
+            .Select(i => CField.FromCppField(cppUnion, i, _nestedCTypeFactory, nestedTypes))
+            .ToArray();
         if (fields == null || fields.Any(field => field is null))
         {
             return null;
@@ -83,6 +80,7 @@ public class UnionParser : BaseParser
         return new CUnion(
             nameOverride ?? cppUnion.Name,
             fields!,
-            isAnonymous);
+            isAnonymous,
+            nestedTypes.ToArray());
     }
 }

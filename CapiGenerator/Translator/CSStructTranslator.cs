@@ -47,10 +47,14 @@ public class CSStructTranslator : BaseTranslator
             Name = structItem.Name,
         };
 
+        foreach (var nestedType in structItem.NestedTypes)
+        {
+            AddNestedRecord(newCSStruct, nestedType);
+        }
+
         foreach (var field in structItem.Fields)
         {
             newCSStruct.Fields.Add(TranslateField(field));
-            AddNestedAnonymousRecord(newCSStruct, field);
         }
 
         newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(structItem));
@@ -74,7 +78,11 @@ public class CSStructTranslator : BaseTranslator
                 [0.ToString()],
                 []));
             newCSStruct.Fields.Add(newField);
-            AddNestedAnonymousRecord(newCSStruct, field);
+        }
+
+        foreach (var nestedType in unionItem.NestedTypes)
+        {
+            AddNestedRecord(newCSStruct, nestedType);
         }
 
         newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(unionItem));
@@ -82,14 +90,8 @@ public class CSStructTranslator : BaseTranslator
         return newCSStruct;
     }
 
-    protected static void AddNestedAnonymousRecord(CSStruct parent, CField field)
+    protected static void AddNestedRecord(CSStruct parent, ICType cType)
     {
-        var cType = field.GetFieldType().GetCType();
-        if (cType is not { IsAnonymous: true })
-        {
-            return;
-        }
-
         var nestedType = cType switch
         {
             CStruct cStruct => TranslateStruct(cStruct),

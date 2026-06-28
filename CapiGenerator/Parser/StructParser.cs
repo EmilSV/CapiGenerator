@@ -1,5 +1,5 @@
 using CapiGenerator.CModel;
-using CapiGenerator.CModel.Type;
+
 using CppAst;
 
 namespace CapiGenerator.Parser;
@@ -7,7 +7,7 @@ namespace CapiGenerator.Parser;
 
 public class StructParser : BaseParser
 {
-    private AnonymousCTypeFactory _anonymousCTypeFactory => field ??= new AnonymousCTypeFactory(Parsers);
+    private NestedCTypeFactory _nestedCTypeFactory => field ??= new NestedCTypeFactory(Parsers);
 
     public override void Init(ParserCollection parsers)
     {
@@ -61,7 +61,7 @@ public class StructParser : BaseParser
     }
 
     protected virtual bool ShouldSkip(CppClass cppStruct) =>
-        cppStruct.IsAnonymous || cppStruct.ClassKind == CppClassKind.Union;
+        cppStruct.IsAnonymous || cppStruct.Parent is CppClass || cppStruct.ClassKind == CppClassKind.Union;
     protected virtual void OnError(CppClass cppStruct, string message)
     {
         Console.Error.WriteLine($"Error parsing struct {cppStruct.Name}: {message}");
@@ -72,12 +72,15 @@ public class StructParser : BaseParser
         string? nameOverride = null,
         bool isAnonymous = false)
     {
-        var fields = cppStruct.Fields.Select(i => CField.FromCppField(i, _anonymousCTypeFactory)).ToArray();
+        List<ICType> nestedTypes = [];
+        var fields = cppStruct.Fields
+            .Select(i => CField.FromCppField(cppStruct, i, _nestedCTypeFactory, nestedTypes))
+            .ToArray();
         if (fields == null || fields.Any(field => field is null))
         {
             return null;
         }
 
-        return new CStruct(nameOverride ?? cppStruct.Name, fields!, isAnonymous);
+        return new CStruct(nameOverride ?? cppStruct.Name, fields!, isAnonymous, nestedTypes.ToArray());
     }
 }

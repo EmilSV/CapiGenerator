@@ -39,7 +39,7 @@ public class CTypeInstance : BaseCAstItem
     {
         CTypeRef.TrySetOutputFromResolver(compilationUnit);
 
-        if (CTypeRef.Output is { IsAnonymous: true } and ICSecondPassable secondPassable)
+        if (CTypeRef.Output is BaseCAnonymousType and ICSecondPassable secondPassable)
         {
             secondPassable.OnSecondPass(compilationUnit);
         }
@@ -47,7 +47,7 @@ public class CTypeInstance : BaseCAstItem
 
     public static CTypeInstance FromCppType(CppType type)
     {
-        var (convertedType, modifiers) = UnpackModifiers(type);
+        var (convertedType, modifiers) = type.UnpackModifiers();
         if (convertedType is CppTypedef cppTypedef)
         {
             var builtinTypedef = AllBuiltinTypedefs.AllTypedefs.FirstOrDefault(item => item.Name == cppTypedef.Name);
@@ -73,45 +73,6 @@ public class CTypeInstance : BaseCAstItem
             };
             return new CTypeInstance(typeName, modifiers);
         }
-    }
-
-    private static (CppType finalType, CTypeModifier[] modifiers) UnpackModifiers(CppType type)
-    {
-        List<CTypeModifier> modifiers = [];
-        CppType? nextType = type;
-
-        static CppType HandlePointerType(CppPointerType type, List<CTypeModifier> outModifiers)
-        {
-            outModifiers.Add(PointerType.Instance);
-            return type.ElementType;
-        }
-
-        static CppType HandleArrayType(CppArrayType type, List<CTypeModifier> outModifiers)
-        {
-            outModifiers.Add(new ArrayType(type.Size));
-            return type.ElementType;
-        }
-
-        static CppType HandleQualifiedType(CppQualifiedType type, List<CTypeModifier> _)
-        {
-            return type.ElementType;
-        }
-
-        do
-        {
-            type = nextType;
-            nextType = nextType switch
-            {
-                CppPointerType pointerType => HandlePointerType(pointerType, modifiers),
-                CppArrayType arrayType => HandleArrayType(arrayType, modifiers),
-                CppQualifiedType qualifiedType => HandleQualifiedType(qualifiedType, modifiers),
-                CppTypedef or CppFunctionType or CppFunctionType => null,
-                CppPrimitiveType or CppEnum or CppClass => null,
-                _ => throw new ArgumentException($"unsupported type {type.GetType().Name}", nameof(type))
-            };
-        } while (nextType != null);
-
-        return (type, modifiers.ToArray());
     }
 
     private static bool TryConvertToCType(CppType type, [NotNullWhen(true)] out ICType? cType)

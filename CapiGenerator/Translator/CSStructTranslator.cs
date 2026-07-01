@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;
@@ -129,55 +130,262 @@ public class CSStructTranslator : BaseTranslator
     }
 
 
-    protected static void FixedInlineArrayFields(CSStruct cSStruct)
+    protected internal static void FixedInlineArrayFields(CSStruct cSStruct)
     {
+        var originalNestedTypeCount = cSStruct.NestedTypes.Count;
+        for (var i = 0; i < originalNestedTypeCount; i++)
+        {
+            if (cSStruct.NestedTypes[i] is CSStruct nestedStruct)
+            {
+                FixedInlineArrayFields(nestedStruct);
+            }
+        }
+
         foreach (var field in cSStruct.Fields)
         {
-            if (field.Type.Modifiers is [CSFixedInlineArrayType arrayType, ..])
+            if (TryCreateFixedBufferFieldType(field, field.Type, out var fixedBufferType, out var fixedBufferSize))
             {
-                FixedInlineArrayField(field, arrayType);
+                field.Type = fixedBufferType;
+                field.FixedBufferSize = fixedBufferSize;
+                cSStruct.IsUnsafe = true;
+                continue;
             }
+
+            field.Type = FixedInlineArrayTypeInstance(cSStruct, field, field.Type);
         }
     }
 
-    protected static void FixedInlineArrayField(CSField field, CSFixedInlineArrayType arrayType)
+    private static bool TryCreateFixedBufferFieldType(
+        CSField field,
+        CSTypeInstance typeInstance,
+        out CSTypeInstance fixedBufferType,
+        out uint fixedBufferSize)
     {
-        if (field.Type.Type is null)
+        fixedBufferType = typeInstance;
+        fixedBufferSize = 0;
+
+        if (typeInstance.Type is null)
         {
-            throw new InvalidOperationException($"Cannot convert fixed inline array field {field.Name} because its element type is not resolved");
+            return false;
         }
 
-        ValidateInlineArraySize(field, arrayType);
-
-        var modifiers = field.Type.GetModifiersAsSpan();
+        var modifiers = typeInstance.GetModifiersAsSpan();
         if (modifiers is not [CSFixedInlineArrayType, ..])
         {
-            throw new InvalidOperationException($"Field {field.Name} does not start with a fixed inline array modifier");
+            return false;
         }
 
-        var fixedArrayCount = 0;
-        while (fixedArrayCount < modifiers.Length && modifiers[fixedArrayCount] is CSFixedInlineArrayType fixedArrayType)
+        uint size = 1;
+        var fixedArrayEndIndex = 0;
+        while (fixedArrayEndIndex < modifiers.Length && modifiers[fixedArrayEndIndex] is CSFixedInlineArrayType fixedArrayType)
         {
             ValidateInlineArraySize(field, fixedArrayType);
-            fixedArrayCount++;
+            size = checked(size * fixedArrayType.Size);
+            fixedArrayEndIndex++;
         }
 
-        var elementType = new CSTypeInstance(field.Type.Type, modifiers[fixedArrayCount..]);
-        for (var i = fixedArrayCount - 1; i >= 0; i--)
+        var elementType = new CSTypeInstance(typeInstance.Type, modifiers[fixedArrayEndIndex..]);
+        if (!IsFixedBufferPrimitiveType(elementType))
+        {
+            return false;
+        }
+
+        fixedBufferType = elementType;
+        fixedBufferSize = size;
+        return true;
+    }
+
+    private static bool IsFixedBufferPrimitiveType(CSTypeInstance typeInstance)
+    {
+        if (typeInstance.Modifiers.Count != 0 || typeInstance.Type is not CSPrimitiveType primitiveType)
+        {
+            return false;
+        }
+
+        return primitiveType.KindValue is
+            CSPrimitiveType.Kind.Bool or
+            CSPrimitiveType.Kind.Byte or
+            CSPrimitiveType.Kind.SByte or
+            CSPrimitiveType.Kind.Short or
+            CSPrimitiveType.Kind.UShort or
+            CSPrimitiveType.Kind.Int or
+            CSPrimitiveType.Kind.UInt or
+            CSPrimitiveType.Kind.Long or
+            CSPrimitiveType.Kind.ULong or
+            CSPrimitiveType.Kind.Char or
+            CSPrimitiveType.Kind.Float or
+            CSPrimitiveType.Kind.Double;
+    }
+
+    protected static CSTypeInstance FixedInlineArrayTypeInstance(
+        CSStruct parentStruct,
+        CSField field,
+        CSTypeInstance typeInstance)
+    {
+        if (typeInstance.Type is null)
+        {
+            if (typeInstance.Modifiers.Any(modifier => modifier is CSFixedInlineArrayType))
+            {
+                throw new InvalidOperationException($"Cannot convert fixed inline array field {field.Name} because its element type is not resolved");
+            }
+
+            return typeInstance;
+        }
+
+        if (typeInstance.Type is CSUnmanagedFunctionType functionType)
+        {
+            functionType.ReplaceTypeInstances(nestedTypeInstance => FixedInlineArrayTypeInstance(
+                parentStruct,
+                field,
+                nestedTypeInstance));
+        }
+
+        var modifiers = typeInstance.GetModifiersAsSpan();
+        var firstFixedArrayIndex = IndexOfModifier<CSFixedInlineArrayType>(modifiers);
+        if (firstFixedArrayIndex < 0)
+        {
+            return typeInstance;
+        }
+
+        var fixedArrayEndIndex = firstFixedArrayIndex;
+        while (fixedArrayEndIndex < modifiers.Length && modifiers[fixedArrayEndIndex] is CSFixedInlineArrayType fixedArrayType)
+        {
+            ValidateInlineArraySize(field, fixedArrayType);
+            fixedArrayEndIndex++;
+        }
+
+        var elementType = FixedInlineArrayTypeInstance(parentStruct, field, new CSTypeInstance(
+            typeInstance.Type,
+            modifiers[fixedArrayEndIndex..]));
+        for (var i = fixedArrayEndIndex - 1; i >= firstFixedArrayIndex; i--)
         {
             var fixedArrayType = (CSFixedInlineArrayType)modifiers[i];
-            elementType = new CSTypeInstance(new CSInlineArrayType(fixedArrayType.Size, elementType));
+            elementType = CreateInlineArrayType(parentStruct, field, fixedArrayType, elementType);
         }
 
-        field.Type = elementType;
+        if (firstFixedArrayIndex == 0)
+        {
+            return elementType;
+        }
+
+        if (elementType.Type is null)
+        {
+            throw new InvalidOperationException($"Cannot convert fixed inline array field {field.Name} because its converted array type is not resolved");
+        }
+
+        return new CSTypeInstance(elementType.Type, modifiers[..firstFixedArrayIndex]);
+    }
+
+    private static int IndexOfModifier<TModifier>(ReadOnlySpan<BaseCSTypeModifier> modifiers)
+        where TModifier : BaseCSTypeModifier
+    {
+        for (var i = 0; i < modifiers.Length; i++)
+        {
+            if (modifiers[i] is TModifier)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private static CSTypeInstance CreateInlineArrayType(
+        CSStruct parentStruct,
+        CSField field,
+        CSFixedInlineArrayType fixedArrayType,
+        CSTypeInstance elementType)
+    {
+        if (fixedArrayType.Size <= CSInlineArrayType.MaxBuiltInSize)
+        {
+            return new CSTypeInstance(new CSInlineArrayType(fixedArrayType.Size, elementType));
+        }
+
+        var inlineArrayStruct = CreateNestedInlineArrayStruct(parentStruct, field, fixedArrayType.Size, elementType);
+        parentStruct.NestedTypes.Add(inlineArrayStruct);
+        return new CSTypeInstance(inlineArrayStruct);
+    }
+
+    private static CSStruct CreateNestedInlineArrayStruct(
+        CSStruct parentStruct,
+        CSField field,
+        uint size,
+        CSTypeInstance elementType)
+    {
+        var inlineArrayStruct = new CSStruct
+        {
+            Name = CreateNestedInlineArrayStructName(parentStruct, field, size),
+            AccessModifier = CSAccessModifier.Public,
+            IsUnsafe = RequiresUnsafe(elementType),
+        };
+
+        inlineArrayStruct.Attributes.Add(CSAttribute<InlineArrayAttribute>.Create(
+            [size.ToString()],
+            []));
+        inlineArrayStruct.Fields.Add(new CSField
+        {
+            Name = "_element0",
+            Type = elementType,
+            AccessModifier = CSAccessModifier.Private,
+        });
+
+        return inlineArrayStruct;
+    }
+
+    private static string CreateNestedInlineArrayStructName(CSStruct parentStruct, CSField field, uint size)
+    {
+        var baseName = $"{ToPascalCaseIdentifier(field.Name)}InlineArray{size}";
+        var name = baseName;
+        var suffix = 1;
+
+        while (parentStruct.NestedTypes.Any(nestedType => nestedType.Name == name))
+        {
+            name = $"{baseName}_{suffix}";
+            suffix++;
+        }
+
+        return name;
+    }
+
+    private static string ToPascalCaseIdentifier(string name)
+    {
+        var builder = new StringBuilder();
+        var capitalizeNext = true;
+
+        foreach (var character in name)
+        {
+            if (char.IsLetterOrDigit(character))
+            {
+                builder.Append(capitalizeNext ? char.ToUpperInvariant(character) : character);
+                capitalizeNext = false;
+            }
+            else
+            {
+                capitalizeNext = true;
+            }
+        }
+
+        if (builder.Length == 0 || char.IsDigit(builder[0]))
+        {
+            builder.Insert(0, "FixedArray");
+        }
+
+        return builder.ToString();
+    }
+
+    private static bool RequiresUnsafe(CSTypeInstance type)
+    {
+        return type.Modifiers.Any(modifier => modifier is CsPointerType) ||
+            type.Type is CSInlineArrayType inlineArrayType && RequiresUnsafe(inlineArrayType.ElementType) ||
+            type.Type is CSStruct csStruct && csStruct.IsUnsafe;
     }
 
     private static void ValidateInlineArraySize(CSField field, CSFixedInlineArrayType arrayType)
     {
-        if (arrayType.Size is < CSInlineArrayType.MinSupportedSize or > CSInlineArrayType.MaxSupportedSize)
+        if (arrayType.Size < CSInlineArrayType.MinSupportedSize)
         {
             throw new NotSupportedException(
-                $"Fixed inline array field {field.Name} has size {arrayType.Size}, but only sizes 1 through 16 are supported");
+                $"Fixed inline array field {field.Name} has size {arrayType.Size}, but only sizes greater than or equal to 1 are supported");
         }
     }
 }

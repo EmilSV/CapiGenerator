@@ -3,7 +3,7 @@ namespace CapiGenerator.CSModel;
 public sealed class CSInlineArrayType(uint size, CSTypeInstance elementType) : BaseBuiltinType
 {
     public const uint MinSupportedSize = 1;
-    public const uint MaxSupportedSize = 16;
+    public const uint MaxBuiltInSize = 16;
 
     public uint Size { get; } = size;
 

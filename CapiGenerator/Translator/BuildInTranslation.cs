@@ -1,6 +1,7 @@
 using CapiGenerator.CModel.BuiltinTypedefs;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;
+using CapiGenerator.CSModel.CFFITypes;
 
 namespace CapiGenerator.Translator;
 
@@ -20,6 +21,7 @@ public static class BuildInTranslation
         .AddPredefinedTranslation(CPrimitiveType.Instances.UnsignedLong, CSCULongType.Instance)
         .AddPredefinedTranslation(CPrimitiveType.Instances.LongLong, CSPrimitiveType.Instances.Long)
         .AddPredefinedTranslation(CPrimitiveType.Instances.UnsignedLongLong, CSPrimitiveType.Instances.ULong)
+        .AddPredefinedTranslation(CPrimitiveType.Instances.WChar, CWCharTType.Instance)
         .AddPredefinedTranslation(CPrimitiveType.Instances.Float, CSPrimitiveType.Instances.Float)
         .AddPredefinedTranslation(CPrimitiveType.Instances.Double, CSPrimitiveType.Instances.Double)
         .AddPredefinedTranslation(CPrimitiveType.Instances._Bool, CSPrimitiveType.Instances.Bool)

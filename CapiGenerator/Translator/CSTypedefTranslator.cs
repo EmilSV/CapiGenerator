@@ -39,6 +39,7 @@ public class CSTypedefTranslator : BaseTranslator
         foreach (var structItem in inputChannel.GetStructs())
         {
             structItem.OnSecondPass(translationUnit);
+            CSStructTranslator.FixedInlineArrayFields(structItem);
         }
     }
 

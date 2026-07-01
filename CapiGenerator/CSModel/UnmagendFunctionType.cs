@@ -37,6 +37,15 @@ public class CSUnmanagedFunctionType(
         }
     }
 
+    public void ReplaceTypeInstances(Func<CSTypeInstance, CSTypeInstance> replaceTypeInstance)
+    {
+        _returnType = replaceTypeInstance(_returnType);
+        for (int i = 0; i < _parameterTypes.Length; i++)
+        {
+            _parameterTypes[i] = replaceTypeInstance(_parameterTypes[i]);
+        }
+    }
+
     public override void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
     {
         for (int i = 0; i < _parameterTypes.Length; i++)

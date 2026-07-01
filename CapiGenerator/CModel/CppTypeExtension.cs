@@ -20,6 +20,12 @@ public static class CppTypeExtension
 
         static CppType HandleArrayType(CppArrayType type, List<CTypeModifier> outModifiers)
         {
+            if (type.Size < 0)
+            {
+                outModifiers.Add(PointerType.Instance);
+                return type.ElementType;
+            }
+
             outModifiers.Add(new ArrayType(type.Size));
             return type.ElementType;
         }

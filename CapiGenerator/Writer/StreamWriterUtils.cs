@@ -125,11 +125,23 @@ public static class StreamWriterUtils
             writer.Write(" required");
         }
 
+        if (field.FixedBufferSize is not null)
+        {
+            writer.Write(" fixed");
+        }
+
         writer.Write(" ");
         writer.Write(field.Type.ToString());
 
         writer.Write(" ");
         writer.Write(field.Name);
+
+        if (field.FixedBufferSize is var fixedBufferSize and not null)
+        {
+            writer.Write('[');
+            writer.Write(fixedBufferSize.Value);
+            writer.Write(']');
+        }
 
         bool hasGetterOrSetter = HasGetterOrSetter(field);
 

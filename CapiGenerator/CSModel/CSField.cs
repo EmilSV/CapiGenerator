@@ -15,6 +15,7 @@ public sealed class CSField : BaseCSAstItem,
     public bool IsStatic;
     public bool IsReadOnly;
     public bool IsRequired;
+    public uint? FixedBufferSize;
     public DocComment? Comments { get; set; }
 
     public CSAccessModifier AccessModifier;

@@ -42,6 +42,7 @@ public sealed class CPrimitiveType : ICType
 
         [Name("unsigned long long", "unsigned long long int")] UnsignedLongLong,
 
+        [Name("wchar_t")] WChar,
         [Name("float")] Float,
         [Name("double")] Double,
         [Name("long double")] LongDouble,
@@ -114,8 +115,7 @@ public sealed class CPrimitiveType : ICType
         CppPrimitiveKind.UnsignedLongLong => GetByKind(Kind.UnsignedLongLong),
         CppPrimitiveKind.Long => GetByKind(Kind.Long),
         CppPrimitiveKind.UnsignedLong => GetByKind(Kind.UnsignedLong),
-
-        CppPrimitiveKind.WChar => GetByKind(Kind.UnsignedShortInt),
+        CppPrimitiveKind.WChar => GetByKind(Kind.WChar),
         _ => throw new NotImplementedException($"Unknown primitive kind: {cppType.Kind}"),
     };
 
@@ -146,6 +146,7 @@ public sealed class CPrimitiveType : ICType
         public static readonly CPrimitiveType UnsignedLong = GetByKind(Kind.UnsignedLong);
         public static readonly CPrimitiveType LongLong = GetByKind(Kind.LongLong);
         public static readonly CPrimitiveType UnsignedLongLong = GetByKind(Kind.UnsignedLongLong);
+        public static readonly CPrimitiveType WChar = GetByKind(Kind.WChar);
         public static readonly CPrimitiveType Float = GetByKind(Kind.Float);
         public static readonly CPrimitiveType Double = GetByKind(Kind.Double);
         public static readonly CPrimitiveType LongDouble = GetByKind(Kind.LongDouble);

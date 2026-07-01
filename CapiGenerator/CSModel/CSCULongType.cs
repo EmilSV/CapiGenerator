@@ -3,21 +3,11 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSCULongType : ICSType
+public sealed class CSCULongType : BaseBuiltinType
 {
     public static CSCULongType Instance { get; } = new();
 
-    public InstanceId Id { get; } = new();
+    public override string Namespace => "System.Runtime.InteropServices";
 
-    public string Namespace { get; } = "System.Runtime.InteropServices";
-
-    public string Name { get; } = "CULong";
-
-    public bool IsAnonymous => false;
-
-    public bool TryGetName([NotNullWhen(true)] out string? name)
-    {
-        name = null;
-        return false;
-    }
+    public override string Name { get; } = "CULong";
 }

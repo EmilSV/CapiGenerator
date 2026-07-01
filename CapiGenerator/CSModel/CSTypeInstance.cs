@@ -65,7 +65,12 @@ public class CSTypeInstance : BaseCSAstItem
 
     public static CSTypeInstance CreateFromCTypeInstance(CTypeInstance cTypeInstance)
     {
-        var cType = cTypeInstance.GetCType() ?? throw new Exception($"cType is null {(cTypeInstance.CTypeRef.TryGetKey(out var key) ? key : "unknown")}");
+        var cType = cTypeInstance.GetCType();
+        if (cType == null)
+        {
+            throw new Exception($"cType is null {(cTypeInstance.CTypeRef.TryGetKey(out var key) ? key : "unknown")}");
+        }
+
         var modifiers = TranslateModifiers(cTypeInstance.Modifiers);
 
         if (cType.IsAnonymous)

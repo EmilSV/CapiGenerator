@@ -1,3 +1,5 @@
+using CppAst;
+
 namespace CapiGenerator.CSModel.Comments;
 
 public class DocComment
@@ -13,6 +15,7 @@ public class DocComment
         bool hasSummary = Summary?.HasValue() == true;
         bool hasValue = Value?.HasValue() == true;
         bool hasParams = Parameters.Count > 0;
+        CppCommentKind
         bool hasRemarks = Remarks.Count > 0;
         bool hasReturn = Return?.HasValue() == true;
         return hasSummary || hasValue || hasParams || hasRemarks || hasReturn;

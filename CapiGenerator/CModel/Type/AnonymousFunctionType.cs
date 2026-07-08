@@ -41,7 +41,7 @@ public class AnonymousFunctionType(CTypeInstance returnType, ReadOnlySpan<CParam
     public static AnonymousFunctionType FromCFunctionType(CppFunctionType function)
     {
         var returnType = CTypeInstance.FromCppType(function.ReturnType);
-        var parameters = function.Parameters.Select(CParameter.FromCPPParameter).ToArray();
+        var parameters = function.Parameters.Select(CParameter.From).ToArray();
         return new AnonymousFunctionType(returnType, parameters);
     }
 }

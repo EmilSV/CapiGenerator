@@ -1,6 +1,7 @@
 using CapiGenerator.Parser;
 using CapiGenerator.CModel.Type;
 using CppAst;
+using CapiGenerator.CModel.Comments;
 
 namespace CapiGenerator.CModel;
 
@@ -9,6 +10,7 @@ public class CField(string name, CTypeInstance type)
 {
     public readonly string Name = name;
     private readonly CTypeInstance _type = type;
+    public CBaseComment? Comments { get; init; }
 
     public CTypeInstance GetFieldType()
     {
@@ -34,9 +36,15 @@ public class CField(string name, CTypeInstance type)
                 nestedTypes.Add(nestedType);
             }
 
-            return new CField(field.Name, new CTypeInstance(nestedType, modifiers));
+            return new CField(field.Name, new CTypeInstance(nestedType, modifiers))
+            {
+                Comments = CBaseComment.From(field.Comment)
+            };
         }
 
-        return new CField(field.Name, CTypeInstance.FromCppType(field.Type));
+        return new CField(field.Name, CTypeInstance.FromCppType(field.Type))
+        {
+            Comments = CBaseComment.From(field.Comment)
+        };
     }
 }

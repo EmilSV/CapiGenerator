@@ -44,16 +44,14 @@ public class FunctionParser : BaseParser
 
     protected virtual CFunction? FirstPass(CppFunction function)
     {
-        var parameters = function.Parameters.Select(CppParameterToCParameter).ToArray();
-        if (parameters == null || parameters.Any(parameter => parameter is null))
+        switch (CFunction.From(function))
         {
-            OnError(function, "Failed to parse parameters");
-            return null;
+            case { } cFunction:
+                return cFunction;
+            default:
+                OnError(function, "Failed to parse parameters");
+                return null;
         }
-
-        var returnType = CTypeInstance.FromCppType(function.ReturnType);
-
-        return new CFunction(returnType, function.Name, parameters!);
 
     }
 
@@ -64,11 +62,5 @@ public class FunctionParser : BaseParser
     protected virtual void OnError(CppFunction constant, string message)
     {
         Console.Error.WriteLine($"Error parsing function {constant.Name}: {message}");
-    }
-
-    private static CParameter CppParameterToCParameter(CppParameter parameter)
-    {
-        var parameterType = CTypeInstance.FromCppType(parameter.Type);
-        return new CParameter(parameter.Name, parameterType);
     }
 }

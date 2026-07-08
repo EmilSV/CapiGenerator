@@ -35,14 +35,14 @@ public class EnumParser : BaseParser
 
     protected virtual CEnum? FirstPass(CppEnum astEnum)
     {
-        var enumConstants = astEnum.Items.Select(CppEnumItemToEnumFelid).ToArray();
-        if (enumConstants == null || enumConstants.Any(token => token is null))
+        switch (CEnum.From(astEnum))
         {
-            OnError(astEnum, "Failed to parse tokens");
-            return null;
+            case { } enumValue:
+                return enumValue;
+            default:
+                OnError(astEnum, "Failed to parse enum");
+                return null;
         }
-
-        return new CEnum(astEnum.Name, enumConstants!);
     }
 
     public override void SecondPass(CCompilationUnit compilationUnit, BaseParserInputChannel inputChannel)
@@ -58,7 +58,4 @@ public class EnumParser : BaseParser
     {
         Console.Error.WriteLine($"Error parsing enum {value.Name}: {message}");
     }
-
-    private static CEnumField? CppEnumItemToEnumFelid(CppEnumItem item) =>
-        new(item.Name, [new CConstLiteralToken(item.Value.ToString())]);
 }

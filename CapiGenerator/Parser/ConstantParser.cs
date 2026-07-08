@@ -90,16 +90,14 @@ public class ConstantParser : BaseParser
 
     protected virtual CConstant? FirstPass(CppMacro macro)
     {
-        var constantTokens = macro.Tokens.Select(CppTokenToConstantToken).ToArray();
-        if (constantTokens == null || constantTokens.Any(token => token is null))
+        switch (CConstant.From(macro))
         {
-            OnError(macro, "Failed to parse tokens");
-            return null;
+            case { } constant:
+                return constant;
+            default:
+                OnError(macro, "Failed to parse tokens");
+                return null;
         }
-
-        constantTokens = ResolveMacroFunction(constantTokens!);
-
-        return new(macro.Name, new(constantTokens!));
     }
 
     protected virtual CStaticConstant? FirstPass(CppField field)
@@ -116,82 +114,6 @@ public class ConstantParser : BaseParser
             name: field.Name,
             expression: [new CConstLiteralToken(field.InitValue.Value!.ToString()!)]
         );
-    }
-
-    protected virtual BaseCConstantToken[] ResolveMacroFunction(BaseCConstantToken[] tokens)
-    {
-        static List<BaseCConstantToken> ResolveMacroFunctionRecursive(ReadOnlySpan<BaseCConstantToken> tokens)
-        {
-            List<BaseCConstantToken> output = new();
-
-            for (int i = 0; i < tokens.Length; i++)
-            {
-                if (tokens[i] is CConstIdentifierToken identifierToken && identifierToken.TryGetName(out var name))
-                {
-                    var macroFunction = AllBuiltinMacroFunctions.Functions.FirstOrDefault(mf => mf.Name == name);
-                    if (macroFunction is null)
-                    {
-                        output.Add(tokens[i]);
-                        continue;
-                    }
-
-                    int leftBracketCount = 0;
-                    int rightBracketCount = 0;
-                    int endIndex = -1;
-                    var start = tokens.Length > i + 2 ? tokens[i + 1] : null;
-                    if (start is not CConstantPunctuationToken punctuationToken || punctuationToken.Type != CPunctuationType.LeftParenthesis)
-                    {
-                        throw new Exception("Expected '(' and ')' after macro function");
-                    }
-
-                    for (int j = i + 1; j < tokens.Length; j++)
-                    {
-                        if (tokens[j] is CConstantPunctuationToken punctuation)
-                        {
-                            if (punctuation.Type == CPunctuationType.LeftParenthesis)
-                            {
-                                leftBracketCount++;
-                            }
-                            else if (punctuation.Type == CPunctuationType.RightParenthesis)
-                            {
-                                rightBracketCount++;
-                            }
-                        }
-
-                        if (leftBracketCount > 0 && rightBracketCount > 0 && leftBracketCount == rightBracketCount)
-                        {
-                            endIndex = j;
-                            break;
-                        }
-                    }
-                    if (endIndex == -1)
-                    {
-                        throw new Exception($"Unmatched parentheses in macro function '{name}'");
-                    }
-
-                    int startIndex = i + 2;
-                    var resolvedTokens = ResolveMacroFunctionRecursive(tokens.Slice(startIndex, endIndex - startIndex));
-                    if (macroFunction.TryEvaluate(CollectionsMarshal.AsSpan(resolvedTokens), out var result))
-                    {
-                        output.AddRange(result!);
-                    }
-                    else
-                    {
-                        throw new Exception($"Failed to evaluate macro function '{name}' with arguments: {string.Join(", ", resolvedTokens)}");
-                    }
-
-                    i = endIndex;
-                }
-                else
-                {
-                    output.Add(tokens[i]);
-                }
-            }
-
-            return output;
-        }
-
-        return ResolveMacroFunctionRecursive(tokens).ToArray();
     }
 
     protected virtual bool ShouldSkip(CppMacro constant) => false;
@@ -249,13 +171,4 @@ public class ConstantParser : BaseParser
             _ => null
         };
     }
-
-    public static BaseCConstantToken? CppTokenToConstantToken(CppToken token) => token.Kind switch
-    {
-        CppTokenKind.Identifier => new CConstIdentifierToken(token.Text),
-        CppTokenKind.Literal => new CConstLiteralToken(token.Text),
-        CppTokenKind.Punctuation when
-            CConstantPunctuationToken.TryParse(token.Text, out var punctuationToken) => punctuationToken,
-        _ => null
-    };
 }

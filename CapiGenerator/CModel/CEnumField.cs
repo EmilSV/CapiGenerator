@@ -1,4 +1,6 @@
+using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.Parser;
+using CppAst;
 
 namespace CapiGenerator.CModel;
 
@@ -18,4 +20,7 @@ public sealed class CEnumField(string name, CConstantExpression expression) :
     {
         expression.OnSecondPass(compilationUnit);
     }
+
+    public static CEnumField From(CppEnumItem item) =>
+        new(item.Name, [new CConstLiteralToken(item.Value.ToString())]);
 }

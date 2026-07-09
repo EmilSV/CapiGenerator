@@ -7,18 +7,15 @@ namespace CapiGenerator.CModel;
 
 
 public class CFunction(object primarySource, CTypeInstance returnType, string name, ReadOnlySpan<CParameter> parameters)
-    : BaseCAstItem
+    : BaseCAstItem(primarySource)
 {
     private readonly CParameter[] _parameters = parameters.ToArray();
     private readonly CTypeInstance _returnType = returnType;
-    private readonly List<object> _secondarySources = [];
 
     public string Name => name;
     public CTypeInstance ReturnType => _returnType;
     public ReadOnlySpan<CParameter> Parameters => _parameters;
-    public object PrimarySource => primarySource;
     public CBaseComment? Comment { get; init; }
-    public IReadOnlyList<object> SecondarySources => _secondarySources;
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {
@@ -34,11 +31,6 @@ public class CFunction(object primarySource, CTypeInstance returnType, string na
 
 
         _returnType.OnSecondPass(compilationUnit);
-    }
-
-    public void AddSecondarySource(object source)
-    {
-        _secondarySources.Add(source);
     }
 
     public static CFunction? From(CppFunction function)

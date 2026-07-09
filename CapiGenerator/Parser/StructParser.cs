@@ -71,7 +71,8 @@ public class StructParser : BaseParser
     public virtual CStruct? CppClassToCStruct(
         CppClass cppStruct,
         string? nameOverride = null,
-        bool isAnonymous = false)
+        bool isAnonymous = false,
+        object? secondarySource = null)
     {
         List<ICType> nestedTypes = [];
         var fields = cppStruct.Fields
@@ -82,6 +83,12 @@ public class StructParser : BaseParser
             return null;
         }
 
-        return new CStruct(nameOverride ?? cppStruct.Name, fields!, isAnonymous, nestedTypes.ToArray());
+        var cStruct = new CStruct(cppStruct, nameOverride ?? cppStruct.Name, fields!, isAnonymous, nestedTypes.ToArray());
+        if (secondarySource is not null)
+        {
+            cStruct.AddSecondarySource(secondarySource);
+        }
+
+        return cStruct;
     }
 }

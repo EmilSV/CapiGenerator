@@ -26,7 +26,7 @@ public class TypedefParser : BaseParser
                 {
                     var type = CTypeInstance.FromCppType(typedef.ElementType);
                     var typedefName = typedef.Name;
-                    outputChannel.OnReceiveTypedef(new CTypedef(typedefName, type));
+                    outputChannel.OnReceiveTypedef(new CTypedef(typedef, typedefName, type));
                 });
             }
         }

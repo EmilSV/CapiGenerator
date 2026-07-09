@@ -67,7 +67,8 @@ public class UnionParser : BaseParser
     public virtual CUnion? CppClassToCUnion(
         CppClass cppUnion,
         string? nameOverride = null,
-        bool isAnonymous = false)
+        bool isAnonymous = false,
+        object? secondarySource = null)
     {
         List<ICType> nestedTypes = [];
         var fields = cppUnion.Fields
@@ -78,10 +79,17 @@ public class UnionParser : BaseParser
             return null;
         }
 
-        return new CUnion(
+        var cUnion = new CUnion(
+            cppUnion,
             nameOverride ?? cppUnion.Name,
             fields!,
             isAnonymous,
             nestedTypes.ToArray());
+        if (secondarySource is not null)
+        {
+            cUnion.AddSecondarySource(secondarySource);
+        }
+
+        return cUnion;
     }
 }

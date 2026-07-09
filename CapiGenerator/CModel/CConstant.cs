@@ -5,8 +5,8 @@ using CppAst;
 
 namespace CapiGenerator.CModel;
 
-public class CConstant(string name, CConstantExpression expression)
-    : BaseCConstant
+public class CConstant(object primarySource, string name, CConstantExpression expression)
+    : BaseCConstant(primarySource)
 {
     public override string Name => name;
 
@@ -37,7 +37,7 @@ public class CConstant(string name, CConstantExpression expression)
 
         constantTokens = MacroFunctionResolver.ResolveMacroFunction(constantTokens!);
 
-        return new(macro.Name, new(constantTokens!))
+        return new(macro, macro.Name, new(constantTokens!))
         {
             Comment = null // TODO: CppAst does not support macro comments we need to parse them manually
         };

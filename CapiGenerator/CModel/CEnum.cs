@@ -6,8 +6,8 @@ using CppAst;
 namespace CapiGenerator.CModel;
 
 
-public sealed class CEnum(string name, ReadOnlySpan<CEnumField> fields) :
-    BaseCAstItem, ICType
+public sealed class CEnum(object primarySource, string name, ReadOnlySpan<CEnumField> fields) :
+    BaseCAstItem(primarySource), ICType
 {
     public string Name => name;
     private readonly CEnumField[] _fields = fields.ToArray();
@@ -31,7 +31,7 @@ public sealed class CEnum(string name, ReadOnlySpan<CEnumField> fields) :
             return null;
         }
 
-        return new CEnum(astEnum.Name, enumConstants!)
+        return new CEnum(astEnum, astEnum.Name, enumConstants!)
         {
             Comment = astEnum.Comment is not null ? CBaseComment.From(astEnum.Comment) : null
         };

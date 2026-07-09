@@ -5,8 +5,8 @@ using CapiGenerator.CModel.Comments;
 
 namespace CapiGenerator.CModel;
 
-public sealed class CParameter(string name, CTypeInstance type)
-    : BaseCAstItem
+public sealed class CParameter(object primarySource, string name, CTypeInstance type)
+    : BaseCAstItem(primarySource)
 {
     public readonly string Name = name;
     private CTypeInstance _type = type;
@@ -29,7 +29,7 @@ public sealed class CParameter(string name, CTypeInstance type)
     public static CParameter From(CppParameter parameter)
     {
         var type = CTypeInstance.FromCppType(parameter.Type);
-        return new CParameter(parameter.Name, type)
+        return new CParameter(parameter, parameter.Name, type)
         {
             Comment = parameter.Comment is not null ? CBaseComment.From(parameter.Comment) : null
         };

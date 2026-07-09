@@ -37,8 +37,8 @@ public sealed class NestedCTypeFactory
 
         nestedType = cppClass.ClassKind switch
         {
-            CppClassKind.Struct => _parserCollection.GetParser<StructParser>()?.CppClassToCStruct(cppClass, typeName, cppClass.IsAnonymous),
-            CppClassKind.Union => _parserCollection.GetParser<UnionParser>()?.CppClassToCUnion(cppClass, typeName, cppClass.IsAnonymous),
+            CppClassKind.Struct => _parserCollection.GetParser<StructParser>()?.CppClassToCStruct(cppClass, typeName, cppClass.IsAnonymous, field),
+            CppClassKind.Union => _parserCollection.GetParser<UnionParser>()?.CppClassToCUnion(cppClass, typeName, cppClass.IsAnonymous, field),
             _ => null,
         };
 

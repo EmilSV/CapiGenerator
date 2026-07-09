@@ -5,8 +5,8 @@ using CppAst;
 namespace CapiGenerator.CModel;
 
 
-public sealed class CEnumField(string name, CConstantExpression expression) :
-    BaseCAstItem, ICConstAssignable
+public sealed class CEnumField(object primarySource, string name, CConstantExpression expression) :
+    BaseCAstItem(primarySource), ICConstAssignable
 {
     public string Name => name;
     public CConstantExpression Expression => expression;
@@ -22,5 +22,5 @@ public sealed class CEnumField(string name, CConstantExpression expression) :
     }
 
     public static CEnumField From(CppEnumItem item) =>
-        new(item.Name, [new CConstLiteralToken(item.Value.ToString())]);
+        new(item, item.Name, [new CConstLiteralToken(item.Value.ToString())]);
 }

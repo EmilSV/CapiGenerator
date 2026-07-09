@@ -3,8 +3,8 @@ using CapiGenerator.CModel.Type;
 
 namespace CapiGenerator.CModel;
 
-public sealed class CTypedef(string name, CTypeInstance innerType) :
-    BaseCAstItem, ICType
+public sealed class CTypedef(object primarySource, string name, CTypeInstance innerType) :
+    BaseCAstItem(primarySource), ICType
 {
     private readonly CTypeInstance _innerType = innerType;
     public string Name => name;

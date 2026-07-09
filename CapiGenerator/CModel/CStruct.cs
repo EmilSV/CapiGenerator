@@ -3,11 +3,12 @@ using CapiGenerator.Parser;
 namespace CapiGenerator.CModel;
 
 public class CStruct(
+    object primarySource,
     string name,
     ReadOnlySpan<CField> fields,
     bool isAnonymous = false,
     ReadOnlySpan<ICType> nestedTypes = default) :
-    BaseCAstItem, ICType
+    BaseCAstItem(primarySource), ICType
 {
     private readonly CField[] _fields = fields.ToArray();
     private readonly ICType[] _nestedTypes = nestedTypes.ToArray();

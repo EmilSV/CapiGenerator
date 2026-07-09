@@ -246,6 +246,10 @@ public sealed class CSTranslationUnit :
         _csTypeByCType.ContainsKey(cType);
 
 
+    public ICSType? GetCsTypeByCName(string cName) =>
+        _csTypeByCTypeName.GetValueOrDefault(cName);
+
+
     public CSTranslationUnit AddTranslator(BaseTranslator translator)
     {
         _translators.Add(translator);
@@ -257,7 +261,6 @@ public sealed class CSTranslationUnit :
         _translators.AddRange(translator);
         return this;
     }
-
 
     public void Translate(ReadOnlySpan<CCompilationUnit> compilationUnits)
     {

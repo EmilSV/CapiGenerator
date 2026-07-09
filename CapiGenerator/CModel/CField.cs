@@ -38,13 +38,13 @@ public class CField(string name, CTypeInstance type)
 
             return new CField(field.Name, new CTypeInstance(nestedType, modifiers))
             {
-                Comments = CBaseComment.From(field.Comment)
+                Comments = field.Comment is not null ? CBaseComment.From(field.Comment) : null
             };
         }
 
         return new CField(field.Name, CTypeInstance.FromCppType(field.Type))
         {
-            Comments = CBaseComment.From(field.Comment)
+            Comments = field.Comment is not null ? CBaseComment.From(field.Comment) : null
         };
     }
 }

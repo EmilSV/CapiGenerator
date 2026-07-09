@@ -31,7 +31,7 @@ public sealed class CParameter(string name, CTypeInstance type)
         var type = CTypeInstance.FromCppType(parameter.Type);
         return new CParameter(parameter.Name, type)
         {
-            Comment = CBaseComment.From(parameter.Comment)
+            Comment = parameter.Comment is not null ? CBaseComment.From(parameter.Comment) : null
         };
     }
 }

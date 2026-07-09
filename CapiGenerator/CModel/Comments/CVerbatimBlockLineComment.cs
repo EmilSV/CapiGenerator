@@ -9,6 +9,6 @@ public sealed class CVerbatimBlockLineComment : CBaseComment
     public static CVerbatimBlockLineComment From(CppCommentVerbatimBlockLine cppComment) => new()
     {
         Text = cppComment.Text,
-        Children = [.. cppComment.Children.Select(From)]
+        Children = [.. (cppComment?.Children?.Select(From) ?? [])]
     };
 }

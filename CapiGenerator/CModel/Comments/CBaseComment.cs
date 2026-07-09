@@ -8,7 +8,7 @@ public abstract class CBaseComment
 {
     public ImmutableArray<CBaseComment> Children { get; init; } = ImmutableArray<CBaseComment>.Empty;
 
-    public static CBaseComment? From(CppComment cppCommentText) => cppCommentText switch
+    public static CBaseComment From(CppComment cppCommentText) => cppCommentText switch
     {
         CppCommentBlockCommand blockCommand => CBlockCommandComment.From(blockCommand),
         CppCommentFull commentFull => CFullComment.From(commentFull),
@@ -22,7 +22,6 @@ public abstract class CBaseComment
         CppCommentVerbatimBlockCommand commentVerbatimBlockCommand => CVerbatimBlockCommandComment.From(commentVerbatimBlockCommand),
         CppCommentVerbatimBlockLine commentVerbatimBlockLine => CVerbatimBlockLineComment.From(commentVerbatimBlockLine),
         CppCommentVerbatimLine commentVerbatimLine => CVerbatimLineComment.From(commentVerbatimLine),
-        null => null,
-        _ => throw new NotImplementedException()
+        _ => throw new NotImplementedException("CppComment type not supported: " + cppCommentText.GetType().FullName)
     };
 }

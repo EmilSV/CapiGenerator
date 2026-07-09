@@ -39,7 +39,7 @@ public class CConstant(string name, CConstantExpression expression)
 
         return new(macro.Name, new(constantTokens!))
         {
-            Comment = CBaseComment.From(macro.),
+            Comment = null // TODO: CppAst does not support macro comments we need to parse them manually
         };
     }
 }

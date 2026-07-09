@@ -1,5 +1,8 @@
 ﻿using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using CapiGenerator;
+using CapiGenerator.CModel.Comments;
 using CapiGenerator.Parser;
 using CapiGenerator.Translator;
 using CapiGenerator.Writer;
@@ -52,6 +55,24 @@ compilationUnit.AddParser([
 
 compilationUnit.Parse([cppCompilation]);
 
+var outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output");
+Directory.CreateDirectory(outputDirectory);
+
+var functionComments = compilationUnit.GetFunctionEnumerable()
+    .Select(function => new
+    {
+        function.Name,
+        Comment = ToJsonComment(function.Comment)
+    });
+
+await File.WriteAllTextAsync(
+    Path.Combine(outputDirectory, "function-comments.json"),
+    JsonSerializer.Serialize(functionComments, new JsonSerializerOptions
+    {
+        WriteIndented = true,
+        Converters = { new JsonStringEnumConverter() }
+    }));
+
 foreach (var constant in compilationUnit.GetEnumEnumerable())
 {
     Console.WriteLine(constant.Name);
@@ -79,7 +100,7 @@ foreach (var csStruct in translationUnit.GetCSStructsEnumerable())
 
     await structWriter.Write(csStruct, new CSWriteConfig
     {
-        OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output"),
+        OutputDirectory = outputDirectory,
         Usings = [
             "System"
         ]
@@ -92,7 +113,7 @@ foreach (var csEnum in translationUnit.GetCSEnumsEnumerable())
 
     await enumWriter.Write(csEnum, new CSWriteConfig
     {
-        OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output"),
+        OutputDirectory = outputDirectory,
         Usings = [
             "System"
         ]
@@ -107,7 +128,7 @@ foreach (var csStaticClass in translationUnit.GetCSStaticClassesEnumerable())
 
     await staticClassWriter.Write(csStaticClass, new CSWriteConfig
     {
-        OutputDirectory = Path.Combine(Directory.GetCurrentDirectory(), "output"),
+        OutputDirectory = outputDirectory,
         Usings = [
             "System"
         ]
@@ -115,3 +136,97 @@ foreach (var csStaticClass in translationUnit.GetCSStaticClassesEnumerable())
 }
 
 return 0;
+
+static object? ToJsonComment(CBaseComment? comment) => comment switch
+{
+    null => null,
+    CBlockCommandComment blockCommand => new
+    {
+        Kind = nameof(CBlockCommandComment),
+        blockCommand.CommandName,
+        blockCommand.Arguments,
+        Children = ToJsonChildren(blockCommand)
+    },
+    CFullComment full => new
+    {
+        Kind = nameof(CFullComment),
+        Children = ToJsonChildren(full)
+    },
+    CHtmlEndTagComment htmlEndTag => new
+    {
+        Kind = nameof(CHtmlEndTagComment),
+        htmlEndTag.TagName,
+        Children = ToJsonChildren(htmlEndTag)
+    },
+    CHtmlStartTagComment htmlStartTag => new
+    {
+        Kind = nameof(CHtmlStartTagComment),
+        htmlStartTag.TagName,
+        htmlStartTag.IsSelfClosing,
+        htmlStartTag.Attributes,
+        Children = ToJsonChildren(htmlStartTag)
+    },
+    CInlineCommandComment inlineCommand => new
+    {
+        Kind = nameof(CInlineCommandComment),
+        inlineCommand.RenderKind,
+        inlineCommand.CommandName,
+        inlineCommand.Arguments,
+        Children = ToJsonChildren(inlineCommand)
+    },
+    CParagraphComment paragraph => new
+    {
+        Kind = nameof(CParagraphComment),
+        Children = ToJsonChildren(paragraph)
+    },
+    CParamCommandComment paramCommand => new
+    {
+        Kind = nameof(CParamCommandComment),
+        paramCommand.ParamName,
+        paramCommand.IsParamIndexValid,
+        paramCommand.ParamIndex,
+        paramCommand.Direction,
+        paramCommand.IsDirectionExplicit,
+        Children = ToJsonChildren(paramCommand)
+    },
+    CTemplateParamCommandComment templateParamCommand => new
+    {
+        Kind = nameof(CTemplateParamCommandComment),
+        templateParamCommand.ParamName,
+        templateParamCommand.Depth,
+        templateParamCommand.IsPositionValid,
+        templateParamCommand.Index,
+        templateParamCommand.CommandName,
+        templateParamCommand.Arguments,
+        Children = ToJsonChildren(templateParamCommand)
+    },
+    CTextComment text => new
+    {
+        Kind = nameof(CTextComment),
+        text.Text,
+        Children = ToJsonChildren(text)
+    },
+    CVerbatimBlockCommandComment verbatimBlockCommand => new
+    {
+        Kind = nameof(CVerbatimBlockCommandComment),
+        verbatimBlockCommand.CommandName,
+        verbatimBlockCommand.Arguments,
+        Children = ToJsonChildren(verbatimBlockCommand)
+    },
+    CVerbatimBlockLineComment verbatimBlockLine => new
+    {
+        Kind = nameof(CVerbatimBlockLineComment),
+        verbatimBlockLine.Text,
+        Children = ToJsonChildren(verbatimBlockLine)
+    },
+    CVerbatimLineComment verbatimLine => new
+    {
+        Kind = nameof(CVerbatimLineComment),
+        verbatimLine.Text,
+        Children = ToJsonChildren(verbatimLine)
+    },
+    _ => throw new NotSupportedException($"Unsupported comment type: {comment.GetType().FullName}")
+};
+
+static object[] ToJsonChildren(CBaseComment comment) =>
+    comment.Children.Select(child => ToJsonComment(child)!).ToArray();

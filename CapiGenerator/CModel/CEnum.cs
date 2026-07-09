@@ -33,7 +33,7 @@ public sealed class CEnum(string name, ReadOnlySpan<CEnumField> fields) :
 
         return new CEnum(astEnum.Name, enumConstants!)
         {
-            Comment = CBaseComment.From(astEnum.Comment)
+            Comment = astEnum.Comment is not null ? CBaseComment.From(astEnum.Comment) : null
         };
     }
 }

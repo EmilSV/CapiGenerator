@@ -32,6 +32,12 @@ public sealed class CSField : BaseCSAstItem,
 
     }
 
+    public CSField(object primarySource)
+        : base(primarySource)
+    {
+
+    }
+
 #pragma warning disable 8618
     [SetsRequiredMembers]
     public CSField(CSClassMemberModifier modifier, CSTypeInstance type, string name)

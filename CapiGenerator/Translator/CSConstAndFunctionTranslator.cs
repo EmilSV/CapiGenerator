@@ -213,7 +213,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
 
         if (IsConstant)
         {
-            newCSField = new CSField
+            newCSField = new CSField(constant)
             {
                 Name = NameSelector(constant),
                 Type = typeInstance,
@@ -223,7 +223,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
         }
         else if (IsStaticGetter)
         {
-            newCSField = new CSField
+            newCSField = new CSField(constant)
             {
                 Name = NameSelector(constant),
                 Type = typeInstance,
@@ -270,7 +270,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
 
         if (IsConstant)
         {
-            newCSField = new CSField
+            newCSField = new CSField(constant)
             {
                 Name = NameSelector(constant),
                 Type = typeInstance,
@@ -280,7 +280,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
         }
         else if (IsStaticGetter)
         {
-            newCSField = new CSField
+            newCSField = new CSField(constant)
             {
                 Name = NameSelector(constant),
                 Type = typeInstance,
@@ -302,7 +302,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
     {
         CTypeInstance returnType = function.ReturnType;
 
-        CSMethod method = new()
+        CSMethod method = new(function)
         {
             ReturnType = CSTypeInstance.CreateFromCTypeInstance(function.ReturnType),
             Name = NameSelector(function),

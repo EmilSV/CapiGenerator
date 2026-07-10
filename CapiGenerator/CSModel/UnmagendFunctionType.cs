@@ -5,9 +5,10 @@ namespace CapiGenerator.CSModel;
 
 
 public class CSUnmanagedFunctionType(
+     object primarySource,
      CSTypeInstance returnType,
      ReadOnlySpan<CSTypeInstance> parameterTypes)
-    : BaseCSAnonymousType()
+    : BaseCSAnonymousType(primarySource)
 {
     private CSTypeInstance _returnType = returnType;
     private readonly CSTypeInstance[] _parameterTypes = parameterTypes.ToArray();

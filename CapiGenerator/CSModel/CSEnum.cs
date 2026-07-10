@@ -11,6 +11,12 @@ public sealed class CSEnum : BaseCSType, ITypeReplace
         Values = new(this);
     }
 
+    public CSEnum(object primarySource)
+        : base(primarySource)
+    {
+        Values = new(this);
+    }
+
     public CSAccessModifier AccessModifier = CSAccessModifier.Public;
     public CSPrimitiveType Type = CSPrimitiveType.Instances.Int;
 

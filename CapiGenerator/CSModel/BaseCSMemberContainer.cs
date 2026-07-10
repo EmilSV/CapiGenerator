@@ -11,6 +11,13 @@ public abstract class BaseCSMemberContainer : BaseCSType, ITypeReplace
         Methods = new(this);
     }
 
+    protected BaseCSMemberContainer(object primarySource)
+        : base(primarySource)
+    {
+        Fields = new(this);
+        Methods = new(this);
+    }
+
     public ChildList<CSField, BaseCSType> Fields { get; }
     public ChildList<CSMethod, BaseCSType> Methods { get; }
 

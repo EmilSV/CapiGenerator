@@ -11,6 +11,13 @@ public class CSStruct : BaseCSMemberContainer
         NestedTypes = new(this);
     }
 
+    public CSStruct(object primarySource)
+        : base(primarySource)
+    {
+        Constructors = new(this);
+        NestedTypes = new(this);
+    }
+
     public CSAccessModifier AccessModifier;
     public bool IsUnsafe;
     public bool IsPartial;

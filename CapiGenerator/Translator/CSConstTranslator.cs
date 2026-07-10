@@ -148,7 +148,7 @@ public class CSConstTranslator(string className) : BaseTranslator
 
         if (IsConstant)
         {
-            newCSField = new CSField
+            newCSField = new CSField(constant)
             {
                 Name = NameSelector(constant),
                 Type = typeInstance,
@@ -158,7 +158,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         }
         else if (IsStaticGetter)
         {
-            newCSField = new CSField
+            newCSField = new CSField(constant)
             {
                 Name = NameSelector(constant),
                 Type = typeInstance,
@@ -205,7 +205,7 @@ public class CSConstTranslator(string className) : BaseTranslator
 
         if (IsConstant)
         {
-            newCSField = new CSField
+            newCSField = new CSField(constant)
             {
                 Name = NameSelector(constant),
                 Type = typeInstance,
@@ -215,7 +215,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         }
         else if (IsStaticGetter)
         {
-            newCSField = new CSField
+            newCSField = new CSField(constant)
             {
                 Name = NameSelector(constant),
                 Type = typeInstance,

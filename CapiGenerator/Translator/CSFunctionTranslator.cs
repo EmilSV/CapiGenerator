@@ -61,7 +61,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
     {
         CTypeInstance returnType = function.ReturnType;
 
-        CSMethod method = new()
+        CSMethod method = new(function)
         {
             ReturnType = CSTypeInstance.CreateFromCTypeInstance(function.ReturnType),
             Name = NameSelector(function),

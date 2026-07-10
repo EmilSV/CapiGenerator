@@ -7,6 +7,15 @@ public class CSEnumField :
     BaseCSAstItem, ICSFieldLike, ICommendableItem,
     IAttributeAssignableItem, IChildAstItem<CSEnum>
 {
+    public CSEnumField()
+    {
+    }
+
+    public CSEnumField(object primarySource)
+        : base(primarySource)
+    {
+    }
+
     public CSEnum? Parent { get; private set; }
     public required string Name { get; set; }
     public CSConstantExpression Expression = [];

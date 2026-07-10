@@ -5,10 +5,33 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public abstract class BaseCSAstItem() : ICSSecondPassable
+public abstract class BaseCSAstItem : ICSSecondPassable
 {
+    private readonly List<object> _secondarySources = [];
+
+    protected BaseCSAstItem()
+    {
+    }
+
+    protected BaseCSAstItem(object primarySource)
+    {
+        PrimarySource = primarySource;
+    }
+
+    public object? PrimarySource { get; }
+    public IReadOnlyList<object> SecondarySources => _secondarySources;
     public EnrichingDataStore EnrichingDataStore { get; } = new();
     public InstanceId Id { get; } = new();
+
+    public void AddSecondarySource(object source)
+    {
+        _secondarySources.Add(source);
+    }
+
+    public void AddSecondarySources(IEnumerable<object> sources)
+    {
+        _secondarySources.AddRange(sources);
+    }
 
     public virtual void OnSecondPass(CSTranslationUnit unit)
     {

@@ -7,6 +7,15 @@ namespace CapiGenerator.CSModel;
 public abstract class BaseCSType
     : BaseCSAstItem, ICSType, ICommendableItem, IAttributeAssignableItem, IChildAstItem<BaseCSType>
 {
+    protected BaseCSType()
+    {
+    }
+
+    protected BaseCSType(object primarySource)
+        : base(primarySource)
+    {
+    }
+
     public string? Namespace;
     public required string Name;
 

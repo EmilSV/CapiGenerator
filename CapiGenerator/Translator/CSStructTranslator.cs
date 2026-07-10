@@ -43,7 +43,7 @@ public class CSStructTranslator : BaseTranslator
 
     protected static CSStruct TranslateStruct(CStruct structItem)
     {
-        var newCSStruct = new CSStruct
+        var newCSStruct = new CSStruct(structItem)
         {
             Name = structItem.Name,
         };
@@ -65,7 +65,7 @@ public class CSStructTranslator : BaseTranslator
 
     protected static CSStruct TranslateUnionRecord(CUnion unionItem)
     {
-        var newCSStruct = new CSStruct
+        var newCSStruct = new CSStruct(unionItem)
         {
             Name = unionItem.Name,
         };
@@ -117,7 +117,7 @@ public class CSStructTranslator : BaseTranslator
     {
         var cTypeInstance = field.GetFieldType();
         var csTypeInstance = CSTypeInstance.CreateFromCTypeInstance(cTypeInstance);
-        var newField = new CSField
+        var newField = new CSField(field)
         {
             Name = field.Name,
             Type = csTypeInstance,

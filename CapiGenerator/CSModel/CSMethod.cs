@@ -30,6 +30,11 @@ public class CSMethod : BaseCSCallableType,
     {
     }
 
+    public CSMethod(object primarySource)
+        : base(primarySource)
+    {
+    }
+
     [SetsRequiredMembers]
     public CSMethod(
         CSClassMemberModifier modifiers,

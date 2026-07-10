@@ -4,14 +4,18 @@ using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel;
 
-public abstract class BaseCSAnonymousType : ICSType, ICSSecondPassable, ITypeReplace
+public abstract class BaseCSAnonymousType : BaseCSAstItem, ICSType, ITypeReplace
 {
-    public BaseCSAnonymousType()
+    protected BaseCSAnonymousType()
     {
         Name = $"__AnonymousType{Id}__";
     }
 
-    public InstanceId Id { get; } = new();
+    protected BaseCSAnonymousType(object primarySource)
+        : base(primarySource)
+    {
+        Name = $"__AnonymousType{Id}__";
+    }
 
     public string? Namespace => null;
 
@@ -19,7 +23,7 @@ public abstract class BaseCSAnonymousType : ICSType, ICSSecondPassable, ITypeRep
     
     public bool IsAnonymous => true;
 
-    public virtual void OnSecondPass(CSTranslationUnit unit)
+    public override void OnSecondPass(CSTranslationUnit unit)
     { }
 
     public abstract string GetFullTypeDefString();

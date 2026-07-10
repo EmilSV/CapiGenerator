@@ -91,7 +91,7 @@ public class CSTypeInstance : BaseCSAstItem
                 var parameters = functionType.Parameters.ToArray().Select(
                     i => CreateFromCTypeInstance(i.GetParameterType())
                 ).ToArray();
-                var csFunctionType = new CSUnmanagedFunctionType(returnType, parameters);
+                var csFunctionType = new CSUnmanagedFunctionType(functionType, returnType, parameters);
                 if (modifiers is [CsPointerType, ..])
                 {
                     return new CSTypeInstance(csFunctionType, modifiers[1..]);

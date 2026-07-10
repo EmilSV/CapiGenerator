@@ -3,22 +3,36 @@ using CapiGenerator.Translator;
 
 namespace CapiGenerator.CSModel;
 
-public sealed class CSParameter(
-    CSTypeInstance type, string name, CSDefaultValue defaultValue = default
-) : BaseCSAstItem, IChildAstItem<BaseCSCallableType>
+public sealed class CSParameter : BaseCSAstItem, IChildAstItem<BaseCSCallableType>
 {
-    public string Name => name;
-    public CSTypeInstance Type => type;
-    public CSDefaultValue DefaultValue => defaultValue;
+    public CSParameter(CSTypeInstance type, string name, CSDefaultValue defaultValue = default)
+    {
+        Type = type;
+        Name = name;
+        DefaultValue = defaultValue;
+    }
+
+    public CSParameter(object primarySource, CSTypeInstance type, string name, CSDefaultValue defaultValue = default)
+        : base(primarySource)
+    {
+        Type = type;
+        Name = name;
+        DefaultValue = defaultValue;
+    }
+
+    public string Name { get; }
+    public CSTypeInstance Type { get; }
+    public CSDefaultValue DefaultValue { get; }
     public BaseCSCallableType? Parent { get; private set; }
 
     public override void OnSecondPass(CSTranslationUnit unit)
     {
-        type.OnSecondPass(unit);
-        defaultValue.OnSecondPass(unit);
+        Type.OnSecondPass(unit);
+        DefaultValue.OnSecondPass(unit);
     }
 
     public static CSParameter FromCParameter(CParameter parameter) => new(
+        primarySource: parameter,
         type: CSTypeInstance.CreateFromCTypeInstance(parameter.GetParameterType()),
         name: parameter.Name,
         defaultValue: CSDefaultValue.NullValue
@@ -26,7 +40,12 @@ public sealed class CSParameter(
 
     public static CSParameter CopyWithNewType(CSParameter original, ICSType newType)
     {
-        return new CSParameter(CSTypeInstance.CopyWithNewType(original.Type, newType), original.Name, original.DefaultValue);
+        var parameter = original.PrimarySource is null
+            ? new CSParameter(CSTypeInstance.CopyWithNewType(original.Type, newType), original.Name, original.DefaultValue)
+            : new CSParameter(original.PrimarySource, CSTypeInstance.CopyWithNewType(original.Type, newType), original.Name, original.DefaultValue);
+
+        parameter.AddSecondarySources(original.SecondarySources);
+        return parameter;
     }
 
     void IChildAstItem<BaseCSCallableType>.SetParent(BaseCSCallableType? parent)

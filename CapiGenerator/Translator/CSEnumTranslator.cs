@@ -47,7 +47,7 @@ public class CSEnumTranslator : BaseTranslator
             enumValue.Add(TranslateEnumField(value));
         }
 
-        var newCSEnum = new CSEnum()
+        var newCSEnum = new CSEnum(enumItem)
         {
             Name = enumItem.Name,
             Type = CSPrimitiveType.Instances.Int
@@ -63,7 +63,7 @@ public class CSEnumTranslator : BaseTranslator
         var cExpression = enumField.Expression ?? throw new InvalidOperationException("Enum field expression is null");
         var csExpression = CSConstantExpression.FromCConstantExpression(cExpression);
 
-        CSEnumField newCSEnumValue = new()
+        CSEnumField newCSEnumValue = new(enumField)
         {
             Name = enumField.Name,
             Expression = csExpression

@@ -8,6 +8,7 @@ namespace CapiGenerator.CSModel;
 public abstract class BaseCSAstItem : ICSSecondPassable
 {
     private readonly List<object> _secondarySources = [];
+    private readonly List<object> _derivatives = [];
 
     protected BaseCSAstItem()
     {
@@ -20,6 +21,7 @@ public abstract class BaseCSAstItem : ICSSecondPassable
 
     public object? PrimarySource { get; }
     public IReadOnlyList<object> SecondarySources => _secondarySources;
+    public IReadOnlyList<object> Derivatives => _derivatives;
     public EnrichingDataStore EnrichingDataStore { get; } = new();
     public InstanceId Id { get; } = new();
 
@@ -31,6 +33,16 @@ public abstract class BaseCSAstItem : ICSSecondPassable
     public void AddSecondarySources(IEnumerable<object> sources)
     {
         _secondarySources.AddRange(sources);
+    }
+
+    public void AddDerivative(object derivative)
+    {
+        _derivatives.Add(derivative);
+    }
+
+    public void AddDerivatives(IEnumerable<object> derivatives)
+    {
+        _derivatives.AddRange(derivatives);
     }
 
     public virtual void OnSecondPass(CSTranslationUnit unit)

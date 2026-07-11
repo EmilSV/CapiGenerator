@@ -66,14 +66,17 @@ public class CSTypedefTranslator : BaseTranslator
         {
             Name = typedefItem.Name,
         };
-        newCSStruct.Fields.Add(new CSField(typedefItem)
+        var valueField = new CSField(typedefItem)
         {
             Name = "Value",
             Type = CSTypeInstance.CreateFromCTypeInstance(typedefItem.InnerType)
-        });
+        };
+        newCSStruct.Fields.Add(valueField);
 
         newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(typedefItem));
         typedefItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
+        typedefItem.AddDerivative(newCSStruct);
+        typedefItem.AddDerivative(valueField);
         return newCSStruct;
     }
 }

@@ -237,6 +237,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
         }
 
         newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
+        constant.AddDerivative(newCSField);
         return newCSField;
     }
 
@@ -294,6 +295,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
         }
 
         newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
+        constant.AddDerivative(newCSField);
         return newCSField;
     }
 
@@ -324,6 +326,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
             ));
         }
         function.EnrichingDataStore.Set(new CTranslationToCSAstData(method));
+        function.AddDerivative(method);
 
         return method;
     }

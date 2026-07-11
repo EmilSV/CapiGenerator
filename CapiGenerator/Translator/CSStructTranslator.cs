@@ -60,6 +60,7 @@ public class CSStructTranslator : BaseTranslator
 
         newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(structItem));
         structItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
+        structItem.AddDerivative(newCSStruct);
         return newCSStruct;
     }
 
@@ -88,6 +89,7 @@ public class CSStructTranslator : BaseTranslator
 
         newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(unionItem));
         unionItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
+        unionItem.AddDerivative(newCSStruct);
         return newCSStruct;
     }
 
@@ -125,6 +127,7 @@ public class CSStructTranslator : BaseTranslator
 
         newField.EnrichingDataStore.Set(new CSTranslationFromCAstData(field));
         field.EnrichingDataStore.Set(new CTranslationToCSAstData(newField));
+        field.AddDerivative(newField);
 
         return newField;
     }

@@ -55,6 +55,7 @@ public class CSEnumTranslator : BaseTranslator
         newCSEnum.Values.AddRange(enumValue);
         newCSEnum.EnrichingDataStore.Set(new CSTranslationFromCAstData(enumItem));
         enumItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSEnum));
+        enumItem.AddDerivative(newCSEnum);
         return newCSEnum;
     }
 
@@ -71,6 +72,7 @@ public class CSEnumTranslator : BaseTranslator
 
         newCSEnumValue.EnrichingDataStore.Set(new CSTranslationFromCAstData(enumField));
         enumField.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSEnumValue));
+        enumField.AddDerivative(newCSEnumValue);
         return newCSEnumValue;
     }
 

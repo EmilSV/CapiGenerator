@@ -83,6 +83,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
             ));
         }
         function.EnrichingDataStore.Set(new CTranslationToCSAstData(method));
+        function.AddDerivative(method);
 
         return method;
     }

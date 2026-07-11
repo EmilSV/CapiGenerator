@@ -172,6 +172,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         }
 
         newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
+        constant.AddDerivative(newCSField);
         return newCSField;
     }
 
@@ -229,6 +230,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         }
 
         newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
+        constant.AddDerivative(newCSField);
         return newCSField;
     }
 

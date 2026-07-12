@@ -4,6 +4,7 @@ using System.Text;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.CSModel.EnrichData;
 using CapiGenerator.Parser;
 
@@ -46,6 +47,7 @@ public class CSStructTranslator : BaseTranslator
         var newCSStruct = new CSStruct(structItem)
         {
             Name = structItem.Name,
+            Comments = CCommentTranslator.Translate(structItem.Comment),
         };
 
         foreach (var nestedType in structItem.NestedTypes)
@@ -58,8 +60,6 @@ public class CSStructTranslator : BaseTranslator
             newCSStruct.Fields.Add(TranslateField(field));
         }
 
-        newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(structItem));
-        structItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
         structItem.AddDerivative(newCSStruct);
         return newCSStruct;
     }
@@ -87,8 +87,6 @@ public class CSStructTranslator : BaseTranslator
             AddNestedRecord(newCSStruct, nestedType);
         }
 
-        newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(unionItem));
-        unionItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
         unionItem.AddDerivative(newCSStruct);
         return newCSStruct;
     }
@@ -123,10 +121,9 @@ public class CSStructTranslator : BaseTranslator
         {
             Name = field.Name,
             Type = csTypeInstance,
+            Comments = CCommentTranslator.Translate(field.Comments),
         };
 
-        newField.EnrichingDataStore.Set(new CSTranslationFromCAstData(field));
-        field.EnrichingDataStore.Set(new CTranslationToCSAstData(newField));
         field.AddDerivative(newField);
 
         return newField;

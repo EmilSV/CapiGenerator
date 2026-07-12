@@ -7,6 +7,7 @@ using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;
 using CapiGenerator.CSModel.BuiltinConstants;
 using CapiGenerator.CSModel.ConstantToken;
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.CSModel.EnrichData;
 using CapiGenerator.Parser;
 
@@ -67,7 +68,6 @@ public class CSConstTranslator(string className) : BaseTranslator
 
         foreach (var constant in constantsTransLated)
         {
-            constant.EnrichingDataStore.Set(new CSTranslationParentClassData(csStaticClass));
         }
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
@@ -171,7 +171,7 @@ public class CSConstTranslator(string className) : BaseTranslator
             throw new Exception("Unknown constant type");
         }
 
-        newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
+        newCSField.Comments = CCommentTranslator.Translate(constant.Comment);
         constant.AddDerivative(newCSField);
         return newCSField;
     }
@@ -229,7 +229,6 @@ public class CSConstTranslator(string className) : BaseTranslator
             throw new Exception("Unknown constant type");
         }
 
-        newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
         constant.AddDerivative(newCSField);
         return newCSField;
     }

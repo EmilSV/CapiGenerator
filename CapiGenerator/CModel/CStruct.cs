@@ -1,3 +1,4 @@
+using CapiGenerator.CModel.Comments;
 using CapiGenerator.Parser;
 
 namespace CapiGenerator.CModel;
@@ -17,6 +18,7 @@ public class CStruct(
     public ReadOnlySpan<CField> Fields => _fields;
     public bool IsAnonymous => isAnonymous;
     public ReadOnlySpan<ICType> NestedTypes => _nestedTypes;
+    public CBaseComment? Comment { get; init; }
 
     public override void OnSecondPass(CCompilationUnit compilationUnit)
     {

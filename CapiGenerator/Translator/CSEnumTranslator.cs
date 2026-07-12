@@ -2,6 +2,7 @@ using CapiGenerator.CModel;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.CSModel.EnrichData;
 using CapiGenerator.Parser;
 
@@ -50,11 +51,10 @@ public class CSEnumTranslator : BaseTranslator
         var newCSEnum = new CSEnum(enumItem)
         {
             Name = enumItem.Name,
-            Type = CSPrimitiveType.Instances.Int
+            Type = CSPrimitiveType.Instances.Int,
+            Comments = CCommentTranslator.Translate(enumItem.Comment),
         };
         newCSEnum.Values.AddRange(enumValue);
-        newCSEnum.EnrichingDataStore.Set(new CSTranslationFromCAstData(enumItem));
-        enumItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSEnum));
         enumItem.AddDerivative(newCSEnum);
         return newCSEnum;
     }
@@ -70,8 +70,6 @@ public class CSEnumTranslator : BaseTranslator
             Expression = csExpression
         };
 
-        newCSEnumValue.EnrichingDataStore.Set(new CSTranslationFromCAstData(enumField));
-        enumField.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSEnumValue));
         enumField.AddDerivative(newCSEnumValue);
         return newCSEnumValue;
     }

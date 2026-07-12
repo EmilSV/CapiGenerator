@@ -5,6 +5,7 @@ using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;
 using CapiGenerator.CSModel.BuiltinConstants;
 using CapiGenerator.CSModel.ConstantToken;
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.CSModel.EnrichData;
 using CapiGenerator.Parser;
 
@@ -49,7 +50,6 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
 
         foreach (var constant in constantsTransLated)
         {
-            constant.EnrichingDataStore.Set(new CSTranslationParentClassData(csStaticClass));
         }
 
         outputChannel.OnReceiveStaticClass(csStaticClass);
@@ -236,7 +236,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
             throw new Exception("Unknown constant type");
         }
 
-        newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
+        newCSField.Comments = CCommentTranslator.Translate(constant.Comment);
         constant.AddDerivative(newCSField);
         return newCSField;
     }
@@ -294,7 +294,6 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
             throw new Exception("Unknown constant type");
         }
 
-        newCSField.EnrichingDataStore.Set(new CSTranslationFromCAstData(constant));
         constant.AddDerivative(newCSField);
         return newCSField;
     }
@@ -309,11 +308,11 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
             ReturnType = CSTypeInstance.CreateFromCTypeInstance(function.ReturnType),
             Name = NameSelector(function),
             IsExtern = true,
-            IsStatic = true
+            IsStatic = true,
+            Comments = CCommentTranslator.Translate(function.Comment),
         };
         method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 
-        method.EnrichingDataStore.Set(new CSTranslationFromCAstData(function));
         if (dllName is not null)
         {
             method.Attributes.Add(CSAttribute<DllImportAttribute>.Create(
@@ -325,7 +324,6 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
                 ]
             ));
         }
-        function.EnrichingDataStore.Set(new CTranslationToCSAstData(method));
         function.AddDerivative(method);
 
         return method;

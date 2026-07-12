@@ -8,6 +8,7 @@ public class DocComment
     public CommentValue? Value = null;
     public List<CommentParameter> Parameters { get; init; } = new();
     public List<CommentRemarks> Remarks { get; init; } = new();
+    public List<CommentSeeAlso> SeeAlso { get; init; } = new();
     public CommentReturn? Return = null;
 
     public bool HasValue()
@@ -16,7 +17,8 @@ public class DocComment
         bool hasValue = Value?.HasValue() == true;
         bool hasParams = Parameters.Count > 0;
         bool hasRemarks = Remarks.Count > 0;
+        bool hasSeeAlso = SeeAlso.Count > 0;
         bool hasReturn = Return?.HasValue() == true;
-        return hasSummary || hasValue || hasParams || hasRemarks || hasReturn;
+        return hasSummary || hasValue || hasParams || hasRemarks || hasSeeAlso || hasReturn;
     }
 }

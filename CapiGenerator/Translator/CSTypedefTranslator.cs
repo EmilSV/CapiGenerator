@@ -73,8 +73,6 @@ public class CSTypedefTranslator : BaseTranslator
         };
         newCSStruct.Fields.Add(valueField);
 
-        newCSStruct.EnrichingDataStore.Set(new CSTranslationFromCAstData(typedefItem));
-        typedefItem.EnrichingDataStore.Set(new CTranslationToCSAstData(newCSStruct));
         typedefItem.AddDerivative(newCSStruct);
         typedefItem.AddDerivative(valueField);
         return newCSStruct;

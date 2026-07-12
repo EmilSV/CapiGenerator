@@ -425,6 +425,10 @@ public static class StreamWriterUtils
             }
         }
 
+        foreach (var seeAlso in comment.SeeAlso)
+        {
+            writer.WriteLine($"/// <seealso cref=\"{seeAlso.Reference}\"/>");
+        }
 
         await writer.FlushAsync();
     }

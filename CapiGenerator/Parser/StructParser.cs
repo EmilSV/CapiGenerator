@@ -1,4 +1,5 @@
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.Comments;
 
 using CppAst;
 using System.Diagnostics;
@@ -83,7 +84,10 @@ public class StructParser : BaseParser
             return null;
         }
 
-        var cStruct = new CStruct(cppStruct, nameOverride ?? cppStruct.Name, fields!, isAnonymous, nestedTypes.ToArray());
+        var cStruct = new CStruct(cppStruct, nameOverride ?? cppStruct.Name, fields!, isAnonymous, nestedTypes.ToArray())
+        {
+            Comment = cppStruct.Comment is not null ? CBaseComment.From(cppStruct.Comment) : null,
+        };
         if (secondarySource is not null)
         {
             cStruct.AddSecondarySource(secondarySource);

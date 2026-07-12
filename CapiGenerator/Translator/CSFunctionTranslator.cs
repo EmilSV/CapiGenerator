@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;
+using CapiGenerator.CSModel.Comments;
 using CapiGenerator.CSModel.EnrichData;
 using CapiGenerator.Parser;
 
@@ -66,11 +67,11 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
             ReturnType = CSTypeInstance.CreateFromCTypeInstance(function.ReturnType),
             Name = NameSelector(function),
             IsExtern = true,
-            IsStatic = true
+            IsStatic = true,
+            Comments = CCommentTranslator.Translate(function.Comment),
         };
         method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 
-        method.EnrichingDataStore.Set(new CSTranslationFromCAstData(function));
         if (dllName is not null)
         {
             method.Attributes.Add(CSAttribute<DllImportAttribute>.Create(
@@ -82,7 +83,6 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
                 ]
             ));
         }
-        function.EnrichingDataStore.Set(new CTranslationToCSAstData(method));
         function.AddDerivative(method);
 
         return method;

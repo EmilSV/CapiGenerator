@@ -70,8 +70,7 @@ public sealed class CSTranslationUnit :
 
         private void RegisterTypeForResolution(BaseCSType type)
         {
-            var cAstType = type.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
-            if (cAstType is ICType cType)
+            if (type.PrimarySource is ICType cType)
             {
                 translationUnit._csTypeByCType.Add(cType, type);
             }
@@ -98,8 +97,7 @@ public sealed class CSTranslationUnit :
         {
             foreach (var field in csEnum.Values)
             {
-                var cAst = field.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
-                if (cAst is not CEnumField cEnumField)
+                if (field.PrimarySource is not CEnumField cEnumField)
                 {
                     continue;
                 }
@@ -112,8 +110,7 @@ public sealed class CSTranslationUnit :
         {
             foreach (var field in fields)
             {
-                var cAst = field.EnrichingDataStore.Get<CSTranslationFromCAstData>()?.AstItem;
-                if (cAst is not CConstant cConstant)
+                if (field.PrimarySource is not CConstant cConstant)
                 {
                     continue;
                 }

@@ -22,7 +22,7 @@ public class CSUnionTranslator : CSStructTranslator
                     continue;
                 }
 
-                outputChannel.OnReceiveStruct(TranslateUnionRecord(unionItem));
+                outputChannel.OnReceiveStruct(TranslateUnionRecord(unionItem, compilationUnit));
             }
         }
     }

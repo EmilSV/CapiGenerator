@@ -144,7 +144,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
                 switch (constant)
                 {
                     case CConstant cConstant:
-                        constantFields.Add(TranslateConstant(cConstant));
+                        constantFields.Add(TranslateConstant(cConstant, compilationUnit));
                         constantsTransLated.Add(constant);
                         break;
                     case CStaticConstant staticConstant:
@@ -179,14 +179,14 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
                     break;
                 }
 
-                methods.Add(TranslateFunction(function));
+                methods.Add(TranslateFunction(function, compilationUnit));
             }
         }
 
         return methods;
     }
 
-    protected CSField TranslateConstant(CConstant constant)
+    protected CSField TranslateConstant(CConstant constant, CCompilationUnit compilationUnit)
     {
         var cType = constant.GetCConstantType();
         ICSType csType = cType switch
@@ -236,7 +236,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
             throw new Exception("Unknown constant type");
         }
 
-        newCSField.Comments = CCommentTranslator.Translate(constant.Comment);
+        newCSField.Comments = CCommentTranslator.Translate(constant.Comment, compilationUnit);
         constant.AddDerivative(newCSField);
         return newCSField;
     }
@@ -299,7 +299,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
     }
 
 
-    protected CSMethod TranslateFunction(CFunction function)
+    protected CSMethod TranslateFunction(CFunction function, CCompilationUnit compilationUnit)
     {
         CTypeInstance returnType = function.ReturnType;
 
@@ -309,7 +309,7 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
             Name = NameSelector(function),
             IsExtern = true,
             IsStatic = true,
-            Comments = CCommentTranslator.Translate(function.Comment),
+            Comments = CCommentTranslator.Translate(function.Comment, compilationUnit),
         };
         method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 

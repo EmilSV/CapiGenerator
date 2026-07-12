@@ -30,7 +30,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
                     break;
                 }
 
-                methods.Add(TranslateFunction(function));
+                methods.Add(TranslateFunction(function, compilationUnit));
             }
         }
         if (methods.Count == 0)
@@ -58,7 +58,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
     }
 
 
-    protected CSMethod TranslateFunction(CFunction function)
+    protected CSMethod TranslateFunction(CFunction function, CCompilationUnit compilationUnit)
     {
         CTypeInstance returnType = function.ReturnType;
 
@@ -68,7 +68,7 @@ public class CSFunctionTranslator(string className, string dllName) : BaseTransl
             Name = NameSelector(function),
             IsExtern = true,
             IsStatic = true,
-            Comments = CCommentTranslator.Translate(function.Comment),
+            Comments = CCommentTranslator.Translate(function.Comment, compilationUnit),
         };
         method.Parameters.AddRange(function.Parameters.ToArray().Select(CSParameter.FromCParameter));
 

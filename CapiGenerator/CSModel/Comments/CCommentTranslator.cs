@@ -1,11 +1,14 @@
 using System.Text;
+using CapiGenerator.CModel;
 using CapiGenerator.CModel.Comments;
+using CapiGenerator.Parser;
+using CapiGenerator.UtilTypes;
 
 namespace CapiGenerator.CSModel.Comments;
 
 public static class CCommentTranslator
 {
-    public static DocComment? Translate(CBaseComment? comment)
+    public static DocComment? Translate(CBaseComment? comment, CCompilationUnit? compilationUnit = null)
     {
         if (comment is null)
         {
@@ -13,18 +16,18 @@ public static class CCommentTranslator
         }
 
         var result = new DocComment();
-        Visit(comment, result);
+        Visit(comment, result, compilationUnit);
         return result.HasValue() ? result : null;
     }
 
-    private static void Visit(CBaseComment comment, DocComment result)
+    private static void Visit(CBaseComment comment, DocComment result, CCompilationUnit? compilationUnit)
     {
         switch (comment)
         {
             case CFullComment:
                 foreach (var child in comment.Children)
                 {
-                    Visit(child, result);
+                    Visit(child, result, compilationUnit);
                 }
                 break;
 
@@ -33,7 +36,7 @@ public static class CCommentTranslator
                 break;
 
             case CBlockCommandComment block:
-                AddBlock(result, block.CommandName, GetText(block, block.Arguments));
+                AddBlock(result, block.CommandName, GetText(block, block.Arguments), compilationUnit);
                 break;
 
             case CParagraphComment paragraph:
@@ -54,7 +57,11 @@ public static class CCommentTranslator
         }
     }
 
-    private static void AddBlock(DocComment result, string commandName, string description)
+    private static void AddBlock(
+        DocComment result,
+        string commandName,
+        string description,
+        CCompilationUnit? compilationUnit)
     {
         switch (commandName.ToLowerInvariant())
         {
@@ -83,7 +90,7 @@ public static class CCommentTranslator
 
             case "see":
             case "sa":
-                AddSeeAlso(result, description);
+                AddSeeAlso(result, description, compilationUnit);
                 break;
 
             default:
@@ -137,15 +144,50 @@ public static class CCommentTranslator
         }
     }
 
-    private static void AddSeeAlso(DocComment result, string reference)
+    private static void AddSeeAlso(
+        DocComment result,
+        string reference,
+        CCompilationUnit? compilationUnit)
     {
-        if (string.IsNullOrWhiteSpace(reference) ||
-            result.SeeAlso.Any(seeAlso => seeAlso.Reference == reference))
+        if (string.IsNullOrWhiteSpace(reference))
         {
             return;
         }
 
-        result.SeeAlso.Add(new CommentSeeAlso { Reference = reference });
+        var cItem = ResolveReference(compilationUnit, reference);
+        LazyFormatString lazyReference = cItem is null
+            ? reference
+            : new LazyFormatString("{0}", (Func<string>)(() => GetCSFullName(cItem) ?? reference));
+
+        result.SeeAlso.Add(new CommentSeeAlso { Reference = lazyReference });
+    }
+
+    private static BaseCAstItem? ResolveReference(CCompilationUnit? compilationUnit, string reference)
+    {
+        return compilationUnit?.GetFunctionByName(reference)
+            ?? compilationUnit?.GetTypeByName(reference) as BaseCAstItem
+            ?? compilationUnit?.GetConstantByName(reference) as BaseCAstItem
+            ?? compilationUnit?.GetEnumFieldByName(reference) as BaseCAstItem;
+    }
+
+    private static string? GetCSFullName(BaseCAstItem cItem)
+    {
+        foreach (var derivative in cItem.Derivatives)
+        {
+            switch (derivative)
+            {
+                case CSMethod method when method.Parent is not null:
+                    return method.GetFullName();
+                case CSField field when field.Parent is not null:
+                    return field.GetFullName();
+                case BaseCSType type:
+                    return type.GetFullName();
+                case CSEnumField enumField when enumField.Parent is not null:
+                    return enumField.GetFullName();
+            }
+        }
+
+        return null;
     }
 
     private static string GetText(CBaseComment comment, IEnumerable<string>? arguments = null)

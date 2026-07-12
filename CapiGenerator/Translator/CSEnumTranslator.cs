@@ -24,7 +24,7 @@ public class CSEnumTranslator : BaseTranslator
                     continue;
                 }
 
-                outputChannel.OnReceiveEnum(TranslateEnum(structItem));
+                outputChannel.OnReceiveEnum(TranslateEnum(structItem, compilationUnit));
             }
         }
     }
@@ -39,7 +39,7 @@ public class CSEnumTranslator : BaseTranslator
         }
     }
 
-    private static CSEnum TranslateEnum(CEnum enumItem)
+    private static CSEnum TranslateEnum(CEnum enumItem, CCompilationUnit compilationUnit)
     {
         List<CSEnumField> enumValue = [];
 
@@ -52,7 +52,7 @@ public class CSEnumTranslator : BaseTranslator
         {
             Name = enumItem.Name,
             Type = CSPrimitiveType.Instances.Int,
-            Comments = CCommentTranslator.Translate(enumItem.Comment),
+            Comments = CCommentTranslator.Translate(enumItem.Comment, compilationUnit),
         };
         newCSEnum.Values.AddRange(enumValue);
         enumItem.AddDerivative(newCSEnum);

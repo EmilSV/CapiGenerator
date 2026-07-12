@@ -26,7 +26,7 @@ public class CSStructTranslator : BaseTranslator
                     continue;
                 }
 
-                outputChannel.OnReceiveStruct(TranslateStruct(structItem));
+                outputChannel.OnReceiveStruct(TranslateStruct(structItem, compilationUnit));
             }
         }
     }
@@ -42,29 +42,29 @@ public class CSStructTranslator : BaseTranslator
         }
     }
 
-    protected static CSStruct TranslateStruct(CStruct structItem)
+    protected static CSStruct TranslateStruct(CStruct structItem, CCompilationUnit compilationUnit)
     {
         var newCSStruct = new CSStruct(structItem)
         {
             Name = structItem.Name,
-            Comments = CCommentTranslator.Translate(structItem.Comment),
+            Comments = CCommentTranslator.Translate(structItem.Comment, compilationUnit),
         };
 
         foreach (var nestedType in structItem.NestedTypes)
         {
-            AddNestedRecord(newCSStruct, nestedType);
+            AddNestedRecord(newCSStruct, nestedType, compilationUnit);
         }
 
         foreach (var field in structItem.Fields)
         {
-            newCSStruct.Fields.Add(TranslateField(field));
+            newCSStruct.Fields.Add(TranslateField(field, compilationUnit));
         }
 
         structItem.AddDerivative(newCSStruct);
         return newCSStruct;
     }
 
-    protected static CSStruct TranslateUnionRecord(CUnion unionItem)
+    protected static CSStruct TranslateUnionRecord(CUnion unionItem, CCompilationUnit compilationUnit)
     {
         var newCSStruct = new CSStruct(unionItem)
         {
@@ -75,7 +75,7 @@ public class CSStructTranslator : BaseTranslator
 
         foreach (var field in unionItem.Fields)
         {
-            var newField = TranslateField(field);
+            var newField = TranslateField(field, compilationUnit);
             newField.Attributes.Add(CSAttribute<FieldOffsetAttribute>.Create(
                 [0.ToString()],
                 []));
@@ -84,19 +84,19 @@ public class CSStructTranslator : BaseTranslator
 
         foreach (var nestedType in unionItem.NestedTypes)
         {
-            AddNestedRecord(newCSStruct, nestedType);
+            AddNestedRecord(newCSStruct, nestedType, compilationUnit);
         }
 
         unionItem.AddDerivative(newCSStruct);
         return newCSStruct;
     }
 
-    protected static void AddNestedRecord(CSStruct parent, ICType cType)
+    protected static void AddNestedRecord(CSStruct parent, ICType cType, CCompilationUnit compilationUnit)
     {
         var nestedType = cType switch
         {
-            CStruct cStruct => TranslateStruct(cStruct),
-            CUnion cUnion => TranslateUnionRecord(cUnion),
+            CStruct cStruct => TranslateStruct(cStruct, compilationUnit),
+            CUnion cUnion => TranslateUnionRecord(cUnion, compilationUnit),
             _ => null,
         };
 
@@ -113,7 +113,7 @@ public class CSStructTranslator : BaseTranslator
             []);
     }
 
-    protected static CSField TranslateField(CField field)
+    protected static CSField TranslateField(CField field, CCompilationUnit compilationUnit)
     {
         var cTypeInstance = field.GetFieldType();
         var csTypeInstance = CSTypeInstance.CreateFromCTypeInstance(cTypeInstance);
@@ -121,7 +121,7 @@ public class CSStructTranslator : BaseTranslator
         {
             Name = field.Name,
             Type = csTypeInstance,
-            Comments = CCommentTranslator.Translate(field.Comments),
+            Comments = CCommentTranslator.Translate(field.Comments, compilationUnit),
         };
 
         field.AddDerivative(newField);

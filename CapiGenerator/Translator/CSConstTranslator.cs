@@ -39,7 +39,7 @@ public class CSConstTranslator(string className) : BaseTranslator
                 switch (constant)
                 {
                     case CConstant cConstant:
-                        constantFields.Add(TranslateConstant(cConstant));
+                        constantFields.Add(TranslateConstant(cConstant, compilationUnit));
                         constantsTransLated.Add(constant);
                         break;
                     case BaseBuiltInCConstant builtinConstant:
@@ -122,7 +122,7 @@ public class CSConstTranslator(string className) : BaseTranslator
         }
     }
 
-    private CSField TranslateConstant(CConstant constant)
+    private CSField TranslateConstant(CConstant constant, CCompilationUnit compilationUnit)
     {
         var cType = constant.GetCConstantType();
         ICSType csType = cType switch
@@ -171,7 +171,7 @@ public class CSConstTranslator(string className) : BaseTranslator
             throw new Exception("Unknown constant type");
         }
 
-        newCSField.Comments = CCommentTranslator.Translate(constant.Comment);
+        newCSField.Comments = CCommentTranslator.Translate(constant.Comment, compilationUnit);
         constant.AddDerivative(newCSField);
         return newCSField;
     }

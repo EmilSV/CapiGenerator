@@ -27,4 +27,10 @@
     <ProjectReference Include="..\CapiGenerator\CapiGenerator.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\TestHeader\DefineRefConst.h"
+          Link="TestHeader\DefineRefConst.h"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

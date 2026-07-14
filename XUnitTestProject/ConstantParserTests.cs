@@ -8,7 +8,47 @@ namespace XUnitTestProject;
 public sealed class ConstantParserTests
 {
     [Fact]
-    public void ReferencedDefineCreatesTranslatedSdlMaxTimeConstant()
+    public void ReferencedDefineCreatesTranslatedTestMaxTimeConstant()
+    {
+        var constants = TranslateConstants();
+
+        Assert.Contains("TEST_MAX_TIME", constants.Keys);
+    }
+
+    [Fact]
+    public void MultiParameterMacroExpandsArguments()
+    {
+        var constants = TranslateConstants();
+
+        Assert.Equal("( 1 + 2 )", constants["TEST_ADD_VALUE"]);
+    }
+
+    [Fact]
+    public void NestedMacroFunctionsExpandRecursively()
+    {
+        var constants = TranslateConstants();
+
+        Assert.Equal("( 1 + 2 )", constants["TEST_NESTED_ADD"]);
+    }
+
+    [Fact]
+    public void ZeroParameterMacroExpands()
+    {
+        var constants = TranslateConstants();
+
+        Assert.Equal("7", constants["TEST_ZERO_VALUE"]);
+    }
+
+    [Fact]
+    public void InvalidMacroInvocationsAreNotTranslated()
+    {
+        var constants = TranslateConstants();
+
+        Assert.DoesNotContain("TEST_RECURSIVE_VALUE", constants.Keys);
+        Assert.DoesNotContain("TEST_WRONG_ARITY", constants.Keys);
+    }
+
+    private static IReadOnlyDictionary<string, string> TranslateConstants()
     {
         var options = new CppParserOptions
         {
@@ -31,6 +71,8 @@ public sealed class ConstantParserTests
         translationUnit.Translate([compilationUnit]);
 
         var constantsClass = Assert.Single(translationUnit.GetCSStaticClassesEnumerable());
-        Assert.Contains(constantsClass.Fields, field => field.Name == "SDL_MAX_TIME");
+        return constantsClass.Fields.ToDictionary(
+            field => field.Name,
+            field => field.DefaultValue.Value?.ToString() ?? string.Empty);
     }
 }

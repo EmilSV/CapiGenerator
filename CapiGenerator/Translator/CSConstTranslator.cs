@@ -130,7 +130,7 @@ public class CSConstTranslator(string className) : BaseTranslator
             CConstantType.Char => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
             CConstantType.Int => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
             CConstantType.UnsignedInt => CSPrimitiveType.Get(CSPrimitiveType.Kind.UInt),
-            CConstantType.LongLong => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
+            CConstantType.LongLong or CConstantType.Int64_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
             CConstantType.UnsignedLongLong => CSPrimitiveType.Get(CSPrimitiveType.Kind.ULong),
             CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Double),
             CConstantType.Size_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.NUInt),

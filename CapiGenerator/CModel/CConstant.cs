@@ -27,9 +27,22 @@ public class CConstant(object primarySource, string name, CConstantExpression ex
         }
     }
 
-    public static CConstant? From(CppMacro macro)
+    public static CConstant? From(
+        CppMacro macro,
+        IReadOnlyDictionary<string, CppMacro>? macroFunctions = null)
     {
-        var constantTokens = macro.Tokens.Select(BaseCConstantToken.From).ToArray();
+        var cppTokens = macro.Tokens
+            .Where(token => token.Kind != CppTokenKind.Comment)
+            .ToArray();
+        if (macroFunctions is not null &&
+            !MacroFunctionExpander.TryExpand(cppTokens, macroFunctions, out cppTokens))
+        {
+            return null;
+        }
+
+        var constantTokens = cppTokens
+            .Select(BaseCConstantToken.From)
+            .ToArray();
         if (constantTokens == null || constantTokens.Any(token => token is null))
         {
             return null;

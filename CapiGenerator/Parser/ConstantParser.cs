@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.BuiltinConstants;
-using CapiGenerator.CModel.BuiltinMacroFunctions;
+
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.CModel.Type;
 using CppAst;
@@ -12,15 +12,19 @@ namespace CapiGenerator.Parser;
 
 public class ConstantParser : BaseParser
 {
+    private IReadOnlyDictionary<string, CppMacro> _macroFunctions = new Dictionary<string, CppMacro>();
+
     public override void FirstPass(
         ReadOnlySpan<CppCompilation> compilations,
         BaseParserOutputChannel outputChannel)
     {
         foreach (var compilation in compilations)
         {
+            _macroFunctions = GetMacroFunctions(compilation);
+
             foreach (var macro in compilation.Macros)
             {
-                if (macro.Parameters != null && macro.Parameters.Count > 0)
+                if (macro.Parameters is not null)
                 {
                     continue;
                 }
@@ -90,7 +94,7 @@ public class ConstantParser : BaseParser
 
     protected virtual CConstant? FirstPass(CppMacro macro)
     {
-        switch (CConstant.From(macro))
+        switch (CConstant.From(macro, _macroFunctions))
         {
             case { } constant:
                 return constant;
@@ -114,6 +118,20 @@ public class ConstantParser : BaseParser
             name: field.Name,
             expression: [new CConstLiteralToken(field.InitValue.Value!.ToString()!)]
         );
+    }
+
+    private static IReadOnlyDictionary<string, CppMacro> GetMacroFunctions(CppCompilation compilation)
+    {
+        Dictionary<string, CppMacro> macroFunctions = [];
+        foreach (var macro in compilation.Macros)
+        {
+            if (macro.Parameters is not null)
+            {
+                macroFunctions[macro.Name] = macro;
+            }
+        }
+
+        return macroFunctions;
     }
 
     protected virtual bool ShouldSkip(CppMacro constant) => false;

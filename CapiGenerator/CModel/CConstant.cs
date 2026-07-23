@@ -41,7 +41,7 @@ public class CConstant(object primarySource, string name, CConstantExpression ex
         }
 
         var constantTokens = cppTokens
-            .Select(BaseCConstantToken.From)
+            .Select(token => BaseCConstantToken.From(token, macro.Span.Start))
             .ToArray();
         if (constantTokens == null || constantTokens.Any(token => token is null))
         {

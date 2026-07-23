@@ -116,7 +116,7 @@ public class ConstantParser : BaseParser
             realType: CTypeInstance.FromCppType(field.Type),
             constantType: constantType.Value,
             name: field.Name,
-            expression: [new CConstLiteralToken(field.InitValue.Value!.ToString()!)]
+            expression: [new CConstLiteralToken(field.InitValue.Value!.ToString()!, field.Span.Start)]
         );
     }
 

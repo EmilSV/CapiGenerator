@@ -52,7 +52,7 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
                 if (identifierTokenConstant == null)
                 {
                     Debugger.Break();
-                    throw new InvalidOperationException($"Constant {(identifierToken.TryGetName(out var name) ? name : "unknown")} not resolve");
+                    throw new InvalidOperationException($"Constant {(identifierToken.TryGetName(out var name) ? name : "unknown")} not resolve at {identifierToken.SourceLocation.File} {identifierToken.SourceLocation.Line}: {identifierToken.SourceLocation.Column}");
                 }
                 constantType = GetConstantType(constantType, identifierTokenConstant.GetCConstantType());
             }

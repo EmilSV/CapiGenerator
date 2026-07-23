@@ -17,7 +17,7 @@ public class Int64CMacroFunction : BuiltinMacroFunctionBase
 
         result =
         [
-            new CConstLiteralToken(literalToken.Value, CConstantType.Int64_t)
+            new CConstLiteralToken(literalToken.Value, CConstantType.Int64_t, literalToken.SourceLocation)
         ];
         return true;
     }

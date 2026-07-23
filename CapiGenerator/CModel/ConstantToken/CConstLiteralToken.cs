@@ -1,5 +1,7 @@
 using System.Globalization;
 using System.Reflection.Metadata;
+using CppAst;
+
 namespace CapiGenerator.CModel.ConstantToken;
 
 public class CConstLiteralToken : BaseCConstantToken
@@ -9,7 +11,8 @@ public class CConstLiteralToken : BaseCConstantToken
     public string Value { get; }
     public CConstantType Type => _type;
 
-    public CConstLiteralToken(string value)
+    public CConstLiteralToken(string value, CppSourceLocation debugInfo)
+        : base(debugInfo)
     {
         Value = value;
         _type = GetConstantType(value, out var newValue);
@@ -19,7 +22,8 @@ public class CConstLiteralToken : BaseCConstantToken
         }
     }
 
-    public CConstLiteralToken(string value, CConstantType type)
+    public CConstLiteralToken(string value, CConstantType type, CppSourceLocation debugInfo)
+        : base(debugInfo)
     {
         Value = value;
         _type = type;

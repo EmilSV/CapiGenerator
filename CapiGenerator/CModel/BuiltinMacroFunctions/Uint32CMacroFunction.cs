@@ -22,7 +22,7 @@ namespace CapiGenerator.CModel.BuiltinMacroFunctions
 
             result = new List<BaseCConstantToken>
             {
-                new CConstLiteralToken(value.ToString(), CConstantType.UInt32_t)
+                new CConstLiteralToken(value.ToString(), CConstantType.UInt32_t, literalToken.SourceLocation)
             };
 
             return true;

@@ -1,5 +1,6 @@
 using CapiGenerator.Parser;
 using CapiGenerator.UtilTypes;
+using CppAst;
 
 namespace CapiGenerator.CModel.ConstantToken;
 
@@ -7,12 +8,14 @@ public class CConstIdentifierToken : BaseCConstantToken
 {
     private readonly ResoleRef<ICConstAssignable, string> _constantRef;
 
-    public CConstIdentifierToken(string constIdentifierName)
+    public CConstIdentifierToken(string constIdentifierName, CppSourceLocation debugInfo)
+        : base(debugInfo)
     {
         _constantRef = new(constIdentifierName);
     }
 
-    public CConstIdentifierToken(ICConstAssignable constantIdentifier)
+    public CConstIdentifierToken(ICConstAssignable constantIdentifier, CppSourceLocation debugInfo)
+        : base(debugInfo)
     {
         _constantRef = new(constantIdentifier);
     }

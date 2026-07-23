@@ -1,4 +1,5 @@
 using CapiGenerator;
+using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.Parser;
 using CapiGenerator.Translator;
 using CppAst;
@@ -7,6 +8,22 @@ namespace XUnitTestProject;
 
 public sealed class ConstantParserTests
 {
+    [Theory]
+    [InlineData(CppTokenKind.Identifier, "VALUE")]
+    [InlineData(CppTokenKind.Literal, "42")]
+    [InlineData(CppTokenKind.Punctuation, "+")]
+    public void ConstantTokensRetainDebugInfo(CppTokenKind kind, string text)
+    {
+        var debugInfo = new CppSourceLocation("constants.h", 100, 10, 5);
+
+        var token = BaseCConstantToken.From(new CppToken(kind, text), debugInfo);
+
+        Assert.NotNull(token);
+        Assert.Equal("constants.h", token.DebugInfo.File);
+        Assert.Equal(10, token.DebugInfo.Line);
+        Assert.Equal(5, token.DebugInfo.Column);
+    }
+
     [Fact]
     public void ReferencedDefineCreatesTranslatedTestMaxTimeConstant()
     {

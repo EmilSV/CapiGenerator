@@ -22,5 +22,5 @@ public sealed class CEnumField(object primarySource, string name, CConstantExpre
     }
 
     public static CEnumField From(CppEnumItem item) =>
-        new(item, item.Name, [new CConstLiteralToken(item.Value.ToString())]);
+        new(item, item.Name, [new CConstLiteralToken(item.Value.ToString(), item.Span.Start)]);
 }

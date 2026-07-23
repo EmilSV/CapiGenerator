@@ -22,6 +22,44 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
     private CConstantType _constantType = CConstantType.NONE;
     public ReadOnlySpan<BaseCConstantToken> Tokens => _tokens;
 
+    public bool IsResolved()
+    {
+        return IsResolved([]);
+    }
+
+    internal bool IsResolved(HashSet<CConstant> visitedConstants)
+    {
+        foreach (var identifierToken in _tokens.OfType<CConstIdentifierToken>())
+        {
+            if (identifierToken.TryGetCastType(out _))
+            {
+                continue;
+            }
+
+            if (identifierToken.GetConstantModel() is not { } constantModel)
+            {
+                return false;
+            }
+
+            if (constantModel is CConstant constant)
+            {
+                if (!visitedConstants.Add(constant))
+                {
+                    return false;
+                }
+
+                var isResolved = constant.Expression.IsResolved(visitedConstants);
+                visitedConstants.Remove(constant);
+                if (!isResolved)
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public CConstantType GetTypeOfExpression()
     {
         if (_constantType != CConstantType.NONE)
@@ -40,6 +78,7 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
         }
 
         CConstantType constantType = CConstantType.NONE;
+        CConstantType castType = CConstantType.NONE;
         foreach (var token in _tokens)
         {
             if (token is CConstLiteralToken literalToken)
@@ -48,6 +87,12 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
             }
             else if (token is CConstIdentifierToken identifierToken)
             {
+                if (identifierToken.TryGetCastType(out var identifierCastType))
+                {
+                    castType = identifierCastType;
+                    continue;
+                }
+
                 var identifierTokenConstant = identifierToken.GetConstantModel();
                 if (identifierTokenConstant == null)
                 {
@@ -63,7 +108,7 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
             }
         }
 
-        _constantType = constantType;
+        _constantType = castType != CConstantType.NONE ? castType : constantType;
 
         return _constantType;
     }

@@ -63,6 +63,7 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
         {
             CConstantPunctuationToken punctuationToken => CSConstantPunctuationToken.FromCConstantPunctuationToken(punctuationToken),
             CConstLiteralToken literalToken => CSConstLiteralToken.FromCConstantLiteralToken(literalToken),
+            CConstIdentifierToken identifierToken when identifierToken.TryGetCastType(out var castType) => new CSConstCastToken(castType),
             CConstIdentifierToken identifierToken => CSConstIdentifierToken.FromCConstantToken(identifierToken),
             _ => throw new NotImplementedException()
         };

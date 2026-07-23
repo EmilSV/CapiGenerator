@@ -19,9 +19,9 @@ public sealed class ConstantParserTests
         var token = BaseCConstantToken.From(new CppToken(kind, text), debugInfo);
 
         Assert.NotNull(token);
-        Assert.Equal("constants.h", token.DebugInfo.File);
-        Assert.Equal(10, token.DebugInfo.Line);
-        Assert.Equal(5, token.DebugInfo.Column);
+        Assert.Equal("constants.h", token.SourceLocation.File);
+        Assert.Equal(10, token.SourceLocation.Line);
+        Assert.Equal(5, token.SourceLocation.Column);
     }
 
     [Fact]
@@ -30,6 +30,14 @@ public sealed class ConstantParserTests
         var constants = TranslateConstants();
 
         Assert.Contains("TEST_MAX_TIME", constants.Keys);
+    }
+
+    [Fact]
+    public void UInt64MacroHandlesMaximumValue()
+    {
+        var constants = TranslateConstants();
+
+        Assert.Equal("0xFFFFFFFFFFFFFFFF", constants["TEST_MAX_UINT64"]);
     }
 
     [Fact]
@@ -63,6 +71,20 @@ public sealed class ConstantParserTests
 
         Assert.DoesNotContain("TEST_RECURSIVE_VALUE", constants.Keys);
         Assert.DoesNotContain("TEST_WRONG_ARITY", constants.Keys);
+        Assert.DoesNotContain("TEST_FORMAT_ANNOTATION", constants.Keys);
+        Assert.DoesNotContain("TEST_EMPTY_ANNOTATION", constants.Keys);
+        Assert.DoesNotContain("TEST_CALL_CONVENTION", constants.Keys);
+        Assert.DoesNotContain("TEST_ATTRIBUTE", constants.Keys);
+        Assert.DoesNotContain("TEST_PLATFORM_PREDICATE", constants.Keys);
+        Assert.DoesNotContain("TEST_WRAPPED_ANNOTATION", constants.Keys);
+    }
+
+    [Fact]
+    public void TypedefCastIsTranslatedAsPrimitiveCast()
+    {
+        var constants = TranslateConstants();
+
+        Assert.Equal("( ( sbyte ) 0x7F )", constants["TEST_MAX_SINT8"]);
     }
 
     private static IReadOnlyDictionary<string, string> TranslateConstants()
@@ -80,7 +102,10 @@ public sealed class ConstantParserTests
             string.Join(Environment.NewLine, cppCompilation.Diagnostics.Messages.Select(message => message.ToString())));
 
         var compilationUnit = new CCompilationUnit();
-        compilationUnit.AddParser(new ConstantParser());
+        compilationUnit.AddParser([
+            new ConstantParser(),
+            new TypedefParser(),
+        ]);
         compilationUnit.Parse([cppCompilation]);
 
         var translationUnit = new CSTranslationUnit();

@@ -131,7 +131,18 @@ public static class StreamWriterUtils
         }
 
         writer.Write(" ");
-        writer.Write(field.Type.ToString());
+        if (field.Type.Type is null)
+        {
+            throw new InvalidOperationException($"Type is unresolved for field {field.Name}");
+        }
+        try
+        {
+            writer.Write(field.Type.ToString());
+        }
+        catch (Exception exception)
+        {
+            throw new InvalidOperationException($"Failed to write type for field {field.Name}", exception);
+        }
 
         writer.Write(" ");
         writer.Write(field.Name);

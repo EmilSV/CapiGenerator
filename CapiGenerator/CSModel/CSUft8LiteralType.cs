@@ -11,7 +11,7 @@ public sealed class CSUft8LiteralType : ICSType
 
     public string Namespace { get; } = "System";
 
-    public string Name { get; } = "ReadonlySpan<byte>";
+    public string Name { get; } = "ReadOnlySpan<byte>";
 
     public bool IsAnonymous => false;
 

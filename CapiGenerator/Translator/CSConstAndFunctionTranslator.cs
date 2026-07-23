@@ -191,16 +191,21 @@ public class CSConstAndFunctionTranslator(string className, string dllName) : Ba
         var cType = constant.GetCConstantType();
         ICSType csType = cType switch
         {
-            CConstantType.Char or CConstantType.Int8_t or CConstantType.UInt8_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
+            CConstantType.Char or CConstantType.UInt8_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.Byte),
+            CConstantType.Int8_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.SByte),
+            CConstantType.Short or CConstantType.Int16_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.Short),
+            CConstantType.UnsignedShort or CConstantType.UInt16_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.UShort),
             CConstantType.Int or CConstantType.Int32_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.Int),
             CConstantType.UnsignedInt or CConstantType.UInt32_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.UInt),
             CConstantType.LongLong or CConstantType.Int64_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.Long),
             CConstantType.UnsignedLongLong or CConstantType.UInt64_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.ULong),
+            CConstantType.IntPtr_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.NInt),
+            CConstantType.UIntPtr_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.NUInt),
             CConstantType.Float => CSPrimitiveType.Get(CSPrimitiveType.Kind.Float),
             CConstantType.Double => CSPrimitiveType.Get(CSPrimitiveType.Kind.Double),
             CConstantType.Size_t => CSPrimitiveType.Get(CSPrimitiveType.Kind.NUInt),
             CConstantType.String => CSUft8LiteralType.Instance,
-            _ => throw new Exception("Unknown constant type"),
+            _ => throw new InvalidOperationException($"Unsupported constant type {cType} for {constant.Name}"),
         };
 
         bool IsStaticGetter = csType == CSUft8LiteralType.Instance;

@@ -46,6 +46,11 @@ public class ConstantParser : BaseParser
                     continue;
                 }
 
+                if (!LooksLikeConstantExpression(macro, _macroFunctions))
+                {
+                    continue;
+                }
+
                 var newConst = FirstPass(macro);
                 if (newConst is not null)
                 {
@@ -120,6 +125,36 @@ public class ConstantParser : BaseParser
         );
     }
 
+    private static bool LooksLikeConstantExpression(
+        CppMacro macro,
+        IReadOnlyDictionary<string, CppMacro> macroFunctions)
+    {
+        var tokens = macro.Tokens
+            .Where(token => token.Kind != CppTokenKind.Comment)
+            .ToArray();
+        if (!MacroFunctionExpander.TryExpand(tokens, macroFunctions, out var expandedTokens) ||
+            expandedTokens.Length == 0)
+        {
+            return false;
+        }
+
+        foreach (var token in expandedTokens)
+        {
+            if (token.Kind is CppTokenKind.Identifier or CppTokenKind.Literal)
+            {
+                continue;
+            }
+
+            if (token.Kind != CppTokenKind.Punctuation ||
+                !CConstantPunctuationToken.TryParse(token.Text, macro.Span.Start, out _))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private static IReadOnlyDictionary<string, CppMacro> GetMacroFunctions(CppCompilation compilation)
     {
         Dictionary<string, CppMacro> macroFunctions = [];
@@ -138,7 +173,8 @@ public class ConstantParser : BaseParser
     protected virtual bool ShouldSkip(CppField constant) => false;
     protected virtual void OnError(CppMacro macro, string message)
     {
-        Console.Error.WriteLine($"Error parsing constant {macro.Name}: {message}");
+        var tokens = string.Join(", ", macro.Tokens.Select(token => $"{token.Kind}:'{token.Text}'"));
+        Console.Error.WriteLine($"Error parsing constant {macro.Name}: {message}. Tokens: {tokens}");
     }
 
     protected virtual void OnError(CppField field, string message)

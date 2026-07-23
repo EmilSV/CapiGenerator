@@ -111,8 +111,9 @@ public class CSTypeInstance : BaseCSAstItem
             BaseCSType namedType => namedType.GetFullName(),
             BaseCSAnonymousType anonymousType => anonymousType.GetFullTypeDefString(),
             CSPrimitiveType primitiveType => primitiveType.Name,
+            CSUft8LiteralType utf8LiteralType => utf8LiteralType.Name,
             BaseBuiltinType builtinType => builtinType.GetFullName(),
-            _ => throw new Exception("unsupported type")
+            _ => throw new InvalidOperationException($"Unsupported type {Type?.GetType().Name ?? "null"}")
         });
 
         if (IsNullable)

@@ -48,11 +48,32 @@ public class CConstant(object primarySource, string name, CConstantExpression ex
             return null;
         }
 
-        constantTokens = MacroFunctionResolver.ResolveMacroFunction(constantTokens!);
+        var resolvedTokens = MacroFunctionResolver.ResolveMacroFunction(
+            constantTokens.Select(token => token!).ToArray()
+        );
+        if (resolvedTokens.Length == 0)
+        {
+            return null;
+        }
 
-        return new(macro, macro.Name, new(constantTokens!))
+        MarkCastCandidates(resolvedTokens);
+
+        return new(macro, macro.Name, new(resolvedTokens))
         {
             Comment = null // TODO: CppAst does not support macro comments we need to parse them manually
         };
+    }
+
+    private static void MarkCastCandidates(ReadOnlySpan<BaseCConstantToken> tokens)
+    {
+        for (var i = 1; i < tokens.Length - 1; i++)
+        {
+            if (tokens[i - 1] is CConstantPunctuationToken { Type: CPunctuationType.LeftParenthesis } &&
+                tokens[i] is CConstIdentifierToken identifier &&
+                tokens[i + 1] is CConstantPunctuationToken { Type: CPunctuationType.RightParenthesis })
+            {
+                identifier.MarkAsCastCandidate();
+            }
+        }
     }
 }

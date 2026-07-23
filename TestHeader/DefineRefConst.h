@@ -17,6 +17,20 @@
 
 #define TEST_MAX_TIME TEST_MAX_SINT64
 
+#define TEST_UINT64_C(value) UINT64_C(value)
+#define TEST_MAX_UINT64 TEST_UINT64_C(0xFFFFFFFFFFFFFFFF)
+
+typedef int8_t TestSint8;
+#define TEST_MAX_SINT8 ((TestSint8)0x7F)
+#define TEST_FORMAT_ANNOTATION _Printf_format_string_
+#define TEST_ANNOTATION(value)
+#define TEST_EMPTY_ANNOTATION TEST_ANNOTATION(value)
+#define TEST_CALL_CONVENTION __cdecl
+#define TEST_ATTRIBUTE __attribute__((deprecated))
+#define TEST_PLATFORM_PREDICATE (UNKNOWN_PLATFORM == 1)
+#define TEST_ANNOTATION_WRAPPER(value) __attribute__((value))
+#define TEST_WRAPPED_ANNOTATION TEST_ANNOTATION_WRAPPER(scoped_lockable)
+
 #define TEST_ADD_VALUE TEST_SOME_ADD(1, 2)
 
 #define TEST_IDENTITY(value) value

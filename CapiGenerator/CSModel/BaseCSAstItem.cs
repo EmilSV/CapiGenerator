@@ -14,7 +14,7 @@ public abstract class BaseCSAstItem : ICSSecondPassable
     {
     }
 
-    protected BaseCSAstItem(object primarySource)
+    protected BaseCSAstItem(object? primarySource)
     {
         PrimarySource = primarySource;
     }

@@ -21,7 +21,14 @@
 #define TEST_MAX_UINT64 TEST_UINT64_C(0xFFFFFFFFFFFFFFFF)
 
 typedef int8_t TestSint8;
+typedef TestSint8 TestSint8Alias;
+typedef TestSint8Alias TestSint8Alias2;
 #define TEST_MAX_SINT8 ((TestSint8)0x7F)
+#define TEST_MAX_SINT8_ALIAS ((TestSint8Alias2)0x7F)
+
+typedef int TestSharedName;
+#define TestSharedName 1
+#define TEST_GROUPED_SHARED_NAME (TestSharedName)
 #define TEST_FORMAT_ANNOTATION _Printf_format_string_
 #define TEST_ANNOTATION(value)
 #define TEST_EMPTY_ANNOTATION TEST_ANNOTATION(value)

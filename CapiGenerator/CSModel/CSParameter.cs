@@ -12,7 +12,7 @@ public sealed class CSParameter : BaseCSAstItem, IChildAstItem<BaseCSCallableTyp
         DefaultValue = defaultValue;
     }
 
-    public CSParameter(object primarySource, CSTypeInstance type, string name, CSDefaultValue defaultValue = default)
+    public CSParameter(object? primarySource, CSTypeInstance type, string name, CSDefaultValue defaultValue = default)
         : base(primarySource)
     {
         Type = type;

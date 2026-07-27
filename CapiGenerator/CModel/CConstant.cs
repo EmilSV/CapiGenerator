@@ -29,7 +29,8 @@ public class CConstant(object primarySource, string name, CConstantExpression ex
 
     public static CConstant? From(
         CppMacro macro,
-        IReadOnlyDictionary<string, CppMacro>? macroFunctions = null)
+        IReadOnlyDictionary<string, CppMacro>? macroFunctions = null,
+        IReadOnlySet<string>? typedefNames = null)
     {
         var cppTokens = macro.Tokens
             .Where(token => token.Kind != CppTokenKind.Comment)
@@ -40,23 +41,20 @@ public class CConstant(object primarySource, string name, CConstantExpression ex
             return null;
         }
 
-        var constantTokens = cppTokens
-            .Select(token => BaseCConstantToken.From(token, macro.Span.Start))
-            .ToArray();
-        if (constantTokens == null || constantTokens.Any(token => token is null))
+        if (!BaseCConstantToken.TryConvert(
+                cppTokens,
+                typedefNames ?? new HashSet<string>(),
+                macro.Span.Start,
+                out var constantTokens))
         {
             return null;
         }
 
-        var resolvedTokens = MacroFunctionResolver.ResolveMacroFunction(
-            constantTokens.Select(token => token!).ToArray()
-        );
+        var resolvedTokens = MacroFunctionResolver.ResolveMacroFunction(constantTokens);
         if (resolvedTokens.Length == 0)
         {
             return null;
         }
-
-        MarkCastCandidates(resolvedTokens);
 
         return new(macro, macro.Name, new(resolvedTokens))
         {
@@ -64,16 +62,4 @@ public class CConstant(object primarySource, string name, CConstantExpression ex
         };
     }
 
-    private static void MarkCastCandidates(ReadOnlySpan<BaseCConstantToken> tokens)
-    {
-        for (var i = 1; i < tokens.Length - 1; i++)
-        {
-            if (tokens[i - 1] is CConstantPunctuationToken { Type: CPunctuationType.LeftParenthesis } &&
-                tokens[i] is CConstIdentifierToken identifier &&
-                tokens[i + 1] is CConstantPunctuationToken { Type: CPunctuationType.RightParenthesis })
-            {
-                identifier.MarkAsCastCandidate();
-            }
-        }
-    }
 }

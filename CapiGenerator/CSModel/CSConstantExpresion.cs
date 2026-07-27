@@ -63,7 +63,10 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
         {
             CConstantPunctuationToken punctuationToken => CSConstantPunctuationToken.FromCConstantPunctuationToken(punctuationToken),
             CConstLiteralToken literalToken => CSConstLiteralToken.FromCConstantLiteralToken(literalToken),
-            CConstIdentifierToken identifierToken when identifierToken.TryGetCastType(out var castType) => new CSConstCastToken(castType),
+            CConstCastToken castToken when castToken.TryGetConstantType(out var castType) => new CSConstCastToken(castType),
+            CConstCastToken castToken => throw new InvalidOperationException(
+                $"Cast type not resolved at {castToken.SourceLocation.File} " +
+                $"{castToken.SourceLocation.Line}: {castToken.SourceLocation.Column}"),
             CConstIdentifierToken identifierToken => CSConstIdentifierToken.FromCConstantToken(identifierToken),
             _ => throw new NotImplementedException()
         };

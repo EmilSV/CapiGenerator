@@ -4,7 +4,9 @@ namespace CapiGenerator.CSModel.ConstantToken;
 
 public sealed class CSConstCastToken(CConstantType type) : BaseCSConstantToken
 {
-    public override string ToString() => type switch
+    public override string ToString() => $"({GetTypeName()})";
+
+    private string GetTypeName() => type switch
     {
         CConstantType.Char or CConstantType.UInt8_t => "byte",
         CConstantType.Int8_t => "sbyte",

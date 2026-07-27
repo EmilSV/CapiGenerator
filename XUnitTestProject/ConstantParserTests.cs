@@ -1,4 +1,5 @@
 using CapiGenerator;
+using CapiGenerator.CModel;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.Parser;
 using CapiGenerator.Translator;
@@ -22,6 +23,78 @@ public sealed class ConstantParserTests
         Assert.Equal("constants.h", token.SourceLocation.File);
         Assert.Equal(10, token.SourceLocation.Line);
         Assert.Equal(5, token.SourceLocation.Column);
+    }
+
+    [Fact]
+    public void TypedefCastCppTokensBecomeSingleUnresolvedCastToken()
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        CppToken[] cppTokens =
+        [
+            new(CppTokenKind.Punctuation, "("),
+            new(CppTokenKind.Identifier, "TestSint8"),
+            new(CppTokenKind.Punctuation, ")"),
+        ];
+
+        var converted = BaseCConstantToken.TryConvert(
+            cppTokens,
+            new HashSet<string> { "TestSint8" },
+            sourceLocation,
+            out var constantTokens);
+
+        Assert.True(converted);
+        var castToken = Assert.IsType<CConstCastToken>(Assert.Single(constantTokens));
+        Assert.False(castToken.TryGetConstantType(out _));
+    }
+
+    [Fact]
+    public void MultiTokenPrimitiveCastCppTokensBecomeSingleResolvedCastToken()
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        CppToken[] cppTokens =
+        [
+            new(CppTokenKind.Punctuation, "("),
+            new(CppTokenKind.Identifier, "unsigned"),
+            new(CppTokenKind.Identifier, "long"),
+            new(CppTokenKind.Identifier, "long"),
+            new(CppTokenKind.Punctuation, ")"),
+        ];
+
+        var converted = BaseCConstantToken.TryConvert(
+            cppTokens,
+            new HashSet<string>(),
+            sourceLocation,
+            out var constantTokens);
+
+        Assert.True(converted);
+        var castToken = Assert.IsType<CConstCastToken>(Assert.Single(constantTokens));
+        Assert.True(castToken.TryGetConstantType(out var constantType));
+        Assert.Equal(CConstantType.UnsignedLongLong, constantType);
+    }
+
+    [Fact]
+    public void ParenthesizedConstantRemainsIdentifierAndPunctuationTokens()
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        CppToken[] cppTokens =
+        [
+            new(CppTokenKind.Punctuation, "("),
+            new(CppTokenKind.Identifier, "TEST_VALUE"),
+            new(CppTokenKind.Punctuation, ")"),
+        ];
+
+        var converted = BaseCConstantToken.TryConvert(
+            cppTokens,
+            new HashSet<string>(),
+            sourceLocation,
+            out var constantTokens);
+
+        Assert.True(converted);
+        Assert.Collection(
+            constantTokens,
+            token => Assert.IsType<CConstantPunctuationToken>(token),
+            token => Assert.IsType<CConstIdentifierToken>(token),
+            token => Assert.IsType<CConstantPunctuationToken>(token));
     }
 
     [Fact]
@@ -84,7 +157,23 @@ public sealed class ConstantParserTests
     {
         var constants = TranslateConstants();
 
-        Assert.Equal("( ( sbyte ) 0x7F )", constants["TEST_MAX_SINT8"]);
+        Assert.Equal("( (sbyte) 0x7F )", constants["TEST_MAX_SINT8"]);
+    }
+
+    [Fact]
+    public void ChainedTypedefCastResolvesToPrimitiveCast()
+    {
+        var constants = TranslateConstants();
+
+        Assert.Equal("( (sbyte) 0x7F )", constants["TEST_MAX_SINT8_ALIAS"]);
+    }
+
+    [Fact]
+    public void ObjectMacroNameTakesPrecedenceOverTypedefCastDetection()
+    {
+        var constants = TranslateConstants();
+
+        Assert.Equal("( Constants.TestSharedName )", constants["TEST_GROUPED_SHARED_NAME"]);
     }
 
     private static IReadOnlyDictionary<string, string> TranslateConstants()

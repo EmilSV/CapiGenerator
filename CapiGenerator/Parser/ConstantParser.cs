@@ -13,6 +13,7 @@ namespace CapiGenerator.Parser;
 public class ConstantParser : BaseParser
 {
     private IReadOnlyDictionary<string, CppMacro> _macroFunctions = new Dictionary<string, CppMacro>();
+    private IReadOnlySet<string> _typedefNames = new HashSet<string>();
 
     public override void FirstPass(
         ReadOnlySpan<CppCompilation> compilations,
@@ -21,6 +22,7 @@ public class ConstantParser : BaseParser
         foreach (var compilation in compilations)
         {
             _macroFunctions = GetMacroFunctions(compilation);
+            _typedefNames = GetTypedefNames(compilation);
 
             foreach (var macro in compilation.Macros)
             {
@@ -99,7 +101,7 @@ public class ConstantParser : BaseParser
 
     protected virtual CConstant? FirstPass(CppMacro macro)
     {
-        switch (CConstant.From(macro, _macroFunctions))
+        switch (CConstant.From(macro, _macroFunctions, _typedefNames))
         {
             case { } constant:
                 return constant;
@@ -153,6 +155,35 @@ public class ConstantParser : BaseParser
         }
 
         return true;
+    }
+
+    private static IReadOnlySet<string> GetTypedefNames(CppCompilation compilation)
+    {
+        HashSet<string> typedefNames = [];
+
+        void AddTypedef(CppTypedef typedef)
+        {
+            typedefNames.Add(typedef.Name);
+            if (typedef.ElementType is CppTypedef innerTypedef)
+            {
+                AddTypedef(innerTypedef);
+            }
+        }
+
+        foreach (var typedef in compilation.Typedefs)
+        {
+            AddTypedef(typedef);
+        }
+
+        foreach (var macro in compilation.Macros)
+        {
+            if (macro.Parameters is null)
+            {
+                typedefNames.Remove(macro.Name);
+            }
+        }
+
+        return typedefNames;
     }
 
     private static IReadOnlyDictionary<string, CppMacro> GetMacroFunctions(CppCompilation compilation)

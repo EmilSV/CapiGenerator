@@ -29,13 +29,13 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
 
     internal bool IsResolved(HashSet<CConstant> visitedConstants)
     {
+        if (_tokens.OfType<CConstCastToken>().Any(token => !token.TryGetConstantType(out _)))
+        {
+            return false;
+        }
+
         foreach (var identifierToken in _tokens.OfType<CConstIdentifierToken>())
         {
-            if (identifierToken.TryGetCastType(out _))
-            {
-                continue;
-            }
-
             if (identifierToken.GetConstantModel() is not { } constantModel)
             {
                 return false;
@@ -85,14 +85,17 @@ public sealed class CConstantExpression(ReadOnlySpan<BaseCConstantToken> tokens)
             {
                 constantType = GetConstantType(constantType, literalToken.Type);
             }
+            else if (token is CConstCastToken castToken)
+            {
+                if (!castToken.TryGetConstantType(out castType))
+                {
+                    throw new InvalidOperationException(
+                        $"Cast type not resolved at {castToken.SourceLocation.File} " +
+                        $"{castToken.SourceLocation.Line}: {castToken.SourceLocation.Column}");
+                }
+            }
             else if (token is CConstIdentifierToken identifierToken)
             {
-                if (identifierToken.TryGetCastType(out var identifierCastType))
-                {
-                    castType = identifierCastType;
-                    continue;
-                }
-
                 var identifierTokenConstant = identifierToken.GetConstantModel();
                 if (identifierTokenConstant == null)
                 {

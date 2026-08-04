@@ -85,6 +85,7 @@ public sealed class CSField : BaseCSAstItem,
         return $"{Parent.GetFullName()}.{Name}";
     }
 
+
     public void ReplaceTypes(ITypeReplace.ReplacePredicate predicate)
     {
         var innerType = Type.Type;

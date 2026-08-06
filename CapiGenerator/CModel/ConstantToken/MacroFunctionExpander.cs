@@ -4,30 +4,8 @@ using CppAst;
 
 namespace CapiGenerator.CModel.ConstantToken;
 
-
 public static class MacroFunctionExpander
 {
-    private readonly struct MacroExpandResult
-    {
-        public int StartIndex { get; init; }
-        public int EndIndex { get; init; }
-        public List<CppToken> OutputTokens { get; init; }
-    }
-
-    private abstract class MacroFunctionExpanderException : Exception
-    {
-
-    }
-
-    private class UnknownMacroException(string macroName) : MacroFunctionExpanderException
-    {
-        public string MacroName => macroName;
-    }
-
-    private class MalformedMacroException : MacroFunctionExpanderException
-    {
-
-    }
     public static bool TryExpand(
         IReadOnlyList<CppToken> tokens,
         IReadOnlyDictionary<string, CppMacro> macroFunctions,
@@ -35,24 +13,29 @@ public static class MacroFunctionExpander
     {
         try
         {
-
-            expandedTokens = [.. ExpandAllMacroFunctions(tokens, macroFunctions)];
+            var macroFunctionContext = new MacroFunctionContext(macroFunctions);
+            expandedTokens = [.. macroFunctionContext.ExpandAllMacroFunctions(tokens)];
         }
         catch (MacroFunctionExpanderException ex)
         {
-            Console.WriteLine(ex.Message);
+            Console.Error.WriteLine(ex.Message);
             expandedTokens = default;
             return false;
         }
         return true;
     }
+}
 
-    private static bool TryExpandNextMarcoFunction(List<CppToken> tokens, IReadOnlyDictionary<string, CppMacro> macroFunctions, out MacroExpandResult expandResult)
+file readonly struct MacroFunctionContext(IReadOnlyDictionary<string, CppMacro> macroFunctions)
+{
+    private readonly HashSet<string> _activeMacroFunctions = [];
+
+    private bool TryExpandNextMarcoFunction(List<CppToken> tokens, out MacroExpandResult expandResult)
     {
         CppMacro? invokedMacro = null;
-        var count = tokens.Count - 1;
+        var count = tokens.Count;
         int i;
-        for (i = 0; i < count; i++)
+        for (i = 0; i < count - 1; i++)
         {
             var token = tokens[i];
             var nextToken = tokens[i + 1];
@@ -61,7 +44,7 @@ public static class MacroFunctionExpander
                 continue;
             }
 
-            if (nextToken.Kind != CppTokenKind.Literal && nextToken.Text != "(")
+            if (nextToken.Kind != CppTokenKind.Punctuation || nextToken.Text != "(")
             {
                 continue;
             }
@@ -88,19 +71,21 @@ public static class MacroFunctionExpander
             return false;
         }
 
-        var openParenCount = 1;
+        var openParenCount = 0;
+
+        i = macroFunctionStartIndex + 1;
 
         //Find end of macro function invocation
-        for (i = 0; i < count; i++)
+        for (; i < count; i++)
         {
             var token = tokens[i];
-            if (token.Kind == CppTokenKind.Literal && token.Text == "(")
+            if (token.Kind == CppTokenKind.Punctuation && token.Text == "(")
             {
                 openParenCount++;
                 continue;
             }
 
-            if (token.Kind == CppTokenKind.Literal && token.Text == ")")
+            if (token.Kind == CppTokenKind.Punctuation && token.Text == ")")
             {
                 openParenCount--;
             }
@@ -116,11 +101,10 @@ public static class MacroFunctionExpander
         }
         if (openParenCount != 0)
         {
-            throw new MalformedMacroException();
+            throw new MalformedMacroCallException();
         }
 
         var macroEndFunctionIndex = i;
-        var output = new List<CppToken>();
 
         //find arguments
         var arguments = new List<List<CppToken>>();
@@ -131,16 +115,15 @@ public static class MacroFunctionExpander
         for (int j = macroFunctionStartIndex + 2; j < macroEndFunctionIndex; j++)
         {
             var token = tokens[j];
-            if (token.Kind == CppTokenKind.Literal && token.Text == "(")
+            if (token.Kind == CppTokenKind.Punctuation && token.Text == "(")
             {
                 openParenCount++;
-                continue;
             }
-            else if (token.Kind == CppTokenKind.Literal && token.Text == ")")
+            else if (token.Kind == CppTokenKind.Punctuation && token.Text == ")")
             {
                 openParenCount--;
             }
-            else if (token.Kind == CppTokenKind.Literal && token.Text == "," && openParenCount == 0)
+            else if (token.Kind == CppTokenKind.Punctuation && token.Text == "," && openParenCount == 0)
             {
                 arguments.Add(currentArgument);
                 currentArgument = [];
@@ -149,9 +132,15 @@ public static class MacroFunctionExpander
 
             currentArgument.Add(token);
         }
-        arguments.Add(currentArgument);
+        var invocationIsEmpty =
+            macroFunctionStartIndex + 2 == macroEndFunctionIndex;
 
-        List<CppToken> outputTokens = ExpandMarcoFunction(invokedMacro, macroFunctions, arguments);
+        if (!invocationIsEmpty || invokedMacro.Parameters.Count > 0)
+        {
+            arguments.Add(currentArgument);
+        }
+
+        List<CppToken> outputTokens = ExpandMarcoFunction(invokedMacro, arguments);
 
         expandResult = new MacroExpandResult
         {
@@ -163,13 +152,37 @@ public static class MacroFunctionExpander
         return true;
     }
 
-    private static List<CppToken> ExpandMarcoFunction(
+    private List<CppToken> ExpandMarcoFunction(
         CppMacro macroFunction,
-        IReadOnlyDictionary<string, CppMacro> macroFunctions,
         List<List<CppToken>> arguments)
     {
-        List<CppToken> expandedTokens = [.. SubstituteArguments(macroFunction, arguments)];
-        return ExpandAllMacroFunctions(expandedTokens, macroFunctions);
+        if (macroFunction.Parameters.Count != arguments.Count)
+        {
+            throw new MalformedMacroCallException();
+        }
+
+        List<List<CppToken>> expandedArguments = [];
+        foreach (var argument in arguments)
+        {
+            expandedArguments.Add(ExpandAllMacroFunctions(argument));
+        }
+
+        if (!_activeMacroFunctions.Add(macroFunction.Name))
+        {
+            throw new RecursiveMacroFunctionException(macroFunction.Name);
+        }
+
+        try
+        {
+            var substitutedTokens =
+                SubstituteArguments(macroFunction, expandedArguments);
+
+            return ExpandAllMacroFunctions(substitutedTokens);
+        }
+        finally
+        {
+            _activeMacroFunctions.Remove(macroFunction.Name);
+        }
     }
 
     private static CppToken[] SubstituteArguments(
@@ -178,7 +191,7 @@ public static class MacroFunctionExpander
     {
         if (macro.Parameters.Count != arguments.Count)
         {
-            throw new MalformedMacroException();
+            throw new MalformedMacroCallException();
         }
 
         List<CppToken> substitutedTokens = [];
@@ -202,18 +215,18 @@ public static class MacroFunctionExpander
         return [.. substitutedTokens];
     }
 
-    private static List<CppToken> ExpandAllMacroFunctions(
-        IReadOnlyList<CppToken> tokens,
-        IReadOnlyDictionary<string, CppMacro> macroFunctions)
+    public List<CppToken> ExpandAllMacroFunctions(
+        IReadOnlyList<CppToken> tokens)
     {
         List<CppToken> expandedTokens = [.. tokens];
 
-        while (TryExpandNextMarcoFunction(expandedTokens, macroFunctions, out var macroFunction))
+        while (TryExpandNextMarcoFunction(expandedTokens, out var macroFunction))
         {
             var startIndex = macroFunction.StartIndex;
             var endIndex = macroFunction.EndIndex;
             var output = macroFunction.OutputTokens;
-            expandedTokens.RemoveRange(startIndex, endIndex - startIndex);
+            var removalCount = endIndex - startIndex + 1;
+            expandedTokens.RemoveRange(startIndex, removalCount);
             expandedTokens.InsertRange(startIndex, output);
         }
 
@@ -225,192 +238,33 @@ public static class MacroFunctionExpander
 }
 
 
-//TODO: this code is hard to understand and should be refactored
-// public static class MacroFunctionExpander
-// {
-//     public static bool TryExpand(
-//         IReadOnlyList<CppToken> tokens,
-//         IReadOnlyDictionary<string, CppMacro> macroFunctions,
-//         out CppToken[] expandedTokens)
-//     {
-//         HashSet<string> activeMacro = [];
-//         return DoTryExpand(tokens, activeMacro, macroFunctions, out expandedTokens);
-//     }
+file abstract class MacroFunctionExpanderException : Exception
+{
 
-//     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-//     private static bool DoTryExpand(
-//         IReadOnlyList<CppToken> tokens,
-//         HashSet<string> activeMacro,
-//         IReadOnlyDictionary<string, CppMacro> macroFunctions,
-//         out CppToken[] expandedTokens)
-//     {
-//         List<CppToken> output = [];
+}
 
-//         for (int i = 0; i < tokens.Count; i++)
-//         {
-//             var token = tokens[i];
-//             if (token.Kind == CppTokenKind.Comment)
-//             {
-//                 continue;
-//             }
+file class UnknownMacroException(string macroName) : MacroFunctionExpanderException
+{
+    public string MacroName => macroName;
 
-//             if (!TryGetMacroInvocation(tokens, i, macroFunctions, out var macro))
-//             {
-//                 output.Add(token);
-//                 continue;
-//             }
+    public override string Message => $"Unknown macro function: {macroName}";
+}
 
-//             if (!TryExpandInvocation(tokens, i + 1, macro, activeMacro, macroFunctions, out var expansion, out var endIndex))
-//             {
-//                 expandedTokens = [];
-//                 return false;
-//             }
+file class MalformedMacroCallException : MacroFunctionExpanderException
+{
+    public override string Message => "Malformed macro function";
+}
 
-//             output.AddRange(expansion);
-//             i = endIndex;
-//         }
+file class RecursiveMacroFunctionException(string macroName) : MacroFunctionExpanderException
+{
+    public string MacroName => macroName;
 
-//         expandedTokens = [.. output];
-//         return true;
-//     }
+    public override string Message => $"Recursive macro function: {macroName}";
+}
 
-//     private static bool TryGetMacroInvocation(
-//         IReadOnlyList<CppToken> tokens,
-//         int macroIndex,
-//         IReadOnlyDictionary<string, CppMacro> macroFunctions,
-//         out CppMacro macro)
-//     {
-//         var token = tokens[macroIndex];
-//         if (token.Kind != CppTokenKind.Identifier ||
-//             IsBuiltinMacroFunction(token.Text) ||
-//             macroIndex + 1 >= tokens.Count ||
-//             tokens[macroIndex + 1].Text != "(\"" ||
-//             !macroFunctions.TryGetValue(token.Text, out var invokedMacro))
-//         {
-//             macro = default!;
-//             return false;
-//         }
-
-//         macro = invokedMacro;
-//         return true;
-//     }
-
-//     private static bool TryExpandInvocation(
-//         IReadOnlyList<CppToken> tokens,
-//         int leftParenthesisIndex,
-//         CppMacro macro,
-//         HashSet<string> activeMacros,
-//         IReadOnlyDictionary<string, CppMacro> macroFunctions,
-//         out CppToken[] expansion,
-//         out int endIndex)
-//     {
-//         expansion = [];
-//         if (!TryParseArguments(
-//                 tokens,
-//                 leftParenthesisIndex,
-//                 macro.Parameters.Count,
-//                 out var arguments,
-//                 out endIndex) ||
-//             activeMacros.Contains(macro.Name))
-//         {
-//             return false;
-//         }
-
-//         Dictionary<string, CppToken[]> argumentsByParameter = [];
-//         for (int i = 0; i < arguments.Count; i++)
-//         {
-//             if (!DoTryExpand(arguments[i], activeMacros, macroFunctions, out var expandedArgument))
-//             {
-//                 return false;
-//             }
-
-//             argumentsByParameter[macro.Parameters[i]] = expandedArgument;
-//         }
-
-//         var substitutedTokens = SubstituteArguments(macro, argumentsByParameter);
-
-//         activeMacros.Add(macro.Name);
-//         try
-//         {
-//             return DoTryExpand(substitutedTokens, activeMacros, macroFunctions, out expansion);
-//         }
-//         finally
-//         {
-//             activeMacros.Remove(macro.Name);
-//         }
-//     }
-
-//     private static CppToken[] SubstituteArguments(
-//         CppMacro macro,
-//         IReadOnlyDictionary<string, CppToken[]> argumentsByParameter)
-//     {
-//         List<CppToken> substitutedTokens = [];
-//         foreach (var token in macro.Tokens)
-//         {
-//             if (token.Kind == CppTokenKind.Identifier &&
-//                 argumentsByParameter.TryGetValue(token.Text, out var argument))
-//             {
-//                 substitutedTokens.AddRange(argument);
-//             }
-//             else
-//             {
-//                 substitutedTokens.Add(token);
-//             }
-//         }
-
-//         return [.. substitutedTokens];
-//     }
-
-
-//     private static bool TryParseArguments(
-//         IReadOnlyList<CppToken> tokens,
-//         int leftParenthesisIndex,
-//         int parameterCount,
-//         out List<CppToken[]> arguments,
-//         out int endIndex)
-//     {
-//         arguments = [];
-//         List<CppToken> currentArgument = [];
-//         int depth = 0;
-
-//         for (int i = leftParenthesisIndex + 1; i < tokens.Count; i++)
-//         {
-//             var token = tokens[i];
-//             if (token.Text == "(")
-//             {
-//                 depth++;
-//             }
-//             else if (token.Text == ")")
-//             {
-//                 if (depth == 0)
-//                 {
-//                     endIndex = i;
-//                     if (currentArgument.Count > 0 || arguments.Count > 0 || parameterCount > 0)
-//                     {
-//                         arguments.Add([.. currentArgument]);
-//                     }
-
-//                     return arguments.Count == parameterCount;
-//                 }
-
-//                 depth--;
-//             }
-
-//             if (token.Text == "," && depth == 0)
-//             {
-//                 arguments.Add([.. currentArgument]);
-//                 currentArgument.Clear();
-//             }
-//             else
-//             {
-//                 currentArgument.Add(token);
-//             }
-//         }
-
-//         endIndex = -1;
-//         return false;
-//     }
-
-//     private static bool IsBuiltinMacroFunction(string name) =>
-//         AllBuiltinMacroFunctions.Functions.Any(macroFunction => macroFunction.Name == name);
-// }
+file readonly struct MacroExpandResult
+{
+    public int StartIndex { get; init; }
+    public int EndIndex { get; init; }
+    public List<CppToken> OutputTokens { get; init; }
+}

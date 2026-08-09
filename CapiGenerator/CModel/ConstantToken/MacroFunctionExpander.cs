@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel.BuiltinMacroFunctions;
 using CppAst;
@@ -32,120 +33,26 @@ file readonly struct MacroFunctionContext(IReadOnlyDictionary<string, CppMacro> 
 
     private bool TryExpandNextMarcoFunction(List<CppToken> tokens, out MacroExpandResult expandResult)
     {
-        CppMacro? invokedMacro = null;
-        var count = tokens.Count;
-        int i;
-        for (i = 0; i < count - 1; i++)
-        {
-            var token = tokens[i];
-            var nextToken = tokens[i + 1];
-            if (token.Kind != CppTokenKind.Identifier)
-            {
-                continue;
-            }
-
-            if (nextToken.Kind != CppTokenKind.Punctuation || nextToken.Text != "(")
-            {
-                continue;
-            }
-
-            var macroName = token.Text;
-
-            if (IsBuiltinMacroFunction(macroName))
-            {
-                continue;
-            }
-
-            if (!macroFunctions.TryGetValue(macroName, out invokedMacro))
-            {
-                throw new UnknownMacroException(macroName);
-            }
-
-            break;
-        }
-        var macroFunctionStartIndex = i;
-
-        if (invokedMacro is null)
+        if (!TryFindStartOfMacroFunction(tokens, out int macroFunctionStartIndex, out CppMacro? invokedMacro))
         {
             expandResult = default;
             return false;
         }
 
-        var openParenCount = 0;
+        var tokenFromFunctionStartingParam = new ReadonlyListSpan<CppToken>(tokens, macroFunctionStartIndex + 1);
+        var functionTokensWithoutName = SliceToEndOfMacroFunction(tokenFromFunctionStartingParam);
 
-        i = macroFunctionStartIndex + 1;
+        var macroFunctionEndIndex = functionTokensWithoutName.MapToOriginalIndex(functionTokensWithoutName.Count - 1);
 
-        //Find end of macro function invocation
-        for (; i < count; i++)
-        {
-            var token = tokens[i];
-            if (token.Kind == CppTokenKind.Punctuation && token.Text == "(")
-            {
-                openParenCount++;
-                continue;
-            }
-
-            if (token.Kind == CppTokenKind.Punctuation && token.Text == ")")
-            {
-                openParenCount--;
-            }
-            else
-            {
-                continue;
-            }
-
-            if (openParenCount == 0)
-            {
-                break;
-            }
-        }
-        if (openParenCount != 0)
-        {
-            throw new MalformedMacroCallException();
-        }
-
-        var macroEndFunctionIndex = i;
-
-        //find arguments
-        var arguments = new List<List<CppToken>>();
-        var currentArgument = new List<CppToken>();
-
-        openParenCount = 0;
-
-        for (int j = macroFunctionStartIndex + 2; j < macroEndFunctionIndex; j++)
-        {
-            var token = tokens[j];
-            if (token.Kind == CppTokenKind.Punctuation && token.Text == "(")
-            {
-                openParenCount++;
-            }
-            else if (token.Kind == CppTokenKind.Punctuation && token.Text == ")")
-            {
-                openParenCount--;
-            }
-            else if (token.Kind == CppTokenKind.Punctuation && token.Text == "," && openParenCount == 0)
-            {
-                arguments.Add(currentArgument);
-                currentArgument = [];
-                continue;
-            }
-
-            currentArgument.Add(token);
-        }
-        var invocationIsEmpty =
-            macroFunctionStartIndex + 2 == macroEndFunctionIndex;
-
-        if (!invocationIsEmpty || invokedMacro.Parameters.Count > 0)
-        {
-            arguments.Add(currentArgument);
-        }
+        var tokenInsideParentheses = functionTokensWithoutName[1..^1];
+        var arguments = ExtractMacroFunctionArguments(tokenInsideParentheses, invokedMacro);
 
         List<CppToken> outputTokens = ExpandMarcoFunction(invokedMacro, arguments);
 
         expandResult = new MacroExpandResult
         {
             StartIndex = macroFunctionStartIndex,
-            EndIndex = macroEndFunctionIndex,
+            EndIndex = macroFunctionEndIndex,
             OutputTokens = outputTokens,
         };
 
@@ -233,6 +140,116 @@ file readonly struct MacroFunctionContext(IReadOnlyDictionary<string, CppMacro> 
         return expandedTokens;
     }
 
+    private bool TryFindStartOfMacroFunction(ReadonlyListSpan<CppToken> tokens, out int startIndex, [NotNullWhen(true)] out CppMacro? invokedMacro)
+    {
+        var count = tokens.Count;
+        int i;
+        invokedMacro = null;
+        for (i = 0; i < count - 1; i++)
+        {
+            var token = tokens[i];
+            var nextToken = tokens[i + 1];
+            if (token.Kind != CppTokenKind.Identifier)
+            {
+                continue;
+            }
+
+            if (nextToken.Kind != CppTokenKind.Punctuation || nextToken.Text != "(")
+            {
+                continue;
+            }
+
+            var macroName = token.Text;
+
+            if (IsBuiltinMacroFunction(macroName))
+            {
+                continue;
+            }
+
+            if (!macroFunctions.TryGetValue(macroName, out invokedMacro))
+            {
+                throw new UnknownMacroException(macroName);
+            }
+            break;
+        }
+        startIndex = i;
+        if (invokedMacro is null)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private static ReadonlyListSpan<CppToken> SliceToEndOfMacroFunction(ReadonlyListSpan<CppToken> tokens)
+    {
+        var openParenCount = 0;
+        int i = 0;
+        for (; i < tokens.Count; i++)
+        {
+            var token = tokens[i];
+            if (token.Kind == CppTokenKind.Punctuation && token.Text == "(")
+            {
+                openParenCount++;
+                continue;
+            }
+
+            if (token.Kind == CppTokenKind.Punctuation && token.Text == ")")
+            {
+                openParenCount--;
+            }
+            else
+            {
+                continue;
+            }
+
+            if (openParenCount == 0)
+            {
+                break;
+            }
+        }
+        if (openParenCount != 0)
+        {
+            throw new MalformedMacroCallException();
+        }
+
+        return tokens[..(i + 1)];
+    }
+
+    private static List<List<CppToken>> ExtractMacroFunctionArguments(ReadonlyListSpan<CppToken> tokens, CppMacro invokedMacro)
+    {
+        var arguments = new List<List<CppToken>>();
+        var currentArgument = new List<CppToken>();
+
+        var openParenCount = 0;
+
+        for (int i = 0; i < tokens.Count; i++)
+        {
+            var token = tokens[i];
+            if (token.Kind == CppTokenKind.Punctuation && token.Text == "(")
+            {
+                openParenCount++;
+            }
+            else if (token.Kind == CppTokenKind.Punctuation && token.Text == ")")
+            {
+                openParenCount--;
+            }
+            else if (token.Kind == CppTokenKind.Punctuation && token.Text == "," && openParenCount == 0)
+            {
+                arguments.Add(currentArgument);
+                currentArgument = [];
+                continue;
+            }
+
+            currentArgument.Add(token);
+        }
+        if (tokens.Count > 0 || invokedMacro.Parameters.Count > 0)
+        {
+            arguments.Add(currentArgument);
+        }
+
+        return arguments;
+    }
+
     private static bool IsBuiltinMacroFunction(string name) =>
         AllBuiltinMacroFunctions.Functions.Any(macroFunction => macroFunction.Name == name);
 }
@@ -267,4 +284,81 @@ file readonly struct MacroExpandResult
     public int StartIndex { get; init; }
     public int EndIndex { get; init; }
     public List<CppToken> OutputTokens { get; init; }
+}
+
+file readonly struct ReadonlyListSpan<T> : IReadOnlyList<T>
+{
+    private readonly List<T> _list;
+    private readonly int _start;
+    private readonly int _length;
+
+    public ReadonlyListSpan(List<T> list, int start)
+    {
+        if (start < 0 || start > list.Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(list), "Index out of range");
+        }
+
+        this._list = list;
+        this._start = start;
+        this._length = list.Count - start;
+    }
+
+    public ReadonlyListSpan(List<T> list, int start, int length)
+    {
+        if (start < 0 || length < 0 || start + length > list.Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(list), "Index out of range");
+        }
+
+        this._list = list;
+        this._start = start;
+        this._length = length;
+    }
+
+    public ReadonlyListSpan(ReadonlyListSpan<T> span, int start, int length)
+    {
+        if (start < 0 || length < 0 || start + length > span.Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(span), "Index out of range");
+        }
+
+        this._list = span._list;
+        this._start = span._start + start;
+        this._length = length;
+    }
+
+    public T this[int index]
+    {
+        get
+        {
+            if (index < 0 || index >= _length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(index), "Index out of range");
+            }
+            return _list[_start + index];
+        }
+    }
+
+    public static implicit operator ReadonlyListSpan<T>(List<T> list) => new(list, 0, list.Count);
+
+    public int Count => _length;
+
+    public ReadonlyListSpan<T> Slice(int start, int length) => new(this, start, length);
+    public ReadonlyListSpan<T> Slice(int start) => new(this, start, _length - start);
+
+    public int MapToOriginalIndex(int index) => _start + index;
+
+    public IEnumerator<T> GetEnumerator()
+    {
+        for (int i = 0; i < _length; i++)
+        {
+            yield return this[i];
+        }
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 }

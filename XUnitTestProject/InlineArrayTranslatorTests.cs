@@ -10,7 +10,7 @@ namespace XUnitTestProject;
 public sealed class InlineArrayTranslatorTests
 {
     [Fact]
-    public void FixedArrayWithBuiltInSizeUsesBuiltInInlineArrayType()
+    public void PrimitiveFixedArrayUsesFixedBuffer()
     {
         var csStruct = TranslateSingleStruct("""
             struct Sample {
@@ -19,14 +19,16 @@ public sealed class InlineArrayTranslatorTests
             """);
 
         var field = Assert.Single(csStruct.Fields.ToArray());
-        var inlineArrayType = Assert.IsType<CSInlineArrayType>(field.Type.Type);
 
-        Assert.Equal(16u, inlineArrayType.Size);
+        Assert.IsType<CSPrimitiveType>(field.Type.Type);
+        Assert.Equal(16u, field.FixedBufferSize);
+        Assert.Empty(field.Type.Modifiers);
         Assert.Empty(csStruct.NestedTypes.ToArray());
+        Assert.True(csStruct.IsUnsafe);
     }
 
     [Fact]
-    public void FixedArrayAboveBuiltInSizeCreatesNestedInlineArrayStruct()
+    public void PrimitiveFixedArrayAboveBuiltInSizeUsesFixedBuffer()
     {
         var csStruct = TranslateSingleStruct("""
             struct Sample {
@@ -35,22 +37,16 @@ public sealed class InlineArrayTranslatorTests
             """);
 
         var field = Assert.Single(csStruct.Fields.ToArray());
-        var nestedInlineArrayStruct = Assert.IsType<CSStruct>(field.Type.Type);
-        var nestedType = Assert.Single(csStruct.NestedTypes.ToArray());
-        var elementField = Assert.Single(nestedInlineArrayStruct.Fields.ToArray());
-        var attribute = Assert.Single(nestedInlineArrayStruct.Attributes);
 
-        Assert.Same(nestedType, nestedInlineArrayStruct);
-        Assert.Equal("DataInlineArray32", nestedInlineArrayStruct.Name);
-        Assert.Equal(typeof(System.Runtime.CompilerServices.InlineArrayAttribute), attribute.GetAttributeType());
-        Assert.Equal(["32"], attribute.CtorArgs.ToArray());
-        Assert.Equal(CSAccessModifier.Public, nestedInlineArrayStruct.AccessModifier);
-        Assert.Equal("_element0", elementField.Name);
-        Assert.IsType<CSPrimitiveType>(elementField.Type.Type);
+        Assert.IsType<CSPrimitiveType>(field.Type.Type);
+        Assert.Equal(32u, field.FixedBufferSize);
+        Assert.Empty(field.Type.Modifiers);
+        Assert.Empty(csStruct.NestedTypes.ToArray());
+        Assert.True(csStruct.IsUnsafe);
     }
 
     [Fact]
-    public void MultiDimensionalFixedArrayCanMixBuiltInAndNestedInlineArrayTypes()
+    public void MultiDimensionalPrimitiveFixedArrayUsesFlattenedFixedBuffer()
     {
         var csStruct = TranslateSingleStruct("""
             struct Sample {
@@ -59,17 +55,16 @@ public sealed class InlineArrayTranslatorTests
             """);
 
         var field = Assert.Single(csStruct.Fields.ToArray());
-        var outerInlineArrayStruct = Assert.IsType<CSStruct>(field.Type.Type);
-        var outerElementField = Assert.Single(outerInlineArrayStruct.Fields.ToArray());
-        var innerInlineArrayType = Assert.IsType<CSInlineArrayType>(outerElementField.Type.Type);
 
-        Assert.Equal("ValuesInlineArray32", outerInlineArrayStruct.Name);
-        Assert.Equal(4u, innerInlineArrayType.Size);
-        Assert.Single(csStruct.NestedTypes.ToArray());
+        Assert.IsType<CSPrimitiveType>(field.Type.Type);
+        Assert.Equal(128u, field.FixedBufferSize);
+        Assert.Empty(field.Type.Modifiers);
+        Assert.Empty(csStruct.NestedTypes.ToArray());
+        Assert.True(csStruct.IsUnsafe);
     }
 
     [Fact]
-    public void NestedStructFixedArrayAboveBuiltInSizeIsConverted()
+    public void NestedStructPrimitiveFixedArrayUsesFixedBuffer()
     {
         var csStruct = TranslateSingleStruct("""
             struct Outer {
@@ -81,10 +76,12 @@ public sealed class InlineArrayTranslatorTests
 
         var innerStruct = Assert.IsType<CSStruct>(Assert.Single(csStruct.NestedTypes.ToArray()));
         var field = Assert.Single(innerStruct.Fields.ToArray());
-        var nestedInlineArrayStruct = Assert.IsType<CSStruct>(field.Type.Type);
 
-        Assert.Equal("DataInlineArray32", nestedInlineArrayStruct.Name);
-        Assert.Contains(nestedInlineArrayStruct, innerStruct.NestedTypes.ToArray());
+        Assert.IsType<CSPrimitiveType>(field.Type.Type);
+        Assert.Equal(32u, field.FixedBufferSize);
+        Assert.Empty(field.Type.Modifiers);
+        Assert.Empty(innerStruct.NestedTypes.ToArray());
+        Assert.True(innerStruct.IsUnsafe);
     }
 
     [Fact]

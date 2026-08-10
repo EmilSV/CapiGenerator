@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -148,73 +149,73 @@ public class CSStructTranslator : BaseTranslator
                 field.Type = fixedBufferType;
                 field.FixedBufferSize = fixedBufferSize;
                 cSStruct.IsUnsafe = true;
-                continue;
             }
-
-            field.Type = FixedInlineArrayTypeInstance(cSStruct, field, field.Type);
+            else
+            {
+                field.Type = FixedInlineArrayTypeInstance(cSStruct, field, field.Type);
+            }
         }
     }
 
     private static bool TryCreateFixedBufferFieldType(
         CSField field,
         CSTypeInstance typeInstance,
-        out CSTypeInstance fixedBufferType,
+        [NotNullWhen(true)] out CSTypeInstance? fixedBufferType,
         out uint fixedBufferSize)
     {
-        fixedBufferType = typeInstance;
-        fixedBufferSize = 0;
+
+        static bool IsFixedBufferPrimitiveType(ICSType csType) =>
+            csType is CSPrimitiveType { KindValue: var kind } && kind is
+                CSPrimitiveType.Kind.Bool or
+                CSPrimitiveType.Kind.Byte or
+                CSPrimitiveType.Kind.SByte or
+                CSPrimitiveType.Kind.Short or
+                CSPrimitiveType.Kind.UShort or
+                CSPrimitiveType.Kind.Int or
+                CSPrimitiveType.Kind.UInt or
+                CSPrimitiveType.Kind.Long or
+                CSPrimitiveType.Kind.ULong or
+                CSPrimitiveType.Kind.Char or
+                CSPrimitiveType.Kind.Float or
+                CSPrimitiveType.Kind.Double;
+
+        fixedBufferType = default;
+        fixedBufferSize = default;
 
         if (typeInstance.Type is null)
         {
             return false;
         }
 
-        var modifiers = typeInstance.GetModifiersAsSpan();
-        if (modifiers is not [CSFixedInlineArrayType, ..])
+        var modifiers = typeInstance.Modifiers;
+
+        if (modifiers is not [CSFixedInlineArrayType, ..] ||
+            modifiers.Any(static m => m is not CSFixedInlineArrayType))
+        {
+            return false;
+        }
+
+        if (!IsFixedBufferPrimitiveType(typeInstance.Type))
         {
             return false;
         }
 
         uint size = 1;
-        var fixedArrayEndIndex = 0;
-        while (fixedArrayEndIndex < modifiers.Length && modifiers[fixedArrayEndIndex] is CSFixedInlineArrayType fixedArrayType)
+        foreach (var modifier in modifiers)
         {
+            if (modifier is not CSFixedInlineArrayType fixedArrayType)
+            {
+                throw new InvalidOperationException($"Expected CSFixedInlineArrayType, got {modifier.GetType().Name}");
+            }
             ValidateInlineArraySize(field, fixedArrayType);
             size = checked(size * fixedArrayType.Size);
-            fixedArrayEndIndex++;
         }
 
-        var elementType = new CSTypeInstance(typeInstance.Type, modifiers[fixedArrayEndIndex..]);
-        if (!IsFixedBufferPrimitiveType(elementType))
-        {
-            return false;
-        }
+        var elementType = new CSTypeInstance(typeInstance.Type);
 
         fixedBufferType = elementType;
         fixedBufferSize = size;
         return true;
-    }
-
-    private static bool IsFixedBufferPrimitiveType(CSTypeInstance typeInstance)
-    {
-        if (typeInstance.Modifiers.Count != 0 || typeInstance.Type is not CSPrimitiveType primitiveType)
-        {
-            return false;
-        }
-
-        return primitiveType.KindValue is
-            CSPrimitiveType.Kind.Bool or
-            CSPrimitiveType.Kind.Byte or
-            CSPrimitiveType.Kind.SByte or
-            CSPrimitiveType.Kind.Short or
-            CSPrimitiveType.Kind.UShort or
-            CSPrimitiveType.Kind.Int or
-            CSPrimitiveType.Kind.UInt or
-            CSPrimitiveType.Kind.Long or
-            CSPrimitiveType.Kind.ULong or
-            CSPrimitiveType.Kind.Char or
-            CSPrimitiveType.Kind.Float or
-            CSPrimitiveType.Kind.Double;
     }
 
     protected static CSTypeInstance FixedInlineArrayTypeInstance(

@@ -2,10 +2,9 @@ namespace CapiGenerator.CSModel;
 
 public sealed class CSInlineArrayType(uint size, CSTypeInstance elementType) : BaseBuiltinType
 {
-    public const uint MinSupportedSize = 1;
     public const uint MaxBuiltInSize = 16;
 
-    public uint Size { get; } = size;
+    public uint Size { get; } = size == 0 ? throw new ArgumentException("Size must be greater than 0", nameof(size)) : size;
 
     public CSTypeInstance ElementType { get; } = elementType;
 

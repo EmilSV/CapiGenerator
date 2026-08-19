@@ -7,6 +7,7 @@ using CapiGenerator.CModel.Type;
 using CapiGenerator.CSModel;
 using CapiGenerator.CSModel.Comments;
 using CapiGenerator.CSModel.EnrichData;
+using CapiGenerator.Extensions;
 using CapiGenerator.Parser;
 
 namespace CapiGenerator.Translator;
@@ -207,7 +208,6 @@ public class CSStructTranslator : BaseTranslator
             {
                 throw new InvalidOperationException($"Expected CSFixedInlineArrayType, got {modifier.GetType().Name}");
             }
-            ValidateInlineArraySize(field, fixedArrayType);
             size = checked(size * fixedArrayType.Size);
         }
 
@@ -223,6 +223,97 @@ public class CSStructTranslator : BaseTranslator
         CSField field,
         CSTypeInstance typeInstance)
     {
+        static bool TryGetFixedInlineRange(ReadOnlySpan<BaseCSTypeModifier> modifiers, out Range range)
+        {
+            int start = -1;
+            int end = -1;
+
+            for (int i = 0; i < modifiers.Length; i++)
+            {
+                if (modifiers[i] is CSFixedInlineArrayType)
+                {
+                    if (start == -1)
+                    {
+                        start = i;
+                    }
+                    end = i;
+                }
+            }
+
+            if (start == -1)
+            {
+                range = default;
+                return false;
+            }
+
+            range = new Range(start, end + 1);
+            return true;
+        }
+
+        static string CreateNestedInlineArrayStructName(CSStruct parentStruct, CSField field, uint size)
+        {
+            var baseName = $"{field.Name.ToPascalCaseIdentifier()}InlineArray{size}";
+            var name = baseName;
+            var suffix = 1;
+
+            while (parentStruct.NestedTypes.Any(nestedType => nestedType.Name == name))
+            {
+                name = $"{baseName}_{suffix}";
+                suffix++;
+            }
+
+            return name;
+        }
+
+        static CSStruct CreateNestedInlineArrayStruct(
+           CSStruct parentStruct,
+           CSField field,
+           uint size,
+           CSTypeInstance elementType)
+        {
+            static bool RequiresUnsafe(CSTypeInstance type)
+            {
+                return type.Modifiers.Any(modifier => modifier is CsPointerType) ||
+                    type.Type is CSInlineArrayType inlineArrayType && RequiresUnsafe(inlineArrayType.ElementType) ||
+                    type.Type is CSStruct csStruct && csStruct.IsUnsafe;
+            }
+
+            var inlineArrayStruct = new CSStruct
+            {
+                Name = CreateNestedInlineArrayStructName(parentStruct, field, size),
+                AccessModifier = CSAccessModifier.Public,
+                IsUnsafe = RequiresUnsafe(elementType),
+            };
+
+            inlineArrayStruct.Attributes.Add(CSAttribute<InlineArrayAttribute>.Create(
+                [size.ToString()],
+                []));
+            inlineArrayStruct.Fields.Add(new CSField
+            {
+                Name = "_element0",
+                Type = elementType,
+                AccessModifier = CSAccessModifier.Private,
+            });
+
+            return inlineArrayStruct;
+        }
+
+        static CSTypeInstance CreateInlineArrayType(
+           CSStruct parentStruct,
+           CSField field,
+           CSFixedInlineArrayType fixedArrayType,
+           CSTypeInstance elementType)
+        {
+            if (fixedArrayType.Size <= CSInlineArrayType.MaxBuiltInSize)
+            {
+                return new CSTypeInstance(new CSInlineArrayType(fixedArrayType.Size, elementType));
+            }
+
+            var inlineArrayStruct = CreateNestedInlineArrayStruct(parentStruct, field, fixedArrayType.Size, elementType);
+            parentStruct.NestedTypes.Add(inlineArrayStruct);
+            return new CSTypeInstance(inlineArrayStruct);
+        }
+
         if (typeInstance.Type is null)
         {
             if (typeInstance.Modifiers.Any(modifier => modifier is CSFixedInlineArrayType))
@@ -240,33 +331,21 @@ public class CSStructTranslator : BaseTranslator
                 field,
                 nestedTypeInstance));
         }
-
         var modifiers = typeInstance.GetModifiersAsSpan();
-        var firstFixedArrayIndex = IndexOfModifier<CSFixedInlineArrayType>(modifiers);
-        if (firstFixedArrayIndex < 0)
+
+        if (!TryGetFixedInlineRange(modifiers, out var inlineArrayRange))
         {
             return typeInstance;
         }
 
-        var fixedArrayEndIndex = firstFixedArrayIndex;
-        while (fixedArrayEndIndex < modifiers.Length && modifiers[fixedArrayEndIndex] is CSFixedInlineArrayType fixedArrayType)
-        {
-            ValidateInlineArraySize(field, fixedArrayType);
-            fixedArrayEndIndex++;
-        }
-
         var elementType = FixedInlineArrayTypeInstance(parentStruct, field, new CSTypeInstance(
             typeInstance.Type,
-            modifiers[fixedArrayEndIndex..]));
-        for (var i = fixedArrayEndIndex - 1; i >= firstFixedArrayIndex; i--)
-        {
-            var fixedArrayType = (CSFixedInlineArrayType)modifiers[i];
-            elementType = CreateInlineArrayType(parentStruct, field, fixedArrayType, elementType);
-        }
+            modifiers[inlineArrayRange.End..]));
 
-        if (firstFixedArrayIndex == 0)
+        foreach (var modifier in modifiers[inlineArrayRange])
         {
-            return elementType;
+            var fixedArrayType = (CSFixedInlineArrayType)modifier;
+            elementType = CreateInlineArrayType(parentStruct, field, fixedArrayType, elementType);
         }
 
         if (elementType.Type is null)
@@ -274,119 +353,7 @@ public class CSStructTranslator : BaseTranslator
             throw new InvalidOperationException($"Cannot convert fixed inline array field {field.Name} because its converted array type is not resolved");
         }
 
-        return new CSTypeInstance(elementType.Type, modifiers[..firstFixedArrayIndex]);
+        return new CSTypeInstance(elementType.Type, modifiers[..inlineArrayRange.Start]);
     }
 
-    private static int IndexOfModifier<TModifier>(ReadOnlySpan<BaseCSTypeModifier> modifiers)
-        where TModifier : BaseCSTypeModifier
-    {
-        for (var i = 0; i < modifiers.Length; i++)
-        {
-            if (modifiers[i] is TModifier)
-            {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    private static CSTypeInstance CreateInlineArrayType(
-        CSStruct parentStruct,
-        CSField field,
-        CSFixedInlineArrayType fixedArrayType,
-        CSTypeInstance elementType)
-    {
-        if (fixedArrayType.Size <= CSInlineArrayType.MaxBuiltInSize)
-        {
-            return new CSTypeInstance(new CSInlineArrayType(fixedArrayType.Size, elementType));
-        }
-
-        var inlineArrayStruct = CreateNestedInlineArrayStruct(parentStruct, field, fixedArrayType.Size, elementType);
-        parentStruct.NestedTypes.Add(inlineArrayStruct);
-        return new CSTypeInstance(inlineArrayStruct);
-    }
-
-    private static CSStruct CreateNestedInlineArrayStruct(
-        CSStruct parentStruct,
-        CSField field,
-        uint size,
-        CSTypeInstance elementType)
-    {
-        var inlineArrayStruct = new CSStruct
-        {
-            Name = CreateNestedInlineArrayStructName(parentStruct, field, size),
-            AccessModifier = CSAccessModifier.Public,
-            IsUnsafe = RequiresUnsafe(elementType),
-        };
-
-        inlineArrayStruct.Attributes.Add(CSAttribute<InlineArrayAttribute>.Create(
-            [size.ToString()],
-            []));
-        inlineArrayStruct.Fields.Add(new CSField
-        {
-            Name = "_element0",
-            Type = elementType,
-            AccessModifier = CSAccessModifier.Private,
-        });
-
-        return inlineArrayStruct;
-    }
-
-    private static string CreateNestedInlineArrayStructName(CSStruct parentStruct, CSField field, uint size)
-    {
-        var baseName = $"{ToPascalCaseIdentifier(field.Name)}InlineArray{size}";
-        var name = baseName;
-        var suffix = 1;
-
-        while (parentStruct.NestedTypes.Any(nestedType => nestedType.Name == name))
-        {
-            name = $"{baseName}_{suffix}";
-            suffix++;
-        }
-
-        return name;
-    }
-
-    private static string ToPascalCaseIdentifier(string name)
-    {
-        var builder = new StringBuilder();
-        var capitalizeNext = true;
-
-        foreach (var character in name)
-        {
-            if (char.IsLetterOrDigit(character))
-            {
-                builder.Append(capitalizeNext ? char.ToUpperInvariant(character) : character);
-                capitalizeNext = false;
-            }
-            else
-            {
-                capitalizeNext = true;
-            }
-        }
-
-        if (builder.Length == 0 || char.IsDigit(builder[0]))
-        {
-            builder.Insert(0, "FixedArray");
-        }
-
-        return builder.ToString();
-    }
-
-    private static bool RequiresUnsafe(CSTypeInstance type)
-    {
-        return type.Modifiers.Any(modifier => modifier is CsPointerType) ||
-            type.Type is CSInlineArrayType inlineArrayType && RequiresUnsafe(inlineArrayType.ElementType) ||
-            type.Type is CSStruct csStruct && csStruct.IsUnsafe;
-    }
-
-    private static void ValidateInlineArraySize(CSField field, CSFixedInlineArrayType arrayType)
-    {
-        if (arrayType.Size < CSInlineArrayType.MinSupportedSize)
-        {
-            throw new NotSupportedException(
-                $"Fixed inline array field {field.Name} has size {arrayType.Size}, but only sizes greater than or equal to 1 are supported");
-        }
-    }
 }

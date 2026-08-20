@@ -132,6 +132,11 @@ public class CConstLiteralToken : BaseCConstantToken
             return CConstantType.Unknown;
         }
 
+        if (isFloat && isFloatSuffix)
+        {
+            newValue = $"{value}f";
+        }
+
         if (isFloat)
         {
             if (isFloatSuffix)

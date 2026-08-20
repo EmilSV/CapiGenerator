@@ -26,6 +26,28 @@ public sealed class ConstantParserTests
     }
 
     [Fact]
+    public void FloatLiteralRetainsCSharpFloatSuffix()
+    {
+        var token = new CConstLiteralToken(
+            "9.80665f",
+            new CppSourceLocation("constants.h", 0, 1, 1));
+
+        Assert.Equal(CConstantType.Float, token.Type);
+        Assert.Equal("9.80665f", token.Value);
+    }
+
+    [Fact]
+    public void DoubleLiteralDoesNotGainFloatSuffix()
+    {
+        var token = new CConstLiteralToken(
+            "3.141592653589793",
+            new CppSourceLocation("constants.h", 0, 1, 1));
+
+        Assert.Equal(CConstantType.Double, token.Type);
+        Assert.Equal("3.141592653589793", token.Value);
+    }
+
+    [Fact]
     public void TypedefCastCppTokensBecomeSingleUnresolvedCastToken()
     {
         var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);

@@ -51,7 +51,27 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
     {
         List<BaseCSConstantToken> tokens = [];
         AddTokens(expression, tokens, []);
+        MergeAdjacentUtf8Literals(tokens);
         return new CSConstantExpression(tokens.ToArray());
+    }
+
+    private static void MergeAdjacentUtf8Literals(List<BaseCSConstantToken> tokens)
+    {
+        for (int i = tokens.Count - 1; i > 0; i--)
+        {
+            if (tokens[i - 1] is not CSConstLiteralToken left ||
+                tokens[i] is not CSConstLiteralToken right ||
+                !left.Utf8Literal ||
+                !right.Utf8Literal ||
+                left.Value.Length < 2 ||
+                right.Value.Length < 2)
+            {
+                continue;
+            }
+
+            left.Value = $"{left.Value[..^1]}{right.Value[1..]}";
+            tokens.RemoveAt(i);
+        }
     }
 
     private static void AddTokens(

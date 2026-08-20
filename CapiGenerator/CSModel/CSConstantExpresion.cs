@@ -49,12 +49,30 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
 
     public static CSConstantExpression FromCConstantExpression(CConstantExpression expression)
     {
-        var tokens = new BaseCSConstantToken[expression.Tokens.Length];
-        for (int i = 0; i < expression.Tokens.Length; i++)
+        List<BaseCSConstantToken> tokens = [];
+        AddTokens(expression, tokens, []);
+        return new CSConstantExpression(tokens.ToArray());
+    }
+
+    private static void AddTokens(
+        CConstantExpression expression,
+        List<BaseCSConstantToken> output,
+        HashSet<CConstant> visitedConstants)
+    {
+        foreach (var token in expression.Tokens)
         {
-            tokens[i] = CConstantTokenToCSConstantToken(expression.Tokens[i]);
+            if (token is CConstIdentifierToken { } identifierToken &&
+                identifierToken.GetConstantModel() is CConstant { } constant &&
+                constant.GetCConstantType() == CConstantType.String &&
+                visitedConstants.Add(constant))
+            {
+                AddTokens(constant.Expression, output, visitedConstants);
+                visitedConstants.Remove(constant);
+                continue;
+            }
+
+            output.Add(CConstantTokenToCSConstantToken(token));
         }
-        return new CSConstantExpression(tokens);
     }
 
     private static BaseCSConstantToken CConstantTokenToCSConstantToken(BaseCConstantToken token)

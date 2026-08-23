@@ -4,6 +4,16 @@ namespace CapiGenerator.CSModel.ConstantToken;
 
 public sealed class CSConstCastToken(CConstantType type) : BaseCSConstantToken
 {
+    public bool IsUnsignedIntegerCast => type is
+        CConstantType.UnsignedChar or
+        CConstantType.UInt8_t or
+        CConstantType.UnsignedShort or
+        CConstantType.UInt16_t or
+        CConstantType.UnsignedInt or
+        CConstantType.UInt32_t or
+        CConstantType.UnsignedLongLong or
+        CConstantType.UInt64_t;
+
     public override string ToString() => $"({GetTypeName()})";
 
     private string GetTypeName() => type switch

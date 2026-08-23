@@ -1,6 +1,8 @@
 using CapiGenerator;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.ConstantToken;
+using CapiGenerator.CSModel;
+using CapiGenerator.CSModel.ConstantToken;
 using CapiGenerator.Parser;
 using CapiGenerator.Translator;
 using CppAst;
@@ -47,6 +49,23 @@ public sealed class ConstantParserTests
         Assert.Equal("3.141592653589793", token.Value);
     }
 
+    [Theory]
+    [InlineData("1u", CConstantType.UnsignedInt, "1u")]
+    [InlineData("1ULL", CConstantType.UnsignedLongLong, "1ul")]
+    public void UnsignedLiteralRetainsCSharpSuffix(
+        string value,
+        CConstantType expectedType,
+        string expectedValue)
+    {
+        var token = new CConstLiteralToken(
+            value,
+            new CppSourceLocation("constants.h", 0, 1, 1));
+
+        Assert.Equal(expectedType, token.Type);
+        Assert.Equal(expectedValue, token.Value);
+        Assert.Equal(expectedValue, CSConstLiteralToken.FromCConstantLiteralToken(token).ToString());
+    }
+
     [Fact]
     public void TypedefCastCppTokensBecomeSingleUnresolvedCastToken()
     {
@@ -67,6 +86,25 @@ public sealed class ConstantParserTests
         Assert.True(converted);
         var castToken = Assert.IsType<CConstCastToken>(Assert.Single(constantTokens));
         Assert.False(castToken.TryGetConstantType(out _));
+    }
+
+    [Theory]
+    [InlineData(CConstantType.UInt32_t, "1", "unchecked ( (uint) - 1 )")]
+    [InlineData(CConstantType.UInt32_t, "2", "unchecked ( (uint) - 2 )")]
+    [InlineData(CConstantType.UInt64_t, "1", "unchecked ( (ulong) - 1 )")]
+    [InlineData(CConstantType.UInt64_t, "2", "unchecked ( (ulong) - 2 )")]
+    public void UnsignedCastOfNegativeIntegerUsesEquivalentUnsignedLiteral(
+        CConstantType castType,
+        string magnitude,
+        string expected)
+    {
+        var expression = new CSConstantExpression([
+            new CSConstCastToken(castType),
+            new CSConstantPunctuationToken { Type = CSPunctuationType.Minus },
+            new CSConstLiteralToken(magnitude, CSConstantType.Int),
+        ]);
+
+        Assert.Equal(expected, expression.ToString());
     }
 
     [Fact]

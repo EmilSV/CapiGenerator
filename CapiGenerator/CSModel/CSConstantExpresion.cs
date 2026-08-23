@@ -20,7 +20,7 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
         }
     }
 
-    private readonly BaseCSConstantToken[] _tokens = tokens.ToArray();
+    private readonly BaseCSConstantToken[] _tokens = NormalizeUnsignedNegativeCasts(tokens);
     public ReadOnlySpan<BaseCSConstantToken> Tokens => _tokens;
 
     public int Count => _tokens.Length;
@@ -53,6 +53,43 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
         AddTokens(expression, tokens, []);
         MergeAdjacentUtf8Literals(tokens);
         return new CSConstantExpression(tokens.ToArray());
+    }
+
+    private static BaseCSConstantToken[] NormalizeUnsignedNegativeCasts(ReadOnlySpan<BaseCSConstantToken> sourceTokens)
+    {
+        List<BaseCSConstantToken> outTokens = [];
+        int i = 0;
+        for (; i + 2 < sourceTokens.Length; i++)
+        {
+            if (sourceTokens[i] is not CSConstCastToken castToken ||
+                sourceTokens[i + 1] is not CSConstantPunctuationToken { Type: CSPunctuationType.Minus } ||
+                sourceTokens[i + 2] is not CSConstLiteralToken literalToken ||
+                !literalToken.TryParseValueAsInteger(out var integerValue) ||
+                integerValue <= 0 ||
+                !castToken.IsUnsignedIntegerCast)
+            {
+                outTokens.Add(sourceTokens[i]);
+                continue;
+            }
+
+            outTokens.AddRange([
+                new CSConstUncheckedToken(),
+                new CSConstantPunctuationToken { Type = CSPunctuationType.LeftParenthesis },
+                castToken,
+                new CSConstantPunctuationToken { Type = CSPunctuationType.Minus },
+                literalToken,
+                new CSConstantPunctuationToken { Type = CSPunctuationType.RightParenthesis }
+            ]);
+
+            i += 2;
+        }
+        for (; i < sourceTokens.Length; i++)
+        {
+            outTokens.Add(sourceTokens[i]);
+        }
+
+
+        return outTokens.ToArray();
     }
 
     private static void MergeAdjacentUtf8Literals(List<BaseCSConstantToken> tokens)

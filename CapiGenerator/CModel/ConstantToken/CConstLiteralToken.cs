@@ -37,7 +37,17 @@ public class CConstLiteralToken : BaseCConstantToken
 
     public bool TryParseValueAsInteger(out long value)
     {
-        return long.TryParse(Value, NumberStyles.Integer | NumberStyles.HexNumber, null, out value);
+        var valueToParse = Value.Trim();
+        if (valueToParse.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+        {
+            return long.TryParse(
+                valueToParse[2..],
+                NumberStyles.AllowHexSpecifier,
+                CultureInfo.InvariantCulture,
+                out value);
+        }
+
+        return long.TryParse(valueToParse, NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
     }
 
     private static CConstantType GetConstantType(string value, out string? newValue)
@@ -135,6 +145,10 @@ public class CConstLiteralToken : BaseCConstantToken
         if (isFloat && isFloatSuffix)
         {
             newValue = $"{value}f";
+        }
+        else if (!isFloat && isUnsigned)
+        {
+            newValue = $"{value}{(isLongLong ? "ul" : "u")}";
         }
 
         if (isFloat)

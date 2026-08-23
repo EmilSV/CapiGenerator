@@ -18,7 +18,17 @@ public class CSConstLiteralToken(string value, CSConstantType type) : BaseCSCons
 
     public bool TryParseValueAsInteger(out long value)
     {
-        return long.TryParse(Value, NumberStyles.Integer | NumberStyles.HexNumber, null, out value);
+        var valueToParse = Value.Trim();
+        if (valueToParse.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+        {
+            return long.TryParse(
+                valueToParse[2..],
+                NumberStyles.AllowHexSpecifier,
+                CultureInfo.InvariantCulture,
+                out value);
+        }
+
+        return long.TryParse(valueToParse, NumberStyles.Integer, CultureInfo.InvariantCulture, out value);
     }
 
     public static CSConstLiteralToken FromCConstantLiteralToken(CConstLiteralToken token)

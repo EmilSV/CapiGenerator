@@ -88,11 +88,35 @@ public sealed class ConstantParserTests
         Assert.False(castToken.TryGetConstantType(out _));
     }
 
+    [Fact]
+    public void SizeTCastCppTokensBecomeResolvedCastToken()
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        CppToken[] cppTokens =
+        [
+            new(CppTokenKind.Punctuation, "("),
+            new(CppTokenKind.Identifier, "size_t"),
+            new(CppTokenKind.Punctuation, ")"),
+        ];
+
+        var converted = BaseCConstantToken.TryConvert(
+            cppTokens,
+            new HashSet<string>(),
+            sourceLocation,
+            out var constantTokens);
+
+        Assert.True(converted);
+        var castToken = Assert.IsType<CConstCastToken>(Assert.Single(constantTokens));
+        Assert.True(castToken.TryGetConstantType(out var constantType));
+        Assert.Equal(CConstantType.Size_t, constantType);
+    }
+
     [Theory]
     [InlineData(CConstantType.UInt32_t, "1", "unchecked ( (uint) - 1 )")]
     [InlineData(CConstantType.UInt32_t, "2", "unchecked ( (uint) - 2 )")]
     [InlineData(CConstantType.UInt64_t, "1", "unchecked ( (ulong) - 1 )")]
     [InlineData(CConstantType.UInt64_t, "2", "unchecked ( (ulong) - 2 )")]
+    [InlineData(CConstantType.Size_t, "1", "unchecked ( (nuint) ( - 1 ) )")]
     public void UnsignedCastOfNegativeIntegerUsesEquivalentUnsignedLiteral(
         CConstantType castType,
         string magnitude,

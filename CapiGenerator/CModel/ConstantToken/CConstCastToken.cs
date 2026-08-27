@@ -21,6 +21,7 @@ public sealed class CConstCastToken : BaseCConstantToken
         : base(sourceLocation)
     {
         _typeRef = new(typeName);
+        _constantType = typeName == "size_t" ? CConstantType.Size_t : CConstantType.NONE;
     }
 
     public bool TryGetConstantType(out CConstantType constantType)

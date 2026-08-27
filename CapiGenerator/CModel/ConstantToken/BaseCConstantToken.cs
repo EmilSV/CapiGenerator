@@ -96,7 +96,8 @@ public abstract class BaseCConstantToken(CppSourceLocation sourceLocation)
         {
             castToken = new(primitiveType, sourceLocation);
         }
-        else if (rightParenthesisIndex == typeStartIndex + 1 && typedefNames.Contains(typeName))
+        else if (rightParenthesisIndex == typeStartIndex + 1 &&
+                 (typedefNames.Contains(typeName) || typeName == "size_t"))
         {
             castToken = new(typeName, sourceLocation);
         }

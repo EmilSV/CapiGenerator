@@ -12,7 +12,12 @@ public sealed class CSConstCastToken(CConstantType type) : BaseCSConstantToken
         CConstantType.UnsignedInt or
         CConstantType.UInt32_t or
         CConstantType.UnsignedLongLong or
-        CConstantType.UInt64_t;
+        CConstantType.UInt64_t or
+        CConstantType.UIntPtr_t or
+        CConstantType.Size_t;
+
+    public bool IsNativeUnsignedIntegerCast => type is
+        CConstantType.UIntPtr_t or CConstantType.Size_t;
 
     public override string ToString() => $"({GetTypeName()})";
 

@@ -72,14 +72,20 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
                 continue;
             }
 
-            outTokens.AddRange([
-                new CSConstUncheckedToken(),
-                new CSConstantPunctuationToken { Type = CSPunctuationType.LeftParenthesis },
-                castToken,
-                new CSConstantPunctuationToken { Type = CSPunctuationType.Minus },
-                literalToken,
-                new CSConstantPunctuationToken { Type = CSPunctuationType.RightParenthesis }
-            ]);
+            outTokens.Add(new CSConstUncheckedToken());
+            outTokens.Add(new CSConstantPunctuationToken { Type = CSPunctuationType.LeftParenthesis });
+            outTokens.Add(castToken);
+            if (castToken.IsNativeUnsignedIntegerCast)
+            {
+                outTokens.Add(new CSConstantPunctuationToken { Type = CSPunctuationType.LeftParenthesis });
+            }
+            outTokens.Add(new CSConstantPunctuationToken { Type = CSPunctuationType.Minus });
+            outTokens.Add(literalToken);
+            if (castToken.IsNativeUnsignedIntegerCast)
+            {
+                outTokens.Add(new CSConstantPunctuationToken { Type = CSPunctuationType.RightParenthesis });
+            }
+            outTokens.Add(new CSConstantPunctuationToken { Type = CSPunctuationType.RightParenthesis });
 
             i += 2;
         }

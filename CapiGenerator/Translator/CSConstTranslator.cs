@@ -145,6 +145,8 @@ public class CSConstTranslator(string className) : BaseTranslator
 
         bool IsStaticGetter = csType == CSUft8LiteralType.Instance;
         bool IsConstant = csType != CSUft8LiteralType.Instance;
+        bool IsNativeInteger = cType is
+            CConstantType.IntPtr_t or CConstantType.UIntPtr_t or CConstantType.Size_t;
 
         var typeInstance = new CSTypeInstance(csType);
         var csConstantExpression = CSConstantExpression.FromCConstantExpression(constant.Expression);
@@ -158,7 +160,9 @@ public class CSConstTranslator(string className) : BaseTranslator
                 Name = NameSelector(constant),
                 Type = typeInstance,
                 DefaultValue = defaultValue,
-                IsConst = true
+                IsConst = !IsNativeInteger,
+                IsStatic = IsNativeInteger,
+                IsReadOnly = IsNativeInteger
             };
         }
         else if (IsStaticGetter)
@@ -203,6 +207,8 @@ public class CSConstTranslator(string className) : BaseTranslator
 
         bool IsStaticGetter = csType == CSUft8LiteralType.Instance;
         bool IsConstant = csType != CSUft8LiteralType.Instance;
+        bool IsNativeInteger = cType is
+            CConstantType.IntPtr_t or CConstantType.UIntPtr_t or CConstantType.Size_t;
 
         var typeInstance = new CSTypeInstance(csType);
         var csConstantExpression = CSConstantExpression.FromCConstantExpression(constant.Expression);
@@ -216,7 +222,9 @@ public class CSConstTranslator(string className) : BaseTranslator
                 Name = NameSelector(constant),
                 Type = typeInstance,
                 DefaultValue = defaultValue,
-                IsConst = true
+                IsConst = !IsNativeInteger,
+                IsStatic = IsNativeInteger,
+                IsReadOnly = IsNativeInteger
             };
         }
         else if (IsStaticGetter)

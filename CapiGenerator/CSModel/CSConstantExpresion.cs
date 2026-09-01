@@ -52,6 +52,7 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
         List<BaseCSConstantToken> tokens = [];
         AddTokens(expression, tokens, []);
         MergeAdjacentUtf8Literals(tokens);
+        AppendNullTerminatorToUtf8Literals(tokens);
         return new CSConstantExpression(tokens.ToArray());
     }
 
@@ -114,6 +115,17 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
 
             left.Value = $"{left.Value[..^1]}{right.Value[1..]}";
             tokens.RemoveAt(i);
+        }
+    }
+
+    private static void AppendNullTerminatorToUtf8Literals(List<BaseCSConstantToken> tokens)
+    {
+        for (int i = 0; i < tokens.Count; i++)
+        {
+            if (tokens[i] is CSConstLiteralToken { Utf8Literal: true } token && token.Value.Length > 0 && !token.Value.EndsWith('\0'))
+            {
+                tokens[i] = new CSConstLiteralToken($"{token.Value}\0", token.Type);
+            }
         }
     }
 

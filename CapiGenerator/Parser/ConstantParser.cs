@@ -1,5 +1,4 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
+using System.Collections.Frozen;
 using CapiGenerator.CModel;
 using CapiGenerator.CModel.BuiltinConstants;
 
@@ -12,6 +11,20 @@ namespace CapiGenerator.Parser;
 
 public class ConstantParser : BaseParser
 {
+    private static readonly FrozenSet<string> ContextDependentMacroNames =
+    [
+        "__COUNTER__",
+        "__DATE__",
+        "__FILE__",
+        "__FILE_NAME__",
+        "__FUNCTION__",
+        "__LINE__",
+        "__PRETTY_FUNCTION__",
+        "__TIMESTAMP__",
+        "__TIME__",
+        "__func__",
+    ];
+
     private IReadOnlyDictionary<string, CppMacro> _macroFunctions = new Dictionary<string, CppMacro>();
     private IReadOnlySet<string> _typedefNames = new HashSet<string>();
 
@@ -23,6 +36,10 @@ public class ConstantParser : BaseParser
         {
             _macroFunctions = GetMacroFunctions(compilation);
             _typedefNames = GetTypedefNames(compilation);
+            var functionNames = compilation.Functions
+                .Select(function => function.Name)
+                .ToHashSet();
+            var nonConstantObjectMacroNames = GetNonConstantObjectMacroNames(compilation, functionNames);
 
             foreach (var macro in compilation.Macros)
             {
@@ -48,7 +65,11 @@ public class ConstantParser : BaseParser
                     continue;
                 }
 
-                if (!LooksLikeConstantExpression(macro, _macroFunctions))
+                if (!LooksLikeConstantExpression(
+                        macro,
+                        _macroFunctions,
+                        functionNames,
+                        nonConstantObjectMacroNames))
                 {
                     continue;
                 }
@@ -129,7 +150,9 @@ public class ConstantParser : BaseParser
 
     private static bool LooksLikeConstantExpression(
         CppMacro macro,
-        IReadOnlyDictionary<string, CppMacro> macroFunctions)
+        IReadOnlyDictionary<string, CppMacro> macroFunctions,
+        IReadOnlySet<string> functionNames,
+        IReadOnlySet<string> nonConstantObjectMacroNames)
     {
         var tokens = macro.Tokens
             .Where(token => token.Kind != CppTokenKind.Comment)
@@ -142,7 +165,19 @@ public class ConstantParser : BaseParser
 
         foreach (var token in expandedTokens)
         {
-            if (token.Kind is CppTokenKind.Identifier or CppTokenKind.Literal)
+            if (token.Kind == CppTokenKind.Identifier)
+            {
+                if (functionNames.Contains(token.Text) ||
+                    nonConstantObjectMacroNames.Contains(token.Text) ||
+                    ContextDependentMacroNames.Contains(token.Text))
+                {
+                    return false;
+                }
+
+                continue;
+            }
+
+            if (token.Kind == CppTokenKind.Literal)
             {
                 continue;
             }
@@ -155,6 +190,42 @@ public class ConstantParser : BaseParser
         }
 
         return true;
+    }
+
+    private static IReadOnlySet<string> GetNonConstantObjectMacroNames(
+        CppCompilation compilation,
+        IReadOnlySet<string> functionNames)
+    {
+        var objectMacros = compilation.Macros
+            .Where(macro => macro.Parameters is null)
+            .GroupBy(macro => macro.Name)
+            .Select(group => group.Last())
+            .ToArray();
+        var nonConstantMacroNames = objectMacros
+            .Where(macro => macro.Tokens.All(token => token.Kind == CppTokenKind.Comment))
+            .Select(macro => macro.Name)
+            .ToHashSet();
+
+        bool addedMacro;
+        do
+        {
+            addedMacro = false;
+            foreach (var macro in objectMacros)
+            {
+                var referencesNonConstantSymbol = macro.Tokens.Any(token =>
+                    token.Kind == CppTokenKind.Identifier &&
+                    (functionNames.Contains(token.Text) ||
+                     ContextDependentMacroNames.Contains(token.Text) ||
+                     nonConstantMacroNames.Contains(token.Text)));
+                if (referencesNonConstantSymbol && nonConstantMacroNames.Add(macro.Name))
+                {
+                    addedMacro = true;
+                }
+            }
+        }
+        while (addedMacro);
+
+        return nonConstantMacroNames;
     }
 
     private static IReadOnlySet<string> GetTypedefNames(CppCompilation compilation)

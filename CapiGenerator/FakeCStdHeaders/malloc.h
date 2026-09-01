@@ -1,4 +1,8 @@
 #ifndef CAPI_GENERATOR_FAKE_C_STD_HEADERS_MALLOC_H
 #define CAPI_GENERATOR_FAKE_C_STD_HEADERS_MALLOC_H
 
+#include <stddef.h>
+
+void *_alloca(size_t size);
+
 #endif // CAPI_GENERATOR_FAKE_C_STD_HEADERS_MALLOC_H

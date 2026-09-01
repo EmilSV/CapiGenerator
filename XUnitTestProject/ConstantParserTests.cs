@@ -260,6 +260,79 @@ public sealed class ConstantParserTests
         Assert.Equal("( Constants.TestSharedName )", constants["TEST_GROUPED_SHARED_NAME"]);
     }
 
+    [Fact]
+    public void MacroAliasingFakeFunctionIsNotParsedAsConstantOrFunction()
+    {
+        var fakeHeaderFolder = FakeCStdHeader.CreateFakeStdHeaderFolder();
+        var headerPath = Path.Combine(Path.GetTempPath(), $"fake-function-alias-{Guid.NewGuid():N}.h");
+
+        try
+        {
+            File.WriteAllText(headerPath, "#include <malloc.h>\n#define alloca _alloca\n");
+
+            var options = new CppParserOptions
+            {
+                ParseMacros = true,
+            };
+            options.IncludeFolders.Add(fakeHeaderFolder);
+
+            var cppCompilation = CppParser.ParseFile(headerPath, options);
+            Assert.False(
+                cppCompilation.HasErrors,
+                string.Join(Environment.NewLine, cppCompilation.Diagnostics.Messages.Select(message => message.ToString())));
+            Assert.Contains(cppCompilation.Functions, function => function.Name == "_alloca");
+
+            var compilationUnit = new CCompilationUnit();
+            compilationUnit.AddParser([
+                new ConstantParser(),
+                new FunctionParser(),
+            ]);
+            compilationUnit.Parse([cppCompilation]);
+
+            Assert.Null(compilationUnit.GetConstantByName("alloca"));
+            Assert.Null(compilationUnit.GetFunctionByName("_alloca"));
+        }
+        finally
+        {
+            File.Delete(headerPath);
+        }
+    }
+
+    [Fact]
+    public void MacroAliasingEmptyFakeMacroIsNotParsedAsConstant()
+    {
+        var fakeHeaderFolder = FakeCStdHeader.CreateFakeStdHeaderFolder();
+        var headerPath = Path.Combine(Path.GetTempPath(), $"fake-empty-alias-{Guid.NewGuid():N}.h");
+
+        try
+        {
+            File.WriteAllText(
+                headerPath,
+                "#include <sal.h>\n#define FORMAT_STRING _Printf_format_string_\n");
+
+            var options = new CppParserOptions
+            {
+                ParseMacros = true,
+            };
+            options.IncludeFolders.Add(fakeHeaderFolder);
+
+            var cppCompilation = CppParser.ParseFile(headerPath, options);
+            Assert.False(
+                cppCompilation.HasErrors,
+                string.Join(Environment.NewLine, cppCompilation.Diagnostics.Messages.Select(message => message.ToString())));
+
+            var compilationUnit = new CCompilationUnit();
+            compilationUnit.AddParser(new ConstantParser());
+            compilationUnit.Parse([cppCompilation]);
+
+            Assert.Null(compilationUnit.GetConstantByName("FORMAT_STRING"));
+        }
+        finally
+        {
+            File.Delete(headerPath);
+        }
+    }
+
     private static IReadOnlyDictionary<string, string> TranslateConstants()
     {
         var options = new CppParserOptions

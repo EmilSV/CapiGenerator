@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinConstants;
 using CapiGenerator.CModel.BuiltinTypedefs;
 using CapiGenerator.CModel.Type;
 using CapiGenerator.UtilTypes;
@@ -295,8 +296,7 @@ public sealed class CCompilationUnit :
 
 
     public IEnumerable<ICType> GetTypeEnumerable() => _types.Values;
-    public IEnumerable<BaseCConstant> GetConstantEnumerable() =>
-        _constants.Values.Where(constant => constant is not CConstant value || value.Expression.IsResolved());
+    public IEnumerable<BaseCConstant> GetConstantEnumerable() => _constants.Values;
     public IEnumerable<CEnum> GetEnumEnumerable() => _enums.Values;
     public IEnumerable<CStruct> GetStructEnumerable() => _structs.Values;
     public IEnumerable<CUnion> GetUnionEnumerable() => _unions.Values;

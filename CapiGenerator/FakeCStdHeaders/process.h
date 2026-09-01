@@ -1,4 +1,7 @@
 #ifndef CAPI_GENERATOR_FAKE_C_STD_HEADERS_PROCESS_H
 #define CAPI_GENERATOR_FAKE_C_STD_HEADERS_PROCESS_H
 
+void _beginthreadex(void);
+void _endthreadex(void);
+
 #endif // CAPI_GENERATOR_FAKE_C_STD_HEADERS_PROCESS_H

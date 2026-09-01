@@ -57,7 +57,8 @@ public class FunctionParser : BaseParser
 
     protected virtual bool ShouldSkip(CppFunction function)
     {
-        return function.Parameters.Any(i => i.Type.TypeKind == CppTypeKind.Typedef && i.Type.GetDisplayName() == "va_list");
+        return FakeCStdHeader.IsFakeStdHeaderFile(function.Span.Start.File) ||
+            function.Parameters.Any(i => i.Type.TypeKind == CppTypeKind.Typedef && i.Type.GetDisplayName() == "va_list");
     }
     protected virtual void OnError(CppFunction constant, string message)
     {

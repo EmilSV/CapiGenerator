@@ -23,6 +23,7 @@ public sealed class CConstantPunctuationToken(CppSourceLocation debugInfo) : Bas
         CPunctuationType.BitwiseRightShift => ">>",
         CPunctuationType.LeftParenthesis => "(",
         CPunctuationType.RightParenthesis => ")",
+        CPunctuationType.Comma => ",",
         _ => throw new ArgumentOutOfRangeException(nameof(Type), Type, null)
     };
 
@@ -56,6 +57,7 @@ public sealed class CConstantPunctuationToken(CppSourceLocation debugInfo) : Bas
             ">>" => new(debugInfo) { Type = CPunctuationType.BitwiseRightShift },
             "(" => new(debugInfo) { Type = CPunctuationType.LeftParenthesis },
             ")" => new(debugInfo) { Type = CPunctuationType.RightParenthesis },
+            "," => new(debugInfo) { Type = CPunctuationType.Comma },
             _ => null
         };
 

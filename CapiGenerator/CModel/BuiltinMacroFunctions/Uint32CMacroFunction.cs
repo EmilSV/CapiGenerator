@@ -6,9 +6,9 @@ namespace CapiGenerator.CModel.BuiltinMacroFunctions
     {
         public override string Name => "UINT32_C";
 
-        public override bool TryEvaluate(ReadOnlySpan<BaseCConstantToken> tokens, out List<BaseCConstantToken>? result)
+        public override bool TryEvaluate(IReadOnlyList<IReadOnlyList<BaseCConstantToken>> arguments, out List<BaseCConstantToken>? result)
         {
-            if (tokens is not [CConstLiteralToken literalToken])
+            if (arguments is not [[CConstLiteralToken literalToken]])
             {
                 result = null;
                 return false;

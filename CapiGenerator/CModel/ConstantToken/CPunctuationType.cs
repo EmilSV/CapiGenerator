@@ -16,4 +16,5 @@ public enum CPunctuationType
     BitwiseRightShift,
     LeftParenthesis,
     RightParenthesis,
+    Comma,
 }

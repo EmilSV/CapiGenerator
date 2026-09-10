@@ -23,6 +23,7 @@ public sealed class CSConstantPunctuationToken : BaseCSConstantToken
         CSPunctuationType.BitwiseRightShift => ">>",
         CSPunctuationType.LeftParenthesis => "(",
         CSPunctuationType.RightParenthesis => ")",
+        CSPunctuationType.Comma => ",",
         _ => throw new ArgumentOutOfRangeException(nameof(Type), Type, null)
     };
 
@@ -53,6 +54,7 @@ public sealed class CSConstantPunctuationToken : BaseCSConstantToken
             ">>" => new() { Type = CSPunctuationType.BitwiseRightShift },
             "(" => new() { Type = CSPunctuationType.LeftParenthesis },
             ")" => new() { Type = CSPunctuationType.RightParenthesis },
+            "," => new() { Type = CSPunctuationType.Comma },
             _ => null
         };
 
@@ -76,6 +78,7 @@ public sealed class CSConstantPunctuationToken : BaseCSConstantToken
             CPunctuationType.BitwiseRightShift => new() { Type = CSPunctuationType.BitwiseRightShift },
             CPunctuationType.LeftParenthesis => new() { Type = CSPunctuationType.LeftParenthesis },
             CPunctuationType.RightParenthesis => new() { Type = CSPunctuationType.RightParenthesis },
+            CPunctuationType.Comma => new() { Type = CSPunctuationType.Comma },
             _ => throw new ArgumentOutOfRangeException(nameof(token), token.Type, null)
         };
 }

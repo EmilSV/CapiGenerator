@@ -15,6 +15,7 @@ public sealed class ConstantParserTests
     [InlineData(CppTokenKind.Identifier, "VALUE")]
     [InlineData(CppTokenKind.Literal, "42")]
     [InlineData(CppTokenKind.Punctuation, "+")]
+    [InlineData(CppTokenKind.Punctuation, ",")]
     public void ConstantTokensRetainDebugInfo(CppTokenKind kind, string text)
     {
         var debugInfo = new CppSourceLocation("constants.h", 100, 10, 5);
@@ -203,6 +204,25 @@ public sealed class ConstantParserTests
         var constants = TranslateConstants();
 
         Assert.Equal("( 1 + 2 )", constants["TEST_ADD_VALUE"]);
+    }
+
+    [Fact]
+    public void BuiltinMacroResolverStillEvaluatesSingleArgumentMacros()
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        BaseCConstantToken[] tokens =
+        [
+            new CConstIdentifierToken("UINT64_C", sourceLocation),
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.LeftParenthesis },
+            new CConstLiteralToken("42", sourceLocation),
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.RightParenthesis },
+        ];
+
+        var result = MacroFunctionResolver.ResolveMacroFunction(tokens);
+
+        var literal = Assert.IsType<CConstLiteralToken>(Assert.Single(result));
+        Assert.Equal("42", literal.Value);
+        Assert.Equal(CConstantType.UInt64_t, literal.Type);
     }
 
     [Fact]

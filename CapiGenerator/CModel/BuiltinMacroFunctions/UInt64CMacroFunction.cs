@@ -8,10 +8,10 @@ public sealed class UInt64CMacroFunction : BuiltinMacroFunctionBase
     public override string Name => "UINT64_C";
 
     public override bool TryEvaluate(
-        ReadOnlySpan<BaseCConstantToken> tokens,
+        IReadOnlyList<IReadOnlyList<BaseCConstantToken>> arguments,
         out List<BaseCConstantToken>? result)
     {
-        if (tokens is not [CConstLiteralToken literalToken] ||
+        if (arguments is not [[CConstLiteralToken literalToken]] ||
             !TryParseUInt64(literalToken.Value, out _))
         {
             result = null;

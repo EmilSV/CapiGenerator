@@ -6,9 +6,9 @@ public class Int64CMacroFunction : BuiltinMacroFunctionBase
 {
     public override string Name => "INT64_C";
 
-    public override bool TryEvaluate(ReadOnlySpan<BaseCConstantToken> tokens, out List<BaseCConstantToken>? result)
+    public override bool TryEvaluate(IReadOnlyList<IReadOnlyList<BaseCConstantToken>> arguments, out List<BaseCConstantToken>? result)
     {
-        if (tokens is not [CConstLiteralToken literalToken] ||
+        if (arguments is not [[CConstLiteralToken literalToken]] ||
             literalToken.Type is CConstantType.Float or CConstantType.Double or CConstantType.String or CConstantType.Char or CConstantType.Unknown)
         {
             result = null;

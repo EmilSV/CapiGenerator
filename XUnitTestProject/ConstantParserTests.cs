@@ -1,5 +1,6 @@
 using CapiGenerator;
 using CapiGenerator.CModel;
+using CapiGenerator.CModel.BuiltinMacroFunctions;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.CSModel;
 using CapiGenerator.CSModel.ConstantToken;
@@ -198,6 +199,146 @@ public sealed class ConstantParserTests
         Assert.Equal("0xFFFFFFFFFFFFFFFF", constants["TEST_MAX_UINT64"]);
     }
 
+    [Theory]
+    [InlineData("INT64_C", "42", CConstantType.Int64_t)]
+    [InlineData("INT64_C", "9223372036854775807", CConstantType.Int64_t)]
+    [InlineData("INT64_C", "0x7FFFFFFFFFFFFFFF", CConstantType.Int64_t)]
+    [InlineData("UINT64_C", "42", CConstantType.UInt64_t)]
+    [InlineData("UINT64_C", "18446744073709551615", CConstantType.UInt64_t)]
+    [InlineData("UINT64_C", "0xFFFFFFFFFFFFFFFF", CConstantType.UInt64_t)]
+    [InlineData("UINT32_C", "42", CConstantType.UInt32_t)]
+    [InlineData("UINT32_C", "4294967295", CConstantType.UInt32_t)]
+    public void IntegerMacroProducesTypedLiteralForSingleNumber(string name, string value, CConstantType expectedType)
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        var literal = new CConstLiteralToken(value, sourceLocation);
+        BaseCConstantToken[] tokens =
+        [
+            new CConstIdentifierToken(name, sourceLocation),
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.LeftParenthesis },
+            literal,
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.RightParenthesis },
+        ];
+
+        var result = MacroFunctionResolver.ResolveMacroFunction(tokens);
+        var expression = new CConstantExpression(result);
+
+        var resolvedLiteral = Assert.IsType<CConstLiteralToken>(Assert.Single(result));
+        Assert.Equal(literal.Value, resolvedLiteral.Value);
+        Assert.Equal(expectedType, resolvedLiteral.Type);
+        Assert.Equal(sourceLocation, resolvedLiteral.SourceLocation);
+        Assert.True(expression.IsResolved());
+        Assert.Equal(expectedType, expression.GetTypeOfExpression());
+        Assert.Equal(value, CSConstantExpression.FromCConstantExpression(expression).ToString());
+    }
+
+    [Theory]
+    [InlineData("1.5f", CConstantType.Float)]
+    [InlineData("1.5", CConstantType.Double)]
+    [InlineData("\"text\"", CConstantType.String)]
+    [InlineData("'a'", CConstantType.Char)]
+    [InlineData("invalid", CConstantType.Unknown)]
+    public void IntegerMacrosRejectNonIntegerLiterals(string value, CConstantType type)
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        var literal = new CConstLiteralToken(value, type, sourceLocation);
+        BaseCConstantToken[] expression =
+        [
+            literal,
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.Plus },
+            new CConstLiteralToken("1", sourceLocation),
+        ];
+
+        foreach (var handler in AllBuiltinMacroFunctions.Functions)
+        {
+            Assert.False(handler.TryEvaluate([[literal]], out var result));
+            Assert.Null(result);
+            Assert.False(handler.TryEvaluate([expression], out result));
+            Assert.Null(result);
+        }
+    }
+
+    [Theory]
+    [InlineData("INT64_C")]
+    [InlineData("UINT64_C")]
+    [InlineData("UINT32_C")]
+    public void IntegerMacroRequiresOneNonEmptyArgument(string name)
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        var literal = new CConstLiteralToken("1", sourceLocation);
+        var handler = AllBuiltinMacroFunctions.Functions.Single(handler => handler.Name == name);
+        IReadOnlyList<IReadOnlyList<BaseCConstantToken>>[] invalidArguments =
+        [
+            [],
+            [[]],
+            [[literal], [literal]],
+        ];
+
+        foreach (var arguments in invalidArguments)
+        {
+            Assert.False(handler.TryEvaluate(arguments, out var result));
+            Assert.Null(result);
+        }
+    }
+
+    [Theory]
+    [InlineData("INT64_C", "long", CConstantType.LongLong)]
+    [InlineData("UINT64_C", "ulong", CConstantType.UnsignedLongLong)]
+    [InlineData("UINT32_C", "uint", CConstantType.UnsignedInt)]
+    public void IntegerMacroCastsWholeArithmeticExpression(string name, string castType, CConstantType expectedType)
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        BaseCConstantToken[] tokens =
+        [
+            new CConstIdentifierToken(name, sourceLocation),
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.LeftParenthesis },
+            new CConstLiteralToken("1", sourceLocation),
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.Plus },
+            new CConstLiteralToken("2", sourceLocation),
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.RightParenthesis },
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.Multiply },
+            new CConstLiteralToken("3", sourceLocation),
+        ];
+
+        var result = MacroFunctionResolver.ResolveMacroFunction(tokens);
+        var expression = new CConstantExpression(result);
+
+        Assert.Equal(expectedType, expression.GetTypeOfExpression());
+        Assert.Equal($"( ({castType}) ( 1 + 2 ) ) * 3", CSConstantExpression.FromCConstantExpression(expression).ToString());
+        Assert.All(result, token => Assert.Equal(sourceLocation, token.SourceLocation));
+        Assert.Same(tokens[2], result[3]);
+        Assert.Same(tokens[3], result[4]);
+        Assert.Same(tokens[4], result[5]);
+    }
+
+    [Theory]
+    [InlineData("INT64_C")]
+    [InlineData("UINT64_C")]
+    [InlineData("UINT32_C")]
+    public void IntegerMacroPreservesIdentifierArgumentsForLaterResolution(string name)
+    {
+        var identifier = new CConstIdentifierToken("VALUE", new CppSourceLocation("constants.h", 0, 1, 1));
+
+        var handler = AllBuiltinMacroFunctions.Functions.Single(handler => handler.Name == name);
+        Assert.True(handler.TryEvaluate([[identifier]], out var result));
+        Assert.NotNull(result);
+        Assert.Same(identifier, result[3]);
+    }
+
+    [Theory]
+    [InlineData("UINT64_C", "18446744073709551616")]
+    [InlineData("UINT64_C", "-1")]
+    [InlineData("UINT32_C", "4294967296")]
+    [InlineData("UINT32_C", "-1")]
+    public void IntegerMacroRejectsOutOfRangeUnsignedLiteral(string name, string value)
+    {
+        var literal = new CConstLiteralToken(value, CConstantType.UnsignedLongLong, new CppSourceLocation("constants.h", 0, 1, 1));
+        var handler = AllBuiltinMacroFunctions.Functions.Single(handler => handler.Name == name);
+
+        Assert.False(handler.TryEvaluate([[literal]], out var result));
+        Assert.Null(result);
+    }
+
     [Fact]
     public void MultiParameterMacroExpandsArguments()
     {
@@ -224,6 +365,7 @@ public sealed class ConstantParserTests
         Assert.Equal("42", literal.Value);
         Assert.Equal(CConstantType.UInt64_t, literal.Type);
     }
+
 
     [Fact]
     public void NestedMacroFunctionsExpandRecursively()
@@ -352,6 +494,7 @@ public sealed class ConstantParserTests
             File.Delete(headerPath);
         }
     }
+
 
     private static IReadOnlyDictionary<string, string> TranslateConstants()
     {

@@ -1,5 +1,6 @@
 using System.Globalization;
 using CapiGenerator.CModel.ConstantToken;
+using CapiGenerator.CModel.Type;
 
 namespace CapiGenerator.CModel.BuiltinMacroFunctions;
 
@@ -11,19 +12,46 @@ public sealed class UInt64CMacroFunction : BuiltinMacroFunctionBase
         IReadOnlyList<IReadOnlyList<BaseCConstantToken>> arguments,
         out List<BaseCConstantToken>? result)
     {
-        if (arguments is not [[CConstLiteralToken literalToken]] ||
-            !TryParseUInt64(literalToken.Value, out _))
+        if (arguments is not [var argument] || argument.Count == 0)
         {
             result = null;
             return false;
         }
 
+        if (argument is [CConstLiteralToken literalToken])
+        {
+            if (!TryParseUInt64(literalToken.Value, out _))
+            {
+                result = null;
+                return false;
+            }
+
+            result =
+            [
+                new CConstLiteralToken(
+                    literalToken.Value,
+                    CConstantType.UInt64_t,
+                    literalToken.SourceLocation)
+            ];
+            return true;
+        }
+
+        if (argument.OfType<CConstLiteralToken>().Any(literal =>
+            literal.Type is CConstantType.Float or CConstantType.Double or CConstantType.String or CConstantType.Char or CConstantType.Unknown))
+        {
+            result = null;
+            return false;
+        }
+
+        var sourceLocation = argument[0].SourceLocation;
         result =
         [
-            new CConstLiteralToken(
-                literalToken.Value,
-                CConstantType.UInt64_t,
-                literalToken.SourceLocation)
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.LeftParenthesis },
+            new CConstCastToken(CPrimitiveType.Instances.UnsignedLongLong, sourceLocation),
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.LeftParenthesis },
+            .. argument,
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.RightParenthesis },
+            new CConstantPunctuationToken(sourceLocation) { Type = CPunctuationType.RightParenthesis }
         ];
         return true;
     }

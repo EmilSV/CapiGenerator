@@ -8,6 +8,13 @@ public abstract class CBaseComment
 {
     public ImmutableArray<CBaseComment> Children { get; init; } = ImmutableArray<CBaseComment>.Empty;
 
+    public static CBaseComment? From(CppComment? cppComment, CppSourceSpan declarationSpan) => cppComment switch
+    {
+        null => null,
+        CppCommentFull commentFull => CFullComment.From(commentFull, declarationSpan),
+        _ => From(cppComment),
+    };
+
     public static CBaseComment From(CppComment cppCommentText) => cppCommentText switch
     {
         CppCommentBlockCommand blockCommand => CBlockCommandComment.From(blockCommand),

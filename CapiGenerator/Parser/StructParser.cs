@@ -86,7 +86,7 @@ public class StructParser : BaseParser
 
         var cStruct = new CStruct(cppStruct, nameOverride ?? cppStruct.Name, fields!, isAnonymous, nestedTypes.ToArray())
         {
-            Comment = cppStruct.Comment is not null ? CBaseComment.From(cppStruct.Comment) : null,
+            Comment = CBaseComment.From(cppStruct.Comment, cppStruct.Span),
         };
         if (secondarySource is not null)
         {

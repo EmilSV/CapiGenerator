@@ -43,6 +43,10 @@ public static class CCommentTranslator
                 AddParagraph(result, GetText(paragraph));
                 break;
 
+            case CCodeBlockComment codeBlock:
+                AddParagraph(result, GetCode(codeBlock));
+                break;
+
             case CVerbatimBlockCommandComment verbatimBlock:
                 AddRemarks(result, GetText(verbatimBlock, verbatimBlock.Arguments));
                 break;
@@ -208,6 +212,11 @@ public static class CCommentTranslator
         }
 
         return EscapeXml(Normalize(builder.ToString()));
+    }
+
+    private static string GetCode(CCodeBlockComment codeBlock)
+    {
+        return string.Join(Environment.NewLine, ["<code>", .. codeBlock.Lines.Select(EscapeXml), "</code>"]);
     }
 
     private static void AppendNodeText(StringBuilder builder, CBaseComment comment)

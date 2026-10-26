@@ -45,7 +45,7 @@ public class CFunction(object primarySource, CTypeInstance returnType, string na
 
         return new CFunction(function, returnType, function.Name, parameters!)
         {
-            Comment = function.Comment is not null ? CBaseComment.From(function.Comment) : null,
+            Comment = CBaseComment.From(function.Comment, function.Span),
         };
     }
 }

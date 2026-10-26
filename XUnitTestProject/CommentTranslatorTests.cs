@@ -36,6 +36,57 @@ public sealed class CommentTranslatorTests
         Assert.Equal("an `id&lt;MTLRenderCommandEncoder&gt;` on success.", comment.Return?.Description);
     }
 
+    [Fact]
+    public void FencedCodeBlockKeepsLinesAndIndentationFromSource()
+    {
+        var comment = TranslateFunctionComment("""
+            /**
+             * Example:
+             *
+             * ```c
+             * for (i = 0; i < n; i++) {
+             *     call(i);
+             *
+             *     other(i);
+             * }
+             * ```
+             *
+             * Text after.
+             */
+            extern void function(void);
+            """);
+
+        var expected = string.Join(Environment.NewLine,
+            "Example:",
+            "",
+            "<code>",
+            "for (i = 0; i &lt; n; i++) {",
+            "    call(i);",
+            "",
+            "    other(i);",
+            "}",
+            "</code>",
+            "",
+            "Text after.");
+        Assert.Equal(expected, comment.Summary?.Description);
+    }
+
+    [Fact]
+    public void UnclosedFencedCodeBlockFallsBackToParsedLines()
+    {
+        var comment = TranslateFunctionComment("""
+            /**
+             * ```
+             *     a + b
+             * c
+             */
+            extern void function(void);
+            """);
+
+        var expected = string.Join(Environment.NewLine, "<code>", "a + b", "c", "</code>");
+        Assert.Equal(expected, comment.Summary?.Description);
+    }
+
     private static DocComment TranslateFunctionComment(string header)
     {
         var headerPath = Path.Combine(Path.GetTempPath(), $"comments-{Guid.NewGuid():N}.h");

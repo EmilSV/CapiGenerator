@@ -122,10 +122,15 @@ public sealed class CSConstantExpression(ReadOnlySpan<BaseCSConstantToken> token
     {
         for (int i = 0; i < tokens.Count; i++)
         {
-            if (tokens[i] is CSConstLiteralToken { Utf8Literal: true } token && token.Value.Length > 0 && !token.Value.EndsWith('\0'))
+            if (tokens[i] is not CSConstLiteralToken { Utf8Literal: true } token || token.Value.Length == 0)
             {
-                tokens[i] = new CSConstLiteralToken($"{token.Value}\0", token.Type);
+                continue;
             }
+
+            var withoutClosingQuote = token.Value.EndsWith('"')
+                ? token.Value[..^1]
+                : token.Value;
+            tokens[i] = new CSConstLiteralToken($"{withoutClosingQuote}\\0\"", token.Type) { Utf8Literal = true };
         }
     }
 

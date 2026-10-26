@@ -527,6 +527,74 @@ public sealed class ConstantParserTests
     }
 
 
+    [Fact]
+    public void Utf8LiteralGetsNullTerminatorInsideQuotes()
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        var expression = new CConstantExpression([new CConstLiteralToken("\"abc\"", sourceLocation)]);
+
+        var csExpression = CSConstantExpression.FromCConstantExpression(expression);
+
+        var literal = Assert.IsType<CSConstLiteralToken>(Assert.Single(csExpression.Tokens.ToArray()));
+        Assert.True(literal.Utf8Literal);
+        Assert.Equal("\"abc\\0\"", csExpression.ToString());
+    }
+
+    [Fact]
+    public void AdjacentUtf8LiteralsAreMergedBeforeNullTerminator()
+    {
+        var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
+        var expression = new CConstantExpression([
+            new CConstLiteralToken("\"ab\"", sourceLocation),
+            new CConstLiteralToken("\"cd\"", sourceLocation),
+        ]);
+
+        Assert.Equal("\"abcd\\0\"", CSConstantExpression.FromCConstantExpression(expression).ToString());
+    }
+
+    [Fact]
+    public void StringConstantsEmitNullTerminatedUtf8Getters()
+    {
+        var headerPath = Path.Combine(Path.GetTempPath(), $"utf8-constants-{Guid.NewGuid():N}.h");
+
+        try
+        {
+            File.WriteAllText(
+                headerPath,
+                "#define TEST_SIMPLE \"abc\"\n#define TEST_MERGED \"ab\" \"cd\"\n#define TEST_REF TEST_SIMPLE\n");
+
+            var options = new CppParserOptions
+            {
+                ParseMacros = true,
+            };
+            options.IncludeFolders.Add(FakeCStdHeader.CreateFakeStdHeaderFolder());
+
+            var cppCompilation = CppParser.ParseFile(headerPath, options);
+            Assert.False(
+                cppCompilation.HasErrors,
+                string.Join(Environment.NewLine, cppCompilation.Diagnostics.Messages.Select(message => message.ToString())));
+
+            var compilationUnit = new CCompilationUnit();
+            compilationUnit.AddParser(new ConstantParser());
+            compilationUnit.Parse([cppCompilation]);
+
+            var translationUnit = new CSTranslationUnit();
+            translationUnit.AddTranslator(new CSConstTranslator("Constants"));
+            translationUnit.Translate([compilationUnit]);
+
+            var getters = Assert.Single(translationUnit.GetCSStaticClassesEnumerable()).Fields
+                .ToDictionary(field => field.Name, field => field.GetterBody?.Code);
+
+            Assert.Equal(" => \"abc\\0\"u8;", getters["TEST_SIMPLE"]);
+            Assert.Equal(" => \"abcd\\0\"u8;", getters["TEST_MERGED"]);
+            Assert.Equal(" => \"abc\\0\"u8;", getters["TEST_REF"]);
+        }
+        finally
+        {
+            File.Delete(headerPath);
+        }
+    }
+
     private static IReadOnlyDictionary<string, string> TranslateConstants()
     {
         var options = new CppParserOptions

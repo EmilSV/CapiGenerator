@@ -40,6 +40,7 @@ public class CSTypedefTranslator : BaseTranslator
         {
             structItem.OnSecondPass(translationUnit);
             CSStructTranslator.FixedInlineArrayFields(structItem);
+            CSStructTranslator.MarkUnsafe(structItem);
         }
     }
 

@@ -41,6 +41,7 @@ public class CSStructTranslator : BaseTranslator
         {
             structItem.OnSecondPass(translationUnit);
             FixedInlineArrayFields(structItem);
+            MarkUnsafe(structItem);
         }
     }
 
@@ -149,13 +150,35 @@ public class CSStructTranslator : BaseTranslator
             {
                 field.Type = fixedBufferType;
                 field.FixedBufferSize = fixedBufferSize;
-                cSStruct.IsUnsafe = true;
             }
             else
             {
                 field.Type = FixedInlineArrayTypeInstance(cSStruct, field, field.Type);
             }
         }
+    }
+
+    protected internal static void MarkUnsafe(CSStruct cSStruct)
+    {
+        foreach (var nestedType in cSStruct.NestedTypes)
+        {
+            if (nestedType is CSStruct nestedStruct)
+            {
+                MarkUnsafe(nestedStruct);
+            }
+        }
+
+        if (cSStruct.Fields.Any(field => field.FixedBufferSize is not null || RequiresUnsafe(field.Type)))
+        {
+            cSStruct.IsUnsafe = true;
+        }
+    }
+
+    private static bool RequiresUnsafe(CSTypeInstance type)
+    {
+        return type.Modifiers.Any(modifier => modifier is CsPointerType) ||
+            type.Type is CSUnmanagedFunctionType ||
+            type.Type is CSInlineArrayType inlineArrayType && RequiresUnsafe(inlineArrayType.ElementType);
     }
 
     private static bool TryCreateFixedBufferFieldType(
@@ -271,18 +294,10 @@ public class CSStructTranslator : BaseTranslator
            uint size,
            CSTypeInstance elementType)
         {
-            static bool RequiresUnsafe(CSTypeInstance type)
-            {
-                return type.Modifiers.Any(modifier => modifier is CsPointerType) ||
-                    type.Type is CSInlineArrayType inlineArrayType && RequiresUnsafe(inlineArrayType.ElementType) ||
-                    type.Type is CSStruct csStruct && csStruct.IsUnsafe;
-            }
-
             var inlineArrayStruct = new CSStruct
             {
                 Name = CreateNestedInlineArrayStructName(parentStruct, field, size),
                 AccessModifier = CSAccessModifier.Public,
-                IsUnsafe = RequiresUnsafe(elementType),
             };
 
             inlineArrayStruct.Attributes.Add(CSAttribute<InlineArrayAttribute>.Create(

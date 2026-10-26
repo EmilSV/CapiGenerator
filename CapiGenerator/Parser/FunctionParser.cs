@@ -58,8 +58,19 @@ public class FunctionParser : BaseParser
     protected virtual bool ShouldSkip(CppFunction function)
     {
         return FakeCStdHeader.IsFakeStdHeaderFile(function.Span.Start.File) ||
+            IsNotExportedInline(function) ||
+            function.Flags.HasFlag(CppFunctionFlags.Variadic) || // varargs (...) are not supported yet
+
             function.Parameters.Any(i => i.Type.TypeKind == CppTypeKind.Typedef && i.Type.GetDisplayName() == "va_list");
     }
+
+    // Header inline functions (e.g. SDL_FORCE_INLINE) have no symbol in the library, so binding them
+    // throws EntryPointNotFoundException. Only `extern inline` emits an exported symbol.
+    // StorageQualifier alone is not enough: MSVC's __forceinline is not `static`.
+    protected static bool IsNotExportedInline(CppFunction function) =>
+        function.Flags.HasFlag(CppFunctionFlags.Inline) &&
+        function.StorageQualifier != CppStorageQualifier.Extern;
+
     protected virtual void OnError(CppFunction constant, string message)
     {
         Console.Error.WriteLine($"Error parsing function {constant.Name}: {message}");

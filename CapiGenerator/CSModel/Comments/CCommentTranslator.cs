@@ -207,7 +207,7 @@ public static class CCommentTranslator
             AppendNodeText(builder, child);
         }
 
-        return Normalize(builder.ToString());
+        return EscapeXml(Normalize(builder.ToString()));
     }
 
     private static void AppendNodeText(StringBuilder builder, CBaseComment comment)
@@ -254,12 +254,17 @@ public static class CCommentTranslator
             return;
         }
 
-        if (builder.Length > 0 && !char.IsWhiteSpace(builder[^1]) && !char.IsPunctuation(text[0]))
+        // Clang splits text at '<' and '>' that look like HTML tags (e.g. `id<MTLRenderCommandEncoder>`),
+        // so keep trailing whitespace and don't separate those pieces unless the source did.
+        if (builder.Length > 0 &&
+            !char.IsWhiteSpace(builder[^1]) &&
+            !char.IsPunctuation(text[0]) &&
+            text[0] is not ('<' or '>'))
         {
             builder.Append(' ');
         }
 
-        builder.Append(text.Trim());
+        builder.Append(text.TrimStart());
     }
 
     private static void AppendLine(StringBuilder builder, string text)
@@ -280,6 +285,12 @@ public static class CCommentTranslator
             .Where(line => line.Length > 0);
 
         return string.Join(Environment.NewLine, lines);
+    }
+
+    // Descriptions are XML fragments (see XmlCommentParser), so C comment text must be escaped.
+    private static string EscapeXml(string text)
+    {
+        return text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
     }
 
     private static string Combine(string? current, string addition)

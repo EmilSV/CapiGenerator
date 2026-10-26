@@ -1,3 +1,4 @@
+using System.Globalization;
 using CapiGenerator.CModel.ConstantToken;
 using CapiGenerator.CModel.Type;
 
@@ -19,7 +20,7 @@ namespace CapiGenerator.CModel.BuiltinMacroFunctions
 
             if (argument is [CConstLiteralToken literalToken])
             {
-                if (!uint.TryParse(literalToken.Value, out var value))
+                if (!TryParseUInt32(literalToken.Value, out _))
                 {
                     result = null;
                     return false;
@@ -27,7 +28,7 @@ namespace CapiGenerator.CModel.BuiltinMacroFunctions
 
                 result = new List<BaseCConstantToken>
                 {
-                    new CConstLiteralToken(value.ToString(), CConstantType.UInt32_t, literalToken.SourceLocation)
+                    new CConstLiteralToken(literalToken.Value, CConstantType.UInt32_t, literalToken.SourceLocation)
                 };
                 return true;
             }
@@ -51,6 +52,24 @@ namespace CapiGenerator.CModel.BuiltinMacroFunctions
             ];
 
             return true;
+        }
+
+        private static bool TryParseUInt32(string value, out uint parsedValue)
+        {
+            if (value.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                return uint.TryParse(
+                    value.AsSpan(2),
+                    NumberStyles.AllowHexSpecifier,
+                    CultureInfo.InvariantCulture,
+                    out parsedValue);
+            }
+
+            return uint.TryParse(
+                value,
+                NumberStyles.Integer,
+                CultureInfo.InvariantCulture,
+                out parsedValue);
         }
     }
 }

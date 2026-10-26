@@ -40,6 +40,18 @@ public sealed class ConstantParserTests
         Assert.Equal("9.80665f", token.Value);
     }
 
+    [Theory]
+    [InlineData("0777", "511")]
+    [InlineData("010", "8")]
+    [InlineData("0", "0")]
+    public void SignedOctalLiteralIsConvertedToDecimal(string value, string expectedValue)
+    {
+        var token = new CConstLiteralToken(value, new CppSourceLocation("constants.h", 0, 1, 1));
+
+        Assert.Equal(CConstantType.Int, token.Type);
+        Assert.Equal(expectedValue, token.Value);
+    }
+
     [Fact]
     public void DoubleLiteralDoesNotGainFloatSuffix()
     {
@@ -54,6 +66,9 @@ public sealed class ConstantParserTests
     [Theory]
     [InlineData("1u", CConstantType.UnsignedInt, "1u")]
     [InlineData("1ULL", CConstantType.UnsignedLongLong, "1ul")]
+    [InlineData("0777u", CConstantType.UnsignedInt, "511u")]
+    [InlineData("0777ULL", CConstantType.UnsignedLongLong, "511ul")]
+    [InlineData("0xFFu", CConstantType.UnsignedInt, "0xFFu")]
     public void UnsignedLiteralRetainsCSharpSuffix(
         string value,
         CConstantType expectedType,
@@ -208,6 +223,8 @@ public sealed class ConstantParserTests
     [InlineData("UINT64_C", "0xFFFFFFFFFFFFFFFF", CConstantType.UInt64_t)]
     [InlineData("UINT32_C", "42", CConstantType.UInt32_t)]
     [InlineData("UINT32_C", "4294967295", CConstantType.UInt32_t)]
+    [InlineData("UINT32_C", "0xFFFFFFFF", CConstantType.UInt32_t)]
+    [InlineData("UINT32_C", "0x80000000", CConstantType.UInt32_t)]
     public void IntegerMacroProducesTypedLiteralForSingleNumber(string name, string value, CConstantType expectedType)
     {
         var sourceLocation = new CppSourceLocation("constants.h", 0, 1, 1);
@@ -330,10 +347,24 @@ public sealed class ConstantParserTests
     [InlineData("UINT64_C", "-1")]
     [InlineData("UINT32_C", "4294967296")]
     [InlineData("UINT32_C", "-1")]
+    [InlineData("UINT32_C", "0x100000000")]
     public void IntegerMacroRejectsOutOfRangeUnsignedLiteral(string name, string value)
     {
         var literal = new CConstLiteralToken(value, CConstantType.UnsignedLongLong, new CppSourceLocation("constants.h", 0, 1, 1));
         var handler = AllBuiltinMacroFunctions.Functions.Single(handler => handler.Name == name);
+
+        Assert.False(handler.TryEvaluate([[literal]], out var result));
+        Assert.Null(result);
+    }
+
+    [Theory]
+    [InlineData("9223372036854775808")]
+    [InlineData("0x8000000000000000")]
+    [InlineData("0xFFFFFFFFFFFFFFFF")]
+    public void Int64MacroRejectsOutOfRangeLiteral(string value)
+    {
+        var literal = new CConstLiteralToken(value, CConstantType.LongLong, new CppSourceLocation("constants.h", 0, 1, 1));
+        var handler = AllBuiltinMacroFunctions.Functions.Single(handler => handler.Name == "INT64_C");
 
         Assert.False(handler.TryEvaluate([[literal]], out var result));
         Assert.Null(result);

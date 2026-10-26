@@ -144,11 +144,11 @@ public class CConstLiteralToken : BaseCConstantToken
 
         if (isFloat && isFloatSuffix)
         {
-            newValue = $"{value}f";
+            newValue = $"{newValue}f";
         }
         else if (!isFloat && isUnsigned)
         {
-            newValue = $"{value}{(isLongLong ? "ul" : "u")}";
+            newValue = $"{newValue}{(isLongLong ? "ul" : "u")}";
         }
 
         if (isFloat)

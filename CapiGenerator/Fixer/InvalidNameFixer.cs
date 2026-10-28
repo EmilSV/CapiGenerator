@@ -45,6 +45,29 @@ public static class InvalidNameFixer
         Local,
     }
 
+    private static string DefaultFixName(string name, NameContext context)
+    {
+        switch (context)
+        {
+            case NameContext.Struct:
+                return $"{name}Struct";
+            case NameContext.Local:
+                return name;
+        }
+        
+        if (_csKeywords.Contains(name))
+        {
+            return $"@{name}";
+        }
+
+        if (_contextualKeywords.Contains(name))
+        {
+            return name;
+        }
+
+        return context == NameContext.Method ? $"{name}Method" : $"{name}Value";
+    }
+
     public static void FixInvalidNames(
         IEnumerable<BaseCSType> types, IEnumerable<string>? invalidNames = null,
         Func<string, NameContext, string>? fixPredicate = null, bool includeDefaultName = true)
@@ -56,15 +79,7 @@ public static class InvalidNameFixer
             invalidNamesSet.UnionWith(_contextualKeywords);
         }
 
-        fixPredicate ??= (name, context) => context switch
-        {
-            NameContext.Struct => $"{name}Struct",
-            NameContext.Method => $"{name}Method",
-            NameContext.Field => $"{name}Value",
-            NameContext.Parameter => $"{name}Value",
-            NameContext.Local => name,
-            _ => name,
-        };
+        fixPredicate ??= DefaultFixName;
 
         List<CSStruct> structs = [];
         List<CSStaticClass> staticClasses = [];
@@ -101,15 +116,7 @@ public static class InvalidNameFixer
             invalidNamesSet.UnionWith(_contextualKeywords);
         }
 
-        fixPredicate ??= (name, context) => context switch
-        {
-            NameContext.Struct => $"{name}Struct",
-            NameContext.Method => $"{name}Method",
-            NameContext.Field => $"{name}Value",
-            NameContext.Parameter => $"{name}Value",
-            NameContext.Local => name,
-            _ => name,
-        };
+        fixPredicate ??= DefaultFixName;
 
         bool IsInvalidName(string? name) => name != null && invalidNamesSet.Contains(name);
 
@@ -170,15 +177,7 @@ public static class InvalidNameFixer
             invalidNamesSet.UnionWith(_contextualKeywords);
         }
 
-        fixPredicate ??= (name, context) => context switch
-        {
-            NameContext.Struct => $"{name}Struct",
-            NameContext.Method => $"{name}Method",
-            NameContext.Field => $"{name}Value",
-            NameContext.Parameter => $"{name}Value",
-            NameContext.Local => name,
-            _ => name,
-        };
+        fixPredicate ??= DefaultFixName;
 
         bool IsInvalidName(string? name) => name != null && invalidNamesSet.Contains(name);
 
@@ -226,15 +225,7 @@ public static class InvalidNameFixer
             invalidNamesSet.UnionWith(_contextualKeywords);
         }
 
-        fixPredicate ??= (name, context) => context switch
-        {
-            NameContext.Struct => $"{name}Struct",
-            NameContext.Method => $"{name}Method",
-            NameContext.Field => $"{name}Value",
-            NameContext.Parameter => $"{name}Value",
-            NameContext.Local => name,
-            _ => name,
-        };
+        fixPredicate ??= DefaultFixName;
 
         bool IsInvalidName(string? name) => name != null && invalidNamesSet.Contains(name);
 

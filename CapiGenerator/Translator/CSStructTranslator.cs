@@ -174,7 +174,7 @@ public class CSStructTranslator : BaseTranslator
         }
     }
 
-    private static bool RequiresUnsafe(CSTypeInstance type)
+    protected internal static bool RequiresUnsafe(CSTypeInstance type)
     {
         return type.Modifiers.Any(modifier => modifier is CsPointerType) ||
             type.Type is CSUnmanagedFunctionType ||

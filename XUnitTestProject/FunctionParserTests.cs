@@ -46,6 +46,22 @@ public sealed class FunctionParserTests
         Assert.Null(compilationUnit.GetFunctionByName("variadic_function"));
     }
 
+    [Fact]
+    public void ReservedIdentifierFunctionsAreNotParsed()
+    {
+        var compilationUnit = ParseFunctions("""
+            extern void __debugbreak_like(void);
+            extern void _Reserved_function(void);
+            extern void _lowercase_function(void);
+            extern void regular__function(void);
+            """);
+
+        Assert.Null(compilationUnit.GetFunctionByName("__debugbreak_like"));
+        Assert.Null(compilationUnit.GetFunctionByName("_Reserved_function"));
+        Assert.NotNull(compilationUnit.GetFunctionByName("_lowercase_function"));
+        Assert.NotNull(compilationUnit.GetFunctionByName("regular__function"));
+    }
+
     private static CCompilationUnit ParseFunctions(string header)
     {
         var headerPath = Path.Combine(Path.GetTempPath(), $"functions-{Guid.NewGuid():N}.h");

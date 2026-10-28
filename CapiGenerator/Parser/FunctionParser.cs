@@ -59,6 +59,7 @@ public class FunctionParser : BaseParser
     {
         return FakeCStdHeader.IsFakeStdHeaderFile(function.Span.Start.File) ||
             IsNotExportedInline(function) ||
+            IsReservedIdentifier(function.Name) ||
             function.Flags.HasFlag(CppFunctionFlags.Variadic) || // varargs (...) are not supported yet
 
             function.Parameters.Any(i => i.Type.TypeKind == CppTypeKind.Typedef && i.Type.GetDisplayName() == "va_list");
@@ -70,6 +71,12 @@ public class FunctionParser : BaseParser
     protected static bool IsNotExportedInline(CppFunction function) =>
         function.Flags.HasFlag(CppFunctionFlags.Inline) &&
         function.StorageQualifier != CppStorageQualifier.Extern;
+
+    // C reserves `__x` and `_X` names for the compiler and standard library (e.g. MSVC's __debugbreak),
+    // so they are not part of the library's API and usually have no symbol in it.
+    protected static bool IsReservedIdentifier(string name) =>
+        name.StartsWith("__", StringComparison.Ordinal) ||
+        name.Length > 1 && name[0] == '_' && char.IsAsciiLetterUpper(name[1]);
 
     protected virtual void OnError(CppFunction constant, string message)
     {

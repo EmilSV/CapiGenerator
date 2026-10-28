@@ -78,6 +78,11 @@ internal static class CSTypeDeclarationWriter
             await WriteIndented(stream, indentLevel + 1, writer => WriteToStream(writer, constructor));
         }
 
+        if (csStruct.Fields.Count > 0 && csStruct.Methods.Count > 0)
+        {
+            stream.WriteLine();
+        }
+
         foreach (var structMethod in csStruct.Methods)
         {
             await WriteIndented(stream, indentLevel + 1, writer => WriteToStream(writer, structMethod.Comments));

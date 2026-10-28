@@ -65,7 +65,6 @@ public static class StreamWriterUtils
         if (method.OperatorModifier is CSMethodOperatorModifier.Explicit or CSMethodOperatorModifier.Implicit)
         {
             writer.Write(method.ReturnType!.ToString());
-            writer.Write(' ');
         }
 
         if (method.OperatorModifier is CSMethodOperatorModifier.None or CSMethodOperatorModifier.Operator)
